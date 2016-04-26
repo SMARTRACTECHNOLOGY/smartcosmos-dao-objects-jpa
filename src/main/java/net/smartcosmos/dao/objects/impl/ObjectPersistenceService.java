@@ -1,18 +1,17 @@
 package net.smartcosmos.dao.objects.impl;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.CreateObjectRequest;
 import net.smartcosmos.dto.objects.GetObjectResponse;
 import net.smartcosmos.util.UuidUtil;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author voor
@@ -23,7 +22,7 @@ public class ObjectPersistenceService implements IObjectDao {
     private final IObjectRepository objectRepository;
 
     @Autowired
-    public ObjectPersistenceShahaervice(IObjectRepository objectRepository) {
+    public ObjectPersistenceService(IObjectRepository objectRepository) {
         this.objectRepository = objectRepository;
     }
 
