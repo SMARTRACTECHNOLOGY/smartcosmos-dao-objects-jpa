@@ -40,7 +40,19 @@ public class ObjectPersistenceService implements IObjectDao {
             .description(createObject.getDescription())
             .moniker(createObject.getMoniker()).build());
 
-        return null;
+        return GetObjectDto.builder()
+            // Required
+            .urn(UuidUtil.getUrnFromUuid(entity.getId()))
+            .objectUrn(entity.getObjectUrn())
+            .accountUrn(entity.getAccountUrn())
+            .type(entity.getType()).name(entity.getName())
+            .lastModifiedTimestamp(entity.getLastModified() != null
+                ? entity.getLastModified().getTime() : null)
+            .activeFlag(entity.getActiveFlag())
+            // Optional
+            .moniker(entity.getMoniker()).description(entity.getDescription())
+            // Don't forget to build it!
+            .build();
     }
 
     @Override
