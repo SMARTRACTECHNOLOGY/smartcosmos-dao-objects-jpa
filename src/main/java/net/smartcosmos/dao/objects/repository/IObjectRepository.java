@@ -1,10 +1,11 @@
 package net.smartcosmos.dao.objects.repository;
 
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 import java.util.UUID;
+
+import net.smartcosmos.dao.objects.domain.ObjectEntity;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * @author voor

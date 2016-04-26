@@ -1,17 +1,18 @@
 package net.smartcosmos.dao.objects.impl;
 
-import net.smartcosmos.dao.objects.IObjectDao;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
-import net.smartcosmos.dto.objects.CreateObjectDto;
-import net.smartcosmos.dto.objects.GetObjectDto;
-import net.smartcosmos.util.UuidUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import net.smartcosmos.dao.objects.IObjectDao;
+import net.smartcosmos.dao.objects.domain.ObjectEntity;
+import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dto.objects.CreateObjectRequest;
+import net.smartcosmos.dto.objects.GetObjectResponse;
+import net.smartcosmos.util.UuidUtil;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author voor
@@ -22,12 +23,12 @@ public class ObjectPersistenceService implements IObjectDao {
     private final IObjectRepository objectRepository;
 
     @Autowired
-    public ObjectPersistenceService(IObjectRepository objectRepository) {
+    public ObjectPersistenceShahaervice(IObjectRepository objectRepository) {
         this.objectRepository = objectRepository;
     }
 
     @Override
-    public GetObjectDto create(String accountUrn, CreateObjectDto createObject) {
+    public GetObjectResponse create(String accountUrn, CreateObjectRequest createObject) {
 
         final ObjectEntity entity = objectRepository.save(ObjectEntity.builder()
             // Required
@@ -40,7 +41,7 @@ public class ObjectPersistenceService implements IObjectDao {
             .description(createObject.getDescription())
             .moniker(createObject.getMoniker()).build());
 
-        return GetObjectDto.builder()
+        return GetObjectResponse.builder()
             // Required
             .urn(UuidUtil.getUrnFromUuid(entity.getId()))
             .objectUrn(entity.getObjectUrn())
@@ -56,9 +57,9 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
-    public Optional<GetObjectDto> findByObjectUrn(String accountUrn, String objectUrn) {
+    public Optional<GetObjectResponse> findByObjectUrn(String accountUrn, String objectUrn) {
         return objectRepository.findByObjectUrn(objectUrn)
-            .map(o -> GetObjectDto.builder()
+            .map(o -> GetObjectResponse.builder()
                 // Required
                 .urn(UuidUtil.getUrnFromUuid(o.getId()))
                 .objectUrn(o.getObjectUrn()).accountUrn(o.getAccountUrn())
@@ -77,12 +78,12 @@ public class ObjectPersistenceService implements IObjectDao {
      *
      * @return All the objects.
      */
-    public List<GetObjectDto> getObjects() {
+    public List<GetObjectResponse> getObjects() {
         // You could theoretically create a conversion function to handle this, since
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
         return objectRepository.findAll().stream()
-            .map(o -> GetObjectDto.builder()
+            .map(o -> GetObjectResponse.builder()
                 // Required
                 .urn(UuidUtil.getUrnFromUuid(o.getId()))
                 .objectUrn(o.getObjectUrn()).accountUrn(o.getAccountUrn())
