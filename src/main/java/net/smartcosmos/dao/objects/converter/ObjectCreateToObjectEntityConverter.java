@@ -6,6 +6,8 @@ import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.security.user.SmartCosmosUserHolder;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.FormatterRegistrar;
+import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ObjectCreateToObjectEntityConverter
-        implements Converter<ObjectCreate, ObjectEntity> {
+        implements Converter<ObjectCreate, ObjectEntity>, FormatterRegistrar {
 
     @Override
     public ObjectEntity convert(ObjectCreate objectCreate) {
@@ -29,5 +31,10 @@ public class ObjectCreateToObjectEntityConverter
                 .activeFlag(objectCreate.getActiveFlag())
                 .description(objectCreate.getDescription())
                 .moniker(objectCreate.getMoniker()).build();
+    }
+
+    @Override
+    public void registerFormatters(FormatterRegistry registry) {
+        registry.addConverter(this);
     }
 }
