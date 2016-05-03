@@ -5,7 +5,6 @@ import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
-import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,8 @@ public class ObjectPersistenceService implements IObjectDao {
     private final ConversionService conversionService;
 
     @Autowired
-    public ObjectPersistenceService(IObjectRepository objectRepository, ConversionService conversionService) {
+    public ObjectPersistenceService(IObjectRepository objectRepository,
+            ConversionService conversionService) {
         this.objectRepository = objectRepository;
         this.conversionService = conversionService;
     }
@@ -40,23 +40,23 @@ public class ObjectPersistenceService implements IObjectDao {
 
     @Override
     public Optional<ObjectResponse> findByObjectUrn(String accountUrn, String objectUrn) {
-        return objectRepository.findByObjectUrn(objectUrn)
-            .map(o -> ObjectResponse.builder()
-                // Required
-                .urn(UuidUtil.getUrnFromUuid(o.getId()))
-                .objectUrn(o.getObjectUrn()).accountUrn(o.getAccountUrn())
-                .type(o.getType()).name(o.getName())
-                .lastModifiedTimestamp(o.getLastModified() != null
-                    ? o.getLastModified().getTime() : null)
-                .activeFlag(o.getActiveFlag())
-                // Optional
-                .moniker(o.getMoniker()).description(o.getDescription())
-                // Don't forget to build it!
-                .build());
+
+        Optional<ObjectEntity> entity = objectRepository.findByObjectUrn(objectUrn);
+
+        if (entity.isPresent()) {
+            final ObjectResponse response = conversionService.convert(entity.get(),
+                    ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     /**
-     * This is a temporary function for development purposes -- eventually we don't want to support a "get everything" call, since theoretically that'd be billions of objects.
+     * This is a temporary function for development purposes -- eventually we don't want
+     * to support a "get everything" call, since theoretically that'd be billions of
+     * objects.
      *
      * @return All the objects.
      */
@@ -65,18 +65,7 @@ public class ObjectPersistenceService implements IObjectDao {
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
         return objectRepository.findAll().stream()
-            .map(o -> ObjectResponse.builder()
-                // Required
-                .urn(UuidUtil.getUrnFromUuid(o.getId()))
-                .objectUrn(o.getObjectUrn()).accountUrn(o.getAccountUrn())
-                .type(o.getType()).name(o.getName())
-                .lastModifiedTimestamp(o.getLastModified() != null
-                    ? o.getLastModified().getTime() : null)
-                .activeFlag(o.getActiveFlag())
-                // Optional
-                .moniker(o.getMoniker()).description(o.getDescription())
-                // Don't forget to build it!
-                .build())
-            .collect(Collectors.toList());
+                .map(o -> conversionService.convert(o, ObjectResponse.class))
+                .collect(Collectors.toList());
     }
 }

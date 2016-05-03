@@ -18,6 +18,10 @@ public class ObjectEntityToObjectResponseConverter
     @Override
     public ObjectResponse convert(ObjectEntity entity) {
 
+        if (entity == null) {
+            return null;
+        }
+
         return ObjectResponse.builder()
                 // Required
                 .urn(UuidUtil.getUrnFromUuid(entity.getId()))
