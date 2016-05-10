@@ -5,6 +5,7 @@ import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.security.user.SmartCosmosUserHolder;
 
+import net.smartcosmos.util.UuidUtil;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
@@ -26,7 +27,8 @@ public class ObjectCreateToObjectEntityConverter
         return ObjectEntity.builder()
                 // Required
                 .objectUrn(objectCreate.getObjectUrn()).type(objectCreate.getType())
-                .name(objectCreate.getName()).accountUrn(user.getAccountUrn())
+                .name(objectCreate.getName())
+                .accountUrn(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
                 // Optional
                 .activeFlag(objectCreate.getActiveFlag())
                 .description(objectCreate.getDescription())

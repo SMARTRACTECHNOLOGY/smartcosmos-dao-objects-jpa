@@ -24,35 +24,35 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 // Need this because Builder will otherwise use the empty constructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "object", uniqueConstraints = @UniqueConstraint(columnNames = { "objectUrn",
-        "accountUrn" }) )
+@Table(name = "object", uniqueConstraints = @UniqueConstraint(columnNames = { "objecturn",
+        "accountuuid" }) )
 public class ObjectEntity implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(name = "systemUuid", columnDefinition = "BINARY(16)")
+    @Column(name = "systemuuid", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @NotNull
-    @Column(nullable = false, updatable = false)
+    @Column(name="objecturn", nullable = false, updatable = false)
     private String objectUrn;
 
     @NotNull
     private String type;
 
     @NotNull
-    @Column(name = "accountUrn")
-    private String accountUrn;
+    @Column(name = "accountuuid")
+    private UUID accountUrn;
 
     @CreatedDate
-    @Column(name = "CREATED", insertable = true, updatable = false)
+    @Column(name = "created", insertable = true, updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
-    @Column(name = "LAST_MODIFIED", insertable = false, updatable = true)
+    @Column(name = "lastmodifiedtimestamp", insertable = false, updatable = true)
     private Date lastModified;
 
     private String moniker;
@@ -61,5 +61,6 @@ public class ObjectEntity implements Serializable {
 
     private String description;
 
+    @Column(name="activeflag")
     private Boolean activeFlag;
 }
