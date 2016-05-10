@@ -25,7 +25,8 @@ public class ObjectEntityToObjectResponseConverter
         return ObjectResponse.builder()
                 // Required
                 .urn(UuidUtil.getUrnFromUuid(entity.getId()))
-                .objectUrn(entity.getObjectUrn()).accountUrn(entity.getAccountUrn())
+                .objectUrn(entity.getObjectUrn())
+                .accountUrn(UuidUtil.getAccountUrnFromUuid(entity.getAccountUrn()))
                 .type(entity.getType()).name(entity.getName())
                 .lastModifiedTimestamp(entity.getLastModified() != null
                         ? entity.getLastModified().getTime() : null)
