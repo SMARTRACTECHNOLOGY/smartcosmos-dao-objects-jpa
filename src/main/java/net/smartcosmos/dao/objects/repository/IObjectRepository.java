@@ -14,4 +14,6 @@ public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID>, Qu
 {
 
     Optional<ObjectEntity> findByAccountIdAndObjectUrn(UUID accountId, String objectUrn);
+
+    Optional<ObjectEntity> findById(UUID systemuuid);
 }

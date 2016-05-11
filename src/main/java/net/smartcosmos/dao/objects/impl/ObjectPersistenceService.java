@@ -84,9 +84,16 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
-        // TODO: implement findByUrn in objectRepopsitory
+        Optional<ObjectEntity> entity = objectRepository.findById(UuidUtil.getUuidFromUrn(urn));
 
-        return Optional.empty();
+        if (entity.isPresent()) {
+            final ObjectResponse response = conversionService.convert(entity.get(),
+                ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     /**
