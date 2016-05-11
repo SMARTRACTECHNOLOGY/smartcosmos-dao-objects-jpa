@@ -13,4 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID> {
 
     Optional<ObjectEntity> findByObjectUrn(String objectUrn);
+
+    Optional<ObjectEntity> findById(UUID systemuuid);
 }

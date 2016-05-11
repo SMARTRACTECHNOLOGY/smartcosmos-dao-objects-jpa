@@ -5,6 +5,7 @@ import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
+import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -73,9 +74,16 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
-        // TODO: implement findByUrn in objectRepopsitory
+        Optional<ObjectEntity> entity = objectRepository.findById(UuidUtil.getUuidFromUrn(urn));
 
-        return Optional.empty();
+        if (entity.isPresent()) {
+            final ObjectResponse response = conversionService.convert(entity.get(),
+                ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     /**
