@@ -1,16 +1,17 @@
 package net.smartcosmos.dao.objects.repository;
 
+import net.smartcosmos.dao.objects.domain.ObjectEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.QueryByExampleExecutor;
+
 import java.util.Optional;
 import java.util.UUID;
-
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-
-import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * @author voor
  */
-public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID> {
+public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID>, QueryByExampleExecutor<ObjectEntity>
+{
 
     Optional<ObjectEntity> findByObjectUrn(String objectUrn);
 }
