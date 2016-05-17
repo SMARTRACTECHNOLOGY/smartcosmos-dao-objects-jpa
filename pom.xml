@@ -23,6 +23,13 @@
                 <artifactId>smartcosmos-dao-objects</artifactId>
                 <version>3.0.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-releasetrain</artifactId>
+                <version>Hopper-SR1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies>
