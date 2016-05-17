@@ -4,6 +4,7 @@ import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,11 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
@@ -50,6 +55,23 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
+    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) {
+
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getObjectUrn());
+
+        if (entity.isPresent()) {
+            ObjectEntity entity2 = conversionService.convert(updateObject, ObjectEntity.class);
+            entity2.setId(entity.get().getId());
+            entity2 = objectRepository.save(entity2);
+            final ObjectResponse response = conversionService.convert(entity2, ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Optional<ObjectResponse> findByObjectUrn(String accountUrn, String objectUrn) {
 
         Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
@@ -57,6 +79,21 @@ public class ObjectPersistenceService implements IObjectDao {
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
                     ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
+
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), UuidUtil.getUuidFromUrn(urn));
+
+        if (entity.isPresent()) {
+            final ObjectResponse response = conversionService.convert(entity.get(),
+                ObjectResponse.class);
             return Optional.ofNullable(response);
         }
         else {

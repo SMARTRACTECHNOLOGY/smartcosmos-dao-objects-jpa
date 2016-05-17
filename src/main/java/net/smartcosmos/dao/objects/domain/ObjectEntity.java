@@ -33,7 +33,7 @@ public class ObjectEntity implements Serializable {
     private UUID id;
 
     @NotNull
-    @Column(name="objecturn", nullable = false, updatable = false)
+    @Column(name="objecturn", length = 767, nullable = false, updatable = false)
     private String objectUrn;
 
     @NotNull
@@ -53,10 +53,12 @@ public class ObjectEntity implements Serializable {
     @Column(name = "lastmodifiedtimestamp", insertable = false, updatable = true)
     private Date lastModified;
 
+    @Column(length = 2048)
     private String moniker;
 
     private String name;
 
+    @Column(length = 1024)
     private String description;
 
     @Column(name="activeflag")
