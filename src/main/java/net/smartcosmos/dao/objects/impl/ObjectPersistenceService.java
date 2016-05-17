@@ -4,6 +4,7 @@ import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> update(String accountUrn, ObjectResponse updateObject) {
+    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) {
 
         Optional<ObjectEntity> entity = objectRepository.findByObjectUrn(updateObject.getObjectUrn());
 
