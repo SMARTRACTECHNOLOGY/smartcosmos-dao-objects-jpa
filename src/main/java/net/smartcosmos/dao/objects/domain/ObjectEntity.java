@@ -1,18 +1,28 @@
 package net.smartcosmos.dao.objects.domain;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.UUID;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import lombok.*;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author voor
@@ -24,25 +34,24 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 // Need this because Builder will otherwise use the empty constructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "object", uniqueConstraints = @UniqueConstraint(columnNames = { "objecturn",
-        "accountuuid" }) )
+@Table(name = "object", uniqueConstraints = @UniqueConstraint(columnNames = { "objectUrn", "accountUuid" }) )
 public class ObjectEntity implements Serializable {
 
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(name = "systemuuid", columnDefinition = "BINARY(16)")
+    @Column(name = "systemUuid", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @NotNull
-    @Column(name="objecturn", nullable = false, updatable = false)
+    @Column(name="objectUrn", nullable = false, updatable = false)
     private String objectUrn;
 
     @NotNull
     private String type;
 
     @NotNull
-    @Column(name = "accountuuid")
+    @Column(name = "accountUuid")
     private UUID accountUrn;
 
     @CreatedDate
@@ -52,7 +61,7 @@ public class ObjectEntity implements Serializable {
 
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
-    @Column(name = "lastmodifiedtimestamp", insertable = false, updatable = true)
+    @Column(name = "lastModifiedTimestamp", insertable = false, updatable = true)
     private Date lastModified;
 
     private String moniker;
@@ -61,6 +70,6 @@ public class ObjectEntity implements Serializable {
 
     private String description;
 
-    @Column(name="activeflag")
+    @Column(name="activeFlag")
     private Boolean activeFlag;
 }
