@@ -75,7 +75,7 @@ public class ObjectEntity implements Serializable {
     private UUID accountUrn;
 
     @CreatedDate
-    @Column(name = "created", insertable = true, updatable = false)
+    @Column(name = "createdTimestamp", insertable = true, updatable = false)
     private Long created;
 
     @LastModifiedDate
