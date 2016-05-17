@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import java.util.Map;
@@ -21,7 +20,6 @@ import java.util.Map;
 @EntityScan
 @ComponentScan
 @Configuration
-@EnableWebMvc
 public class ObjectPersistenceConfig extends WebMvcConfigurerAdapter {
 
     @Autowired

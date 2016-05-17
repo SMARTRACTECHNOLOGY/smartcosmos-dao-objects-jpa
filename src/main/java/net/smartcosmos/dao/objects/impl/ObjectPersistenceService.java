@@ -5,24 +5,18 @@ import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
+import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.*;
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.ENDING;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.EXACT;
 
 /**
  * @author voor
@@ -58,7 +52,7 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> findByObjectUrn(String accountUrn, String objectUrn) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByObjectUrn(objectUrn);
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
 
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
