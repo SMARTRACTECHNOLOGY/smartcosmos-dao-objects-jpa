@@ -25,7 +25,7 @@ public class ObjectUpdateToObjectEntityConverter
             // Required
             .objectUrn(objectUpdate.getObjectUrn()).type(objectUpdate.getType())
             .name(objectUpdate.getName())
-            .accountUrn(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
+            .accountId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
             // Optional
             .activeFlag(objectUpdate.getActiveFlag())
             .description(objectUpdate.getDescription())

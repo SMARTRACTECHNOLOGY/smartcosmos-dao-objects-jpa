@@ -53,7 +53,7 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByObjectUrn(updateObject.getObjectUrn());
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getObjectUrn());
 
         if (entity.isPresent()) {
             ObjectEntity entity2 = conversionService.convert(updateObject, ObjectEntity.class);
@@ -85,7 +85,7 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
-        Optional<ObjectEntity> entity = objectRepository.findById(UuidUtil.getUuidFromUrn(urn));
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), UuidUtil.getUuidFromUrn(urn));
 
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
