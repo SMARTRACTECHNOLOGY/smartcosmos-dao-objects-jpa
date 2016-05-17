@@ -28,8 +28,7 @@ public class ObjectEntityToObjectResponseConverter
                 .objectUrn(entity.getObjectUrn())
                 .accountUrn(UuidUtil.getAccountUrnFromUuid(entity.getAccountUrn()))
                 .type(entity.getType()).name(entity.getName())
-                .lastModifiedTimestamp(entity.getLastModified() != null
-                        ? entity.getLastModified().getTime() : null)
+                .lastModifiedTimestamp(entity.getLastModified())
                 .activeFlag(entity.getActiveFlag())
                 // Optional
                 .moniker(entity.getMoniker()).description(entity.getDescription())
