@@ -1,18 +1,16 @@
 package net.smartcosmos.dao.objects.domain;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.UUID;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 import lombok.*;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author voor
@@ -43,7 +41,7 @@ public class ObjectEntity implements Serializable {
 
     @NotNull
     @Column(name = "accountuuid")
-    private UUID accountUrn;
+    private UUID accountId;
 
     @CreatedDate
     @Column(name = "created", insertable = true, updatable = false)

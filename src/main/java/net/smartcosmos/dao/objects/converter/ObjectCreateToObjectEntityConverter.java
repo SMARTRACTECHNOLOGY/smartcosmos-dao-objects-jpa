@@ -28,7 +28,7 @@ public class ObjectCreateToObjectEntityConverter
                 // Required
                 .objectUrn(objectCreate.getObjectUrn()).type(objectCreate.getType())
                 .name(objectCreate.getName())
-                .accountUrn(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
+                .accountId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
                 // Optional
                 .activeFlag(objectCreate.getActiveFlag())
                 .description(objectCreate.getDescription())
