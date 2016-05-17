@@ -56,7 +56,7 @@ public class ObjectEntity implements Serializable {
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Type(type = "uuid-binary")
-    @Column(name = "systemUuid", length = UUID_LENGTH, nullable = false, updatable = false, unique = true)
+    @Column(name = "systemUuid", length = UUID_LENGTH)
     private UUID id;
 
     @NotNull
@@ -79,9 +79,7 @@ public class ObjectEntity implements Serializable {
     private Long created;
 
     @LastModifiedDate
-    @Basic
-    @NotNull
-    @Column(name = "lastModifiedTimestamp", insertable = false, nullable = false, updatable = true)
+    @Column(name = "lastModifiedTimestamp", insertable = false, updatable = true)
     private Long lastModified;
 
     @Size(max = MONIKER_LENGTH)
