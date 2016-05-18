@@ -79,7 +79,8 @@ public class ObjectEntity implements Serializable {
     private Long created;
 
     @LastModifiedDate
-    @Column(name = "lastModifiedTimestamp", insertable = false, updatable = true)
+//    @Column(name = "lastModifiedTimestamp", insertable = false, updatable = true) // lastModified only set on update, might be used later
+    @Column(name = "lastModifiedTimestamp", insertable = true, updatable = true) // lastModified already set on create (v2 compatibility)
     private Long lastModified;
 
     @Size(max = MONIKER_LENGTH)
