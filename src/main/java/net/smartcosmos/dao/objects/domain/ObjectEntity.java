@@ -72,7 +72,7 @@ public class ObjectEntity implements Serializable {
     @NotNull
     @Type(type = "uuid-binary")
     @Column(name = "accountUuid", length = UUID_LENGTH, nullable = false, updatable = false)
-    private UUID accountUrn;
+    private UUID accountId;
 
     @CreatedDate
     @Column(name = "createdTimestamp", insertable = true, updatable = false)
