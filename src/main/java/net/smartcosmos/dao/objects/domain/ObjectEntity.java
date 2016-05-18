@@ -1,7 +1,6 @@
 package net.smartcosmos.dao.objects.domain;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -30,9 +30,6 @@ import java.util.UUID;
 @Entity(name = "object")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
-@Builder
-// Need this because Builder will otherwise use the empty constructor
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners({ AuditingEntityListener.class })
 @Table(name = "object", uniqueConstraints = @UniqueConstraint(columnNames = { "objectUrn", "accountUuid" }) )
 public class ObjectEntity implements Serializable {
@@ -101,4 +98,36 @@ public class ObjectEntity implements Serializable {
     @NotNull
     @Column(name="activeFlag", nullable = false)
     private Boolean activeFlag;
+
+    /*
+        Lombok's @Builder is not able to deal with field initialization default values. That's a known issue which won't get fixed:
+        https://github.com/rzwitserloot/lombok/issues/663
+
+        We therefore provide our own AllArgsConstructor that is used by the generated builder and takes care of field initialization.
+     */
+    @Builder
+    @ConstructorProperties({"id", "objectUrn", "type", "accountId", "created", "lastModified", "moniker", "name", "description",
+        "activeFlag"})
+    protected ObjectEntity(UUID id,
+                           String objectUrn,
+                           String type,
+                           UUID accountId,
+                           Long created,
+                           Long lastModified,
+                           String moniker,
+                           String name,
+                           String description,
+                           Boolean activeFlag)
+    {
+        this.id = id;
+        this.objectUrn = objectUrn;
+        this.type = type;
+        this.accountId = accountId;
+        this.created = created;
+        this.lastModified = lastModified;
+        this.moniker = moniker;
+        this.name = name;
+        this.description = description;
+        this.activeFlag = activeFlag != null ? activeFlag : true;
+    }
 }
