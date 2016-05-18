@@ -14,7 +14,6 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -148,12 +147,10 @@ public class ObjectPersistenceService implements IObjectDao {
         }
 
         // findByExample doesn't deal with dates, so we have to do it ourselves
-        Date modifiedAfterDate = new Date(0);
-        boolean modifiedAfterDateSpecified = false;
+        Long modifiedAfterDate = null;
 
         if (queryParameters.containsKey(MODIFIED_AFTER)){
-            modifiedAfterDate = (Date)queryParameters.get(MODIFIED_AFTER);
-            modifiedAfterDateSpecified = true;
+            modifiedAfterDate = (Long) queryParameters.get(MODIFIED_AFTER);
         }
         ObjectEntity exampleEntity = builder.build();
 
@@ -164,11 +161,11 @@ public class ObjectPersistenceService implements IObjectDao {
         for (ObjectEntity singleResult : queryResult)
         {
             // created is set at object creation time, and lastModified is not
-            Date singleResultLastModified = singleResult.getLastModified();
+            Long singleResultLastModified = singleResult.getLastModified();
             if (singleResultLastModified == null){
                 singleResultLastModified = singleResult.getCreated();
             }
-            if(!modifiedAfterDateSpecified || singleResultLastModified.after(modifiedAfterDate))
+            if(modifiedAfterDate == null || singleResultLastModified > modifiedAfterDate)
             {
                 returnValue.add(conversionService.convert(singleResult, ObjectResponse.class));
             }
