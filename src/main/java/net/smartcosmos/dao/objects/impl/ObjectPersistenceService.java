@@ -114,11 +114,9 @@ public class ObjectPersistenceService implements IObjectDao {
 
         // findByExample doesn't deal with dates, so we have to do it ourselves
         Long modifiedAfterDate = null;
-        boolean modifiedAfterDateSpecified = false;
 
         if (queryParameters.containsKey(MODIFIED_AFTER)){
             modifiedAfterDate = (Long) queryParameters.get(MODIFIED_AFTER);
-            modifiedAfterDateSpecified = true;
         }
         ObjectEntity exampleEntity = builder.build();
 
@@ -133,7 +131,7 @@ public class ObjectPersistenceService implements IObjectDao {
             if (singleResultLastModified == null){
                 singleResultLastModified = singleResult.getCreated();
             }
-            if(!modifiedAfterDateSpecified || singleResultLastModified > modifiedAfterDate)
+            if(modifiedAfterDate == null || singleResultLastModified > modifiedAfterDate)
             {
                 returnValue.add(conversionService.convert(singleResult, ObjectResponse.class));
             }
