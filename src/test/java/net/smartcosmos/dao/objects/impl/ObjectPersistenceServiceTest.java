@@ -6,6 +6,7 @@ import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.util.UuidUtil;
 import org.junit.Before;
@@ -81,6 +82,34 @@ public class ObjectPersistenceServiceTest {
 
         assertEquals("urn:fakeUrn", entity.get().getObjectUrn());
         assertEquals("urn:fakeUrn", response.getObjectUrn());
+    }
+
+    @Test
+    public void update() {
+        ObjectCreate create = ObjectCreate.builder().objectUrn("urn:fakeUrn-update")
+            .moniker("moniker").description("description").name("name").type("type")
+            .build();
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        System.out.println(responseCreate.getAccountUrn());
+        System.out.println(accountId);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, "urn:fakeUrn-update");
+
+        assertTrue(entity.isPresent());
+
+        assertEquals("urn:fakeUrn-update", entity.get().getObjectUrn());
+        assertEquals("urn:fakeUrn-update", responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder().objectUrn("urn:fakeUrn-update").name("new name").build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals("urn:fakeUrn-update", responseUpdate.get().getObjectUrn());
+        assertEquals("new name", responseUpdate.get().getName());
     }
 
     @Test
