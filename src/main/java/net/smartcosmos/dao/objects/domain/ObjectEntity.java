@@ -40,7 +40,7 @@ public class ObjectEntity implements Serializable {
     private String type;
 
     @NotNull
-    @Column(name = "accountuuid")
+    @Column(name = "accountuuid", columnDefinition = "BINARY(16)")
     private UUID accountId;
 
     @CreatedDate
