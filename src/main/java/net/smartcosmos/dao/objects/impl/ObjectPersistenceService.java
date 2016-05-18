@@ -60,15 +60,44 @@ public class ObjectPersistenceService implements IObjectDao {
         Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getObjectUrn());
 
         if (entity.isPresent()) {
-            ObjectEntity entity2 = conversionService.convert(updateObject, ObjectEntity.class);
-            entity2.setId(entity.get().getId());
-            entity2 = objectRepository.save(entity2);
-            final ObjectResponse response = conversionService.convert(entity2, ObjectResponse.class);
+            ObjectEntity updateEntity = merge(entity.get(), updateObject);
+            updateEntity = objectRepository.save(updateEntity);
+
+            final ObjectResponse response = conversionService.convert(updateEntity, ObjectResponse.class);
             return Optional.ofNullable(response);
         }
         else {
             return Optional.empty();
         }
+    }
+
+    private ObjectEntity merge(ObjectEntity objectEntity, ObjectUpdate updateObject) {
+
+        if (updateObject.getObjectUrn() != null) {
+            objectEntity.setObjectUrn(updateObject.getObjectUrn());
+        }
+
+        if (updateObject.getUrn() != null) {
+            objectEntity.setId(UuidUtil.getUuidFromUrn(updateObject.getUrn()));
+        }
+
+        if (updateObject.getName() != null && !updateObject.getName().isEmpty()) {
+            objectEntity.setName(updateObject.getName());
+        }
+
+        if (updateObject.getActiveFlag() != null) {
+            objectEntity.setActiveFlag(updateObject.getActiveFlag());
+        }
+
+        if (updateObject.getDescription() != null) {
+            objectEntity.setDescription(updateObject.getDescription());
+        }
+
+        if (updateObject.getMoniker() != null) {
+            objectEntity.setMoniker(updateObject.getMoniker());
+        }
+
+        return objectEntity;
     }
 
     @Override
