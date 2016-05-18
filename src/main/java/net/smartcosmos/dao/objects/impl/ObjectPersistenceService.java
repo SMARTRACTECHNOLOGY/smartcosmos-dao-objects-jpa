@@ -5,6 +5,7 @@ import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
@@ -103,18 +104,10 @@ public class ObjectPersistenceService implements IObjectDao {
             .withStringMatcher(STARTING)
             .withMatcher(TYPE, exact());
 
-        if (queryParameters.containsKey(OBJECT_URN_LIKE)){
-            builder.objectUrn((String)queryParameters.get(OBJECT_URN_LIKE));
-        }
-        if (queryParameters.containsKey(TYPE)){
-            builder.type((String)queryParameters.get(TYPE));
-        }
-        if (queryParameters.containsKey(NAME_LIKE)){
-            builder.name((String)queryParameters.get(NAME_LIKE));
-        }
-        if (queryParameters.containsKey(MONIKER_LIKE)){
-            builder.moniker((String)queryParameters.get(MONIKER_LIKE));
-        }
+        builder.objectUrn(MapUtils.getString(queryParameters, OBJECT_URN_LIKE));
+        builder.type(MapUtils.getString(queryParameters, TYPE));
+        builder.name(MapUtils.getString(queryParameters, NAME_LIKE));
+        builder.moniker(MapUtils.getString(queryParameters, MONIKER_LIKE));
 
         // findByExample doesn't deal with dates, so we have to do it ourselves
         Date modifiedAfterDate = new Date(0);
