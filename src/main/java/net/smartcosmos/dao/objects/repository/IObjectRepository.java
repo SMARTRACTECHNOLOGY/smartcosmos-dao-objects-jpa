@@ -13,5 +13,7 @@ import java.util.UUID;
 public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID>, QueryByExampleExecutor<ObjectEntity>
 {
 
-    Optional<ObjectEntity> findByObjectUrn(String objectUrn);
+    Optional<ObjectEntity> findByAccountIdAndObjectUrn(UUID accountId, String objectUrn);
+
+    Optional<ObjectEntity> findByAccountIdAndId(UUID accountId, UUID id);
 }

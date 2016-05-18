@@ -4,8 +4,10 @@ import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import org.apache.commons.collections4.MapUtils;
+import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
@@ -13,17 +15,13 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.*;
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.ENDING;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.EXACT;
 
 /**
  * @author voor
@@ -57,13 +55,45 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
+    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) {
+
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getObjectUrn());
+
+        if (entity.isPresent()) {
+            ObjectEntity entity2 = conversionService.convert(updateObject, ObjectEntity.class);
+            entity2.setId(entity.get().getId());
+            entity2 = objectRepository.save(entity2);
+            final ObjectResponse response = conversionService.convert(entity2, ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Optional<ObjectResponse> findByObjectUrn(String accountUrn, String objectUrn) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByObjectUrn(objectUrn);
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
 
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
                     ObjectResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
+
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), UuidUtil.getUuidFromUrn(urn));
+
+        if (entity.isPresent()) {
+            final ObjectResponse response = conversionService.convert(entity.get(),
+                ObjectResponse.class);
             return Optional.ofNullable(response);
         }
         else {
@@ -110,12 +140,10 @@ public class ObjectPersistenceService implements IObjectDao {
         builder.moniker(MapUtils.getString(queryParameters, MONIKER_LIKE));
 
         // findByExample doesn't deal with dates, so we have to do it ourselves
-        Date modifiedAfterDate = new Date(0);
-        boolean modifiedAfterDateSpecified = false;
+        Long modifiedAfterDate = null;
 
         if (queryParameters.containsKey(MODIFIED_AFTER)){
-            modifiedAfterDate = (Date)queryParameters.get(MODIFIED_AFTER);
-            modifiedAfterDateSpecified = true;
+            modifiedAfterDate = (Long) queryParameters.get(MODIFIED_AFTER);
         }
         ObjectEntity exampleEntity = builder.build();
 
@@ -126,11 +154,11 @@ public class ObjectPersistenceService implements IObjectDao {
         for (ObjectEntity singleResult : queryResult)
         {
             // created is set at object creation time, and lastModified is not
-            Date singleResultLastModified = singleResult.getLastModified();
+            Long singleResultLastModified = singleResult.getLastModified();
             if (singleResultLastModified == null){
                 singleResultLastModified = singleResult.getCreated();
             }
-            if(!modifiedAfterDateSpecified || singleResultLastModified.after(modifiedAfterDate))
+            if(modifiedAfterDate == null || singleResultLastModified > modifiedAfterDate)
             {
                 returnValue.add(conversionService.convert(singleResult, ObjectResponse.class));
             }

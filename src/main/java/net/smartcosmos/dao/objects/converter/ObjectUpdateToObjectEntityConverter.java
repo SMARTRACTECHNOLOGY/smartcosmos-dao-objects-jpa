@@ -1,7 +1,7 @@
 package net.smartcosmos.dao.objects.converter;
 
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dto.objects.ObjectCreate;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.security.user.SmartCosmosUserHolder;
 
@@ -11,28 +11,25 @@ import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
 
-/**
- * @author voor
- */
 @Component
-public class ObjectCreateToObjectEntityConverter
-        implements Converter<ObjectCreate, ObjectEntity>, FormatterRegistrar {
+public class ObjectUpdateToObjectEntityConverter
+    implements Converter<ObjectUpdate, ObjectEntity>, FormatterRegistrar {
 
     @Override
-    public ObjectEntity convert(ObjectCreate objectCreate) {
+    public ObjectEntity convert(ObjectUpdate objectUpdate) {
 
         // Retrieve current user.
         SmartCosmosUser user = SmartCosmosUserHolder.getCurrentUser();
 
         return ObjectEntity.builder()
-                // Required
-                .objectUrn(objectCreate.getObjectUrn()).type(objectCreate.getType())
-                .name(objectCreate.getName())
-                .accountId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
-                // Optional
-                .activeFlag(objectCreate.getActiveFlag())
-                .description(objectCreate.getDescription())
-                .moniker(objectCreate.getMoniker()).build();
+            // Required
+            .objectUrn(objectUpdate.getObjectUrn()).type(objectUpdate.getType())
+            .name(objectUpdate.getName())
+            .accountId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
+            // Optional
+            .activeFlag(objectUpdate.getActiveFlag())
+            .description(objectUpdate.getDescription())
+            .moniker(objectUpdate.getMoniker()).build();
     }
 
     @Override
