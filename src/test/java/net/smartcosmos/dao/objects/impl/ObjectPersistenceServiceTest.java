@@ -24,6 +24,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -41,6 +45,7 @@ import static org.junit.Assert.assertTrue;
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
 public class ObjectPersistenceServiceTest {
 
+    public static final int DELAY_BETWEEN_LAST_MODIFIED_DATES = 2000;
     private final UUID accountId = UUID.randomUUID();
 
     private final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountId);
@@ -108,8 +113,207 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters() throws Exception {
-        // TODO to.. do...
+    public void findByQueryParametersStringParameters() throws Exception
+    {
+        findByQueryParametersUtil();
+
+        Map<String, Object> queryParams = new HashMap<>();
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams");
+
+        List<ObjectResponse> response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 12);
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams0");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 9);
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams1");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 3);
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams11");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 1);
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams99");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "bjectUrnQueryParams");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams");
+        queryParams.put(ObjectPersistenceService.TYPE, "type");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 6);
+
+        queryParams.put(ObjectPersistenceService.TYPE, "type o");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 3);
+
+        queryParams.put(ObjectPersistenceService.TYPE, "type t");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 3);
+
+        queryParams.put(ObjectPersistenceService.TYPE, "type z");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+        queryParams.put(ObjectPersistenceService.TYPE, "ype");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+        queryParams.remove(ObjectPersistenceService.TYPE);
+        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 3);
+
+        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker o");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 1);
+
+        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker t");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 2);
+
+        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker three");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 1);
+
+        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker z");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "oniker");
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+    }
+
+    @Test
+    public void findByQueryParametersLastModified() throws Exception
+    {
+        final UUID accountUuid = UuidUtil.getNewUuid();
+        final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
+        Map<String, Object> queryParams = new HashMap<>();
+
+        Long firstDate = new Date().getTime();
+        Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
+
+        ObjectEntity firstObject = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnLastModTest1").name("last mod test 1").type("anythingIsFine").build();
+        this.objectRepository.save(firstObject);
+
+        Long secondDate = new Date().getTime();
+        Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
+
+        ObjectEntity secondObject = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnLastModTest2").name("last mod test 2").type("anythingIsFine").build();
+        this.objectRepository.save(secondObject);
+
+        Long thirdDate = new Date().getTime();
+        Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
+
+        ObjectEntity thirdObject = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnLastModTest3").name("last mod test 3").type("anythingIsFine").build();
+        this.objectRepository.save(thirdObject);
+
+        Long fourthDate = new Date().getTime();
+
+        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, firstDate);
+        List<ObjectResponse> response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 3);
+
+        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, secondDate);
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 2);
+
+        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, thirdDate);
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 1);
+
+        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, fourthDate);
+        response = objectPersistenceService
+            .findByQueryParameters(accountUrn, queryParams);
+        assertTrue(response.size() == 0);
+
+    }
+
+
+    private void findByQueryParametersUtil() throws Exception
+    {
+        final UUID accountUuid = UuidUtil.getNewUuid();
+
+        ObjectEntity entityNameOneTypeOne = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams01").name("name one").type("type one").build();
+
+        ObjectEntity entityNameTwoTypeOne = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams02").name("name two").type("type one").build();
+
+        ObjectEntity entityNameThreeTypeOne = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams03").name("name three").type("type one").build();
+
+        ObjectEntity entityNameOneTypeTwo = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams04").name("name one").type("type two").build();
+
+        ObjectEntity entityNameTwoTypeTwo = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams05").name("name two").type("type two").build();
+
+        ObjectEntity entityNameThreeTypeTwo = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams06").name("name three").type("type two").build();
+
+        ObjectEntity entityNameOneMonikerOne = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams07").name("name one").type("whatever").moniker("moniker one").build();
+
+        ObjectEntity entityNameOneMonikerTwo = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams08").name("name one").type("whatever").moniker("moniker two").build();
+
+        ObjectEntity entityNameOneMonikerThree = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams09").name("name one").type("whatever").moniker("moniker three").build();
+
+        ObjectEntity entityObjectUrn10 = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams10").name("whatever").type("whatever").build();
+
+        ObjectEntity entityObjectUrn11 = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams11").name("whatever").type("whatever").build();
+
+        ObjectEntity entityObjectUrn12 = ObjectEntity.builder().accountId(accountUuid)
+            .objectUrn("objectUrnQueryParams12").name("whatever").type("whatever").build();
+
+        this.objectRepository.save(entityNameOneTypeOne);
+        this.objectRepository.save(entityNameTwoTypeOne);
+        this.objectRepository.save(entityNameThreeTypeOne);
+        this.objectRepository.save(entityNameOneTypeTwo);
+        this.objectRepository.save(entityNameTwoTypeTwo);
+        this.objectRepository.save(entityNameThreeTypeTwo);
+        this.objectRepository.save(entityNameOneMonikerOne);
+        this.objectRepository.save(entityNameOneMonikerTwo);
+        this.objectRepository.save(entityNameOneMonikerThree);
+        this.objectRepository.save(entityObjectUrn10);
+        this.objectRepository.save(entityObjectUrn11);
+        this.objectRepository.save(entityObjectUrn12);
     }
 
 }
