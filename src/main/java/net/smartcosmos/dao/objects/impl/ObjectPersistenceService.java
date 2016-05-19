@@ -56,7 +56,7 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> update(String accountUrn, @Valid ObjectUpdate updateObject) {
 
-        Optional<ObjectEntity> entity = findEntity(accountUrn, updateObject.getUrn(), updateObject.getObjectUrn());
+        Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
 
         if (entity.isPresent()) {
             ObjectEntity updateEntity = ObjectsPersistenceUtil.merge(entity.get(), updateObject);
@@ -173,17 +173,17 @@ public class ObjectPersistenceService implements IObjectDao {
         return returnValue;
     }
 
-    private Optional<ObjectEntity> findEntity(String accountUrn, String urn, String objectUrn) throws IllegalArgumentException {
+    private Optional<ObjectEntity> findEntity(UUID accountId, String urn, String objectUrn) throws IllegalArgumentException {
 
         Optional<ObjectEntity> entity = Optional.empty();
         UUID id = UuidUtil.getUuidFromUrn(urn);
 
         if (id != null) {
-            entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), id);
+            entity = objectRepository.findByAccountIdAndId(accountId, id);
         }
 
         if (!StringUtils.isEmpty(objectUrn)) {
-            entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
+            entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
         }
 
         if (entity.isPresent() && !StringUtils.isEmpty(objectUrn) && id != null) {
