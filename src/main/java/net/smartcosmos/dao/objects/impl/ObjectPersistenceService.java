@@ -54,7 +54,7 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> update(String accountUrn, @Valid ObjectUpdate updateObject) {
+    public Optional<ObjectResponse> update(String accountUrn, @Valid ObjectUpdate updateObject) throws IllegalArgumentException {
 
         Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
 
@@ -180,14 +180,16 @@ public class ObjectPersistenceService implements IObjectDao {
 
         if (id != null) {
             entity = objectRepository.findByAccountIdAndId(accountId, id);
+
+            if (entity.isPresent() && !objectUrn.isEmpty() && !objectUrn.equals(entity.get().getObjectUrn())) {
+                throw new IllegalArgumentException("urn and objectUrn do not match");
+            }
         }
 
         if (!StringUtils.isEmpty(objectUrn)) {
             entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
-        }
 
-        if (entity.isPresent() && !StringUtils.isEmpty(objectUrn) && id != null) {
-            if (!objectUrn.equals(entity.get().getObjectUrn()) || !id.equals(entity.get().getId())) {
+            if (entity.isPresent() && id != null && !id.equals(entity.get().getId())) {
                 throw new IllegalArgumentException("urn and objectUrn do not match");
             }
         }
