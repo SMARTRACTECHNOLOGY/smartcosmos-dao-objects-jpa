@@ -28,11 +28,11 @@ public class ObjectEntityToObjectResponseConverter
                 .objectUrn(entity.getObjectUrn())
                 .accountUrn(UuidUtil.getAccountUrnFromUuid(entity.getAccountId()))
                 .type(entity.getType()).name(entity.getName())
-                .lastModifiedTimestamp(entity.getLastModified() != null
-                        ? entity.getLastModified().getTime() : null)
+                .lastModifiedTimestamp(entity.getLastModified() != null ? entity.getLastModified() : entity.getCreated())
                 .activeFlag(entity.getActiveFlag())
                 // Optional
-                .moniker(entity.getMoniker()).description(entity.getDescription())
+                .moniker(entity.getMoniker())
+                .description(entity.getDescription())
                 // Don't forget to build it!
                 .build();
     }
