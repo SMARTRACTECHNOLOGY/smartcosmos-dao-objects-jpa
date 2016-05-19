@@ -13,11 +13,10 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import javax.validation.Valid;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
@@ -55,9 +54,9 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) {
+    public Optional<ObjectResponse> update(String accountUrn, @Valid ObjectUpdate updateObject) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getObjectUrn());
+        Optional<ObjectEntity> entity = findEntity(accountUrn, updateObject.getUrn(), updateObject.getObjectUrn());
 
         if (entity.isPresent()) {
             ObjectEntity updateEntity = ObjectsPersistenceUtil.merge(entity.get(), updateObject);
@@ -172,5 +171,27 @@ public class ObjectPersistenceService implements IObjectDao {
             }
         }
         return returnValue;
+    }
+
+    private Optional<ObjectEntity> findEntity(String accountUrn, String urn, String objectUrn) throws IllegalArgumentException {
+
+        Optional<ObjectEntity> entity = Optional.empty();
+        UUID id = UuidUtil.getUuidFromUrn(urn);
+
+        if (id != null) {
+            entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), id);
+        }
+
+        if (!StringUtils.isEmpty(objectUrn)) {
+            entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
+        }
+
+        if (entity.isPresent() && !StringUtils.isEmpty(objectUrn) && id != null) {
+            if (!objectUrn.equals(entity.get().getObjectUrn()) || !id.equals(entity.get().getId())) {
+                throw new IllegalArgumentException("urn and objectUrn do not match");
+            }
+        }
+
+        return entity;
     }
 }
