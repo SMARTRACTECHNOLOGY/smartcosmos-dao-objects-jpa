@@ -261,9 +261,10 @@ public class ObjectPersistenceServiceTest {
 
     }
 
-
+    // used by findByQueryParametersStringParameters()
     private void findByQueryParametersUtil() throws Exception
     {
+
         final UUID accountUuid = UuidUtil.getNewUuid();
 
         ObjectEntity entityNameOneTypeOne = ObjectEntity.builder().accountId(accountUuid)
