@@ -3,9 +3,10 @@ package net.smartcosmos.dao.objects.impl;
 import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
 import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.dto.objects.ObjectResponse;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -59,7 +60,7 @@ public class ObjectPersistenceService implements IObjectDao {
         Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getObjectUrn());
 
         if (entity.isPresent()) {
-            ObjectEntity updateEntity = merge(entity.get(), updateObject);
+            ObjectEntity updateEntity = ObjectsPersistenceUtil.merge(entity.get(), updateObject);
             updateEntity = objectRepository.save(updateEntity);
 
             final ObjectResponse response = conversionService.convert(updateEntity, ObjectResponse.class);
@@ -68,35 +69,6 @@ public class ObjectPersistenceService implements IObjectDao {
         else {
             return Optional.empty();
         }
-    }
-
-    private ObjectEntity merge(ObjectEntity objectEntity, ObjectUpdate updateObject) {
-
-        if (updateObject.getObjectUrn() != null) {
-            objectEntity.setObjectUrn(updateObject.getObjectUrn());
-        }
-
-        if (updateObject.getUrn() != null) {
-            objectEntity.setId(UuidUtil.getUuidFromUrn(updateObject.getUrn()));
-        }
-
-        if (updateObject.getName() != null && !updateObject.getName().isEmpty()) {
-            objectEntity.setName(updateObject.getName());
-        }
-
-        if (updateObject.getActiveFlag() != null) {
-            objectEntity.setActiveFlag(updateObject.getActiveFlag());
-        }
-
-        if (updateObject.getDescription() != null) {
-            objectEntity.setDescription(updateObject.getDescription());
-        }
-
-        if (updateObject.getMoniker() != null) {
-            objectEntity.setMoniker(updateObject.getMoniker());
-        }
-
-        return objectEntity;
     }
 
     @Override
