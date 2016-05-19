@@ -14,8 +14,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 
-import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,7 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> update(String accountUrn, @Valid ObjectUpdate updateObject) throws IllegalArgumentException {
+    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws IllegalArgumentException {
 
         Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
 
