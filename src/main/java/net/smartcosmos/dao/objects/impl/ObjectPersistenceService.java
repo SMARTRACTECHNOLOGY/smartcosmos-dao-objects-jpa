@@ -181,7 +181,7 @@ public class ObjectPersistenceService implements IObjectDao {
         if (id != null) {
             entity = objectRepository.findByAccountIdAndId(accountId, id);
 
-            if (entity.isPresent() && !objectUrn.isEmpty() && !objectUrn.equals(entity.get().getObjectUrn())) {
+            if (entity.isPresent() && !StringUtils.isEmpty(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
                 throw new IllegalArgumentException("urn and objectUrn do not match");
             }
         }
