@@ -180,6 +180,282 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
+    public void thatUpdateTypeSucceeds() {
+
+        String objectUrn = "urn:fakeUrn-update7";
+        String name = "name";
+        String type = "type";
+        String description = "description";
+        String moniker = "moniker";
+
+        String newType = "new type";
+
+        ObjectCreate create = ObjectCreate.builder()
+            .objectUrn(objectUrn)
+            .name(name)
+            .type(type)
+            .description(description)
+            .moniker(moniker)
+            .build();
+
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, objectUrn);
+
+        assertTrue(entity.isPresent());
+
+        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder()
+            .urn(responseCreate.getUrn())
+            .type(newType)
+            .build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals(objectUrn, responseUpdate.get().getObjectUrn());
+        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
+        assertEquals(name, responseUpdate.get().getName());
+        assertEquals(newType, responseUpdate.get().getType());
+        assertEquals(description, responseUpdate.get().getDescription());
+        assertEquals(moniker, responseUpdate.get().getMoniker());
+    }
+
+    @Test(expected=ConstraintViolationException.class)
+    public void thatUpdateEmptyTypeFails() {
+
+        String objectUrn = "urn:fakeUrn-update12";
+        String name = "name";
+        String type = "type";
+        String description = "description";
+        String moniker = "moniker";
+
+        String newType = "";
+
+        ObjectCreate create = ObjectCreate.builder()
+            .objectUrn(objectUrn)
+            .name(name)
+            .type(type)
+            .description(description)
+            .moniker(moniker)
+            .build();
+
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, objectUrn);
+
+        assertTrue(entity.isPresent());
+
+        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder()
+            .urn(responseCreate.getUrn())
+            .type(newType)
+            .build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals(objectUrn, responseUpdate.get().getObjectUrn());
+        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
+        assertEquals(name, responseUpdate.get().getName());
+        assertEquals(newType, responseUpdate.get().getType());
+        assertEquals(description, responseUpdate.get().getDescription());
+        assertEquals(moniker, responseUpdate.get().getMoniker());
+    }
+
+    @Test
+    public void thatUpdateDescriptionSucceeds() {
+
+        String objectUrn = "urn:fakeUrn-update8";
+        String name = "name";
+        String type = "type";
+        String description = "description";
+        String moniker = "moniker";
+
+        String newDescription = "new description";
+
+        ObjectCreate create = ObjectCreate.builder()
+            .objectUrn(objectUrn)
+            .name(name)
+            .type(type)
+            .description(description)
+            .moniker(moniker)
+            .build();
+
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, objectUrn);
+
+        assertTrue(entity.isPresent());
+
+        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder()
+            .urn(responseCreate.getUrn())
+            .description(newDescription)
+            .build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals(objectUrn, responseUpdate.get().getObjectUrn());
+        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
+        assertEquals(name, responseUpdate.get().getName());
+        assertEquals(type, responseUpdate.get().getType());
+        assertEquals(newDescription, responseUpdate.get().getDescription());
+        assertEquals(moniker, responseUpdate.get().getMoniker());
+    }
+
+    @Test
+    public void thatUpdateEmptyDescriptionSucceeds() {
+
+        String objectUrn = "urn:fakeUrn-update9";
+        String name = "name";
+        String type = "type";
+        String description = "description";
+        String moniker = "moniker";
+
+        String newDescription = "";
+
+        ObjectCreate create = ObjectCreate.builder()
+            .objectUrn(objectUrn)
+            .name(name)
+            .type(type)
+            .description(description)
+            .moniker(moniker)
+            .build();
+
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, objectUrn);
+
+        assertTrue(entity.isPresent());
+
+        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder()
+            .urn(responseCreate.getUrn())
+            .description(newDescription)
+            .build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals(objectUrn, responseUpdate.get().getObjectUrn());
+        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
+        assertEquals(name, responseUpdate.get().getName());
+        assertEquals(type, responseUpdate.get().getType());
+        assertEquals(newDescription, responseUpdate.get().getDescription());
+        assertEquals(moniker, responseUpdate.get().getMoniker());
+    }
+
+    @Test
+    public void thatUpdateMonikerSucceeds() {
+
+        String objectUrn = "urn:fakeUrn-update10";
+        String name = "name";
+        String type = "type";
+        String description = "description";
+        String moniker = "moniker";
+
+        String newMoniker = "new moniker";
+
+        ObjectCreate create = ObjectCreate.builder()
+            .objectUrn(objectUrn)
+            .name(name)
+            .type(type)
+            .description(description)
+            .moniker(moniker)
+            .build();
+
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, objectUrn);
+
+        assertTrue(entity.isPresent());
+
+        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder()
+            .urn(responseCreate.getUrn())
+            .moniker(newMoniker)
+            .build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals(objectUrn, responseUpdate.get().getObjectUrn());
+        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
+        assertEquals(name, responseUpdate.get().getName());
+        assertEquals(type, responseUpdate.get().getType());
+        assertEquals(description, responseUpdate.get().getDescription());
+        assertEquals(newMoniker, responseUpdate.get().getMoniker());
+    }
+
+    @Test
+    public void thatUpdateEmptyMonikerSucceeds() {
+
+        String objectUrn = "urn:fakeUrn-update11";
+        String name = "name";
+        String type = "type";
+        String description = "description";
+        String moniker = "moniker";
+
+        String newMoniker = "";
+
+        ObjectCreate create = ObjectCreate.builder()
+            .objectUrn(objectUrn)
+            .name(name)
+            .type(type)
+            .description(description)
+            .moniker(moniker)
+            .build();
+
+        ObjectResponse responseCreate = objectPersistenceService
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+
+        Optional<ObjectEntity> entity = objectRepository
+            .findByAccountIdAndObjectUrn(accountId, objectUrn);
+
+        assertTrue(entity.isPresent());
+
+        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, responseCreate.getObjectUrn());
+
+        ObjectUpdate update = ObjectUpdate.builder()
+            .urn(responseCreate.getUrn())
+            .moniker(newMoniker)
+            .build();
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+
+        assertTrue(responseUpdate.isPresent());
+
+        assertEquals(objectUrn, responseUpdate.get().getObjectUrn());
+        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
+        assertEquals(description, responseUpdate.get().getDescription());
+        assertEquals(type, responseUpdate.get().getType());
+        assertEquals(description, responseUpdate.get().getDescription());
+        assertEquals(newMoniker, responseUpdate.get().getMoniker());
+    }
+
+    @Test
     public void thatUpdateNonexistentFails() {
         ObjectUpdate update = ObjectUpdate.builder()
             .objectUrn("urn:DOES-NOT-EXIST")
