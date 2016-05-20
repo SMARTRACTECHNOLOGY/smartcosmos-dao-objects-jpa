@@ -67,7 +67,7 @@ public class ObjectEntity implements Serializable {
     @Column(name = "type", length = TYPE_LENGTH, nullable = false)
     private String type;
 
-    @NotEmpty
+    @NotNull
     @Type(type = "uuid-binary")
     @Column(name = "accountUuid", length = UUID_LENGTH, nullable = false, updatable = false)
     private UUID accountId;
