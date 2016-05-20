@@ -45,7 +45,28 @@ import static org.junit.Assert.assertTrue;
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
 public class ObjectPersistenceServiceTest {
 
-    public static final int DELAY_BETWEEN_LAST_MODIFIED_DATES = 2000;
+    public static final int DELAY_BETWEEN_LAST_MODIFIED_DATES = 10;
+    public static final String OBJECT_URN_QUERY_PARAMS_01 = "objectUrnQueryParams01";
+    public static final String OBJECT_URN_QUERY_PARAMS_02 = "objectUrnQueryParams02";
+    public static final String OBJECT_URN_QUERY_PARAMS_03 = "objectUrnQueryParams03";
+    public static final String OBJECT_URN_QUERY_PARAMS_04 = "objectUrnQueryParams04";
+    public static final String OBJECT_URN_QUERY_PARAMS_05 = "objectUrnQueryParams05";
+    public static final String OBJECT_URN_QUERY_PARAMS_06 = "objectUrnQueryParams06";
+    public static final String OBJECT_URN_QUERY_PARAMS_07 = "objectUrnQueryParams07";
+    public static final String OBJECT_URN_QUERY_PARAMS_08 = "objectUrnQueryParams08";
+    public static final String OBJECT_URN_QUERY_PARAMS_09 = "objectUrnQueryParams09";
+    public static final String OBJECT_URN_QUERY_PARAMS_10 = "objectUrnQueryParams10";
+    public static final String OBJECT_URN_QUERY_PARAMS_11 = "objectUrnQueryParams11";
+    public static final String OBJECT_URN_QUERY_PARAMS_12 = "objectUrnQueryParams12";
+    public static final String NAME_ONE = "name one";
+    public static final String TYPE_ONE = "type one";
+    public static final String NAME_TWO = "name two";
+    public static final String NAME_THREE = "name three";
+    public static final String TYPE_TWO = "type two";
+    public static final String WHATEVER = "whatever";
+    public static final String MONIKER_ONE = "moniker one";
+    public static final String MONIKER_TWO = "moniker two";
+    public static final String MONIKER_THREE = "moniker three";
     private final UUID accountId = UUID.randomUUID();
 
     private final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountId);
@@ -115,7 +136,7 @@ public class ObjectPersistenceServiceTest {
     @Test
     public void findByQueryParametersStringParameters() throws Exception
     {
-        findByQueryParametersUtil();
+        populateQueryData();
 
         Map<String, Object> queryParams = new HashMap<>();
 
@@ -262,46 +283,46 @@ public class ObjectPersistenceServiceTest {
     }
 
     // used by findByQueryParametersStringParameters()
-    private void findByQueryParametersUtil() throws Exception
+    private void populateQueryData() throws Exception
     {
 
         final UUID accountUuid = UuidUtil.getNewUuid();
 
         ObjectEntity entityNameOneTypeOne = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams01").name("name one").type("type one").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_01).name(NAME_ONE).type(TYPE_ONE).build();
 
         ObjectEntity entityNameTwoTypeOne = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams02").name("name two").type("type one").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_02).name(NAME_TWO).type(TYPE_ONE).build();
 
         ObjectEntity entityNameThreeTypeOne = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams03").name("name three").type("type one").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_03).name(NAME_THREE).type(TYPE_ONE).build();
 
         ObjectEntity entityNameOneTypeTwo = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams04").name("name one").type("type two").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_04).name(NAME_ONE).type(TYPE_TWO).build();
 
         ObjectEntity entityNameTwoTypeTwo = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams05").name("name two").type("type two").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_05).name(NAME_TWO).type(TYPE_TWO).build();
 
         ObjectEntity entityNameThreeTypeTwo = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams06").name("name three").type("type two").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_06).name(NAME_THREE).type(TYPE_TWO).build();
 
         ObjectEntity entityNameOneMonikerOne = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams07").name("name one").type("whatever").moniker("moniker one").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_07).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_ONE).build();
 
         ObjectEntity entityNameOneMonikerTwo = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams08").name("name one").type("whatever").moniker("moniker two").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_08).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_TWO).build();
 
         ObjectEntity entityNameOneMonikerThree = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams09").name("name one").type("whatever").moniker("moniker three").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_09).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_THREE).build();
 
         ObjectEntity entityObjectUrn10 = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams10").name("whatever").type("whatever").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_10).name(WHATEVER).type(WHATEVER).build();
 
         ObjectEntity entityObjectUrn11 = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams11").name("whatever").type("whatever").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_11).name(WHATEVER).type(WHATEVER).build();
 
         ObjectEntity entityObjectUrn12 = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrnQueryParams12").name("whatever").type("whatever").build();
+            .objectUrn(OBJECT_URN_QUERY_PARAMS_12).name(WHATEVER).type(WHATEVER).build();
 
         this.objectRepository.save(entityNameOneTypeOne);
         this.objectRepository.save(entityNameTwoTypeOne);
