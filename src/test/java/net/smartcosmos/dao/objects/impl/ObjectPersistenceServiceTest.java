@@ -97,7 +97,11 @@ public class ObjectPersistenceServiceTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+    }
 
+    @After
+    public void tearDown() throws Exception {
+        objectRepository.deleteAll();
     }
 
     @Test
@@ -142,43 +146,65 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParametersStringParameters() throws Exception {
+    public void findByQueryParameters_ObjectUrnLike() throws Exception {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        expectedSize = 12;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 9;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_0);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 3;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_1);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 1;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_11);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_99);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, BJECT_URN_QUERY_PARAMS);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 6;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
+        queryParams.put(TYPE, "type");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    @Test
+    public void findByQueryParameters_Type() throws Exception {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
 
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
-
-        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 12);
-
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_0);
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 9);
-
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_1);
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 3);
-
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_11);
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 1);
-
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_99);
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
-
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, BJECT_URN_QUERY_PARAMS);
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
-
-        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
-        queryParams.put(TYPE, "type");
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 6);
-
         queryParams.put(TYPE, "type o");
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
         queryParams.put(TYPE, "type z");
@@ -188,10 +214,17 @@ public class ObjectPersistenceServiceTest {
         queryParams.put(TYPE, "ype");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
+    }
+
+    @Test
+    public void findByQueryParameters_MonikerLike() throws Exception {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
 
         queryParams.remove(TYPE);
         queryParams.put(MONIKER_LIKE, "moniker");
-        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
         queryParams.put(MONIKER_LIKE, "moniker o");
@@ -209,11 +242,10 @@ public class ObjectPersistenceServiceTest {
         queryParams.put(MONIKER_LIKE, "oniker");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
-
     }
 
     @Test
-    public void findByQueryParametersLastModified() throws Exception {
+    public void findByQueryParameters_LastModified() throws Exception {
         final UUID accountUuid = UuidUtil.getNewUuid();
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -256,7 +288,6 @@ public class ObjectPersistenceServiceTest {
         queryParams.put(MODIFIED_AFTER, fourthDate);
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
-
     }
 
     // used by findByQueryParametersStringParameters()
@@ -300,18 +331,18 @@ public class ObjectPersistenceServiceTest {
         ObjectEntity entityObjectUrn12 = ObjectEntity.builder().accountId(accountUuid)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_12).name(WHATEVER).type(WHATEVER).build();
 
-        this.objectRepository.save(entityNameOneTypeOne);
-        this.objectRepository.save(entityNameTwoTypeOne);
-        this.objectRepository.save(entityNameThreeTypeOne);
-        this.objectRepository.save(entityNameOneTypeTwo);
-        this.objectRepository.save(entityNameTwoTypeTwo);
-        this.objectRepository.save(entityNameThreeTypeTwo);
-        this.objectRepository.save(entityNameOneMonikerOne);
-        this.objectRepository.save(entityNameOneMonikerTwo);
-        this.objectRepository.save(entityNameOneMonikerThree);
-        this.objectRepository.save(entityObjectUrn10);
-        this.objectRepository.save(entityObjectUrn11);
-        this.objectRepository.save(entityObjectUrn12);
+        objectRepository.save(entityNameOneTypeOne);
+        objectRepository.save(entityNameTwoTypeOne);
+        objectRepository.save(entityNameThreeTypeOne);
+        objectRepository.save(entityNameOneTypeTwo);
+        objectRepository.save(entityNameTwoTypeTwo);
+        objectRepository.save(entityNameThreeTypeTwo);
+        objectRepository.save(entityNameOneMonikerOne);
+        objectRepository.save(entityNameOneMonikerTwo);
+        objectRepository.save(entityNameOneMonikerThree);
+        objectRepository.save(entityObjectUrn10);
+        objectRepository.save(entityObjectUrn11);
+        objectRepository.save(entityObjectUrn12);
     }
 
 }
