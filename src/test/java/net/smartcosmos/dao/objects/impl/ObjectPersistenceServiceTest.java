@@ -1,17 +1,16 @@
 package net.smartcosmos.dao.objects.impl;
 
-import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
-import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
-import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectResponse;
-import net.smartcosmos.security.user.SmartCosmosUser;
-import net.smartcosmos.util.UuidUtil;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.*;
+import org.junit.runner.*;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -23,23 +22,27 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
+import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
+import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
+import net.smartcosmos.dao.objects.domain.ObjectEntity;
+import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dto.objects.ObjectCreate;
+import net.smartcosmos.dto.objects.ObjectResponse;
+import net.smartcosmos.security.user.SmartCosmosUser;
+import net.smartcosmos.util.UuidUtil;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MODIFIED_AFTER;
+import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MONIKER_LIKE;
+import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.TYPE;
+import static org.junit.Assert.*;
 
 /**
  * @author voor
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { ObjectPersistenceTestApplication.class,
-        ObjectPersistenceConfig.class })
+                                            ObjectPersistenceConfig.class })
 @ActiveProfiles("test")
 @WebAppConfiguration
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
@@ -67,6 +70,11 @@ public class ObjectPersistenceServiceTest {
     public static final String MONIKER_ONE = "moniker one";
     public static final String MONIKER_TWO = "moniker two";
     public static final String MONIKER_THREE = "moniker three";
+    public static final String OBJECT_URN_QUERY_PARAMS = "objectUrnQueryParams";
+    public static final String OBJECT_URN_QUERY_PARAMS_0 = "objectUrnQueryParams0";
+    public static final String OBJECT_URN_QUERY_PARAMS_1 = "objectUrnQueryParams1";
+    public static final String OBJECT_URN_QUERY_PARAMS_99 = "objectUrnQueryParams99";
+    public static final String BJECT_URN_QUERY_PARAMS = "bjectUrnQueryParams";
     private final UUID accountId = UUID.randomUUID();
 
     private final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountId);
@@ -84,8 +92,8 @@ public class ObjectPersistenceServiceTest {
         // Might be a good candidate for a test package util.
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal())
-                .thenReturn(new SmartCosmosUser(accountUrn, "urn:userUrn", "username",
-                        "password", Arrays.asList(new SimpleGrantedAuthority("USER"))));
+            .thenReturn(new SmartCosmosUser(accountUrn, "urn:userUrn", "username",
+                                            "password", Arrays.asList(new SimpleGrantedAuthority("USER"))));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
@@ -95,13 +103,13 @@ public class ObjectPersistenceServiceTest {
     @Test
     public void create() throws Exception {
         ObjectCreate create = ObjectCreate.builder().objectUrn("urn:fakeUrn")
-                .moniker("moniker").description("description").name("name").type("type")
-                .build();
+            .moniker("moniker").description("description").name("name").type("type")
+            .build();
         ObjectResponse response = objectPersistenceService
-                .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
         Optional<ObjectEntity> entity = objectRepository
-                .findByAccountIdAndObjectUrn(accountId, "urn:fakeUrn");
+            .findByAccountIdAndObjectUrn(accountId, "urn:fakeUrn");
 
         assertTrue(entity.isPresent());
 
@@ -116,12 +124,12 @@ public class ObjectPersistenceServiceTest {
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
 
         ObjectEntity entity = ObjectEntity.builder().accountId(accountUuid)
-                .objectUrn("objectUrn").name("my object name").type("some type").build();
+            .objectUrn("objectUrn").name("my object name").type("some type").build();
 
         this.objectRepository.save(entity);
 
         Optional<ObjectResponse> response = objectPersistenceService
-                .findByObjectUrn(accountUrn, "objectUrn");
+            .findByObjectUrn(accountUrn, "objectUrn");
 
         assertTrue(response.isPresent());
     }
@@ -134,98 +142,81 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParametersStringParameters() throws Exception
-    {
+    public void findByQueryParametersStringParameters() throws Exception {
         populateQueryData();
 
-        Map<String, Object> queryParams = new HashMap<>();
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams");
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
 
-        List<ObjectResponse> response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 12);
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams0");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_0);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 9);
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams1");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_1);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams11");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_11);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 1);
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams99");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_99);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "bjectUrnQueryParams");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, BJECT_URN_QUERY_PARAMS);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
-        queryParams.put(ObjectPersistenceService.OBJECT_URN_LIKE, "objectUrnQueryParams");
-        queryParams.put(ObjectPersistenceService.TYPE, "type");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
+        queryParams.put(TYPE, "type");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 6);
 
-        queryParams.put(ObjectPersistenceService.TYPE, "type o");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(TYPE, "type o");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        queryParams.put(ObjectPersistenceService.TYPE, "type z");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(TYPE, "type z");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
-        queryParams.put(ObjectPersistenceService.TYPE, "ype");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(TYPE, "ype");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
-        queryParams.remove(ObjectPersistenceService.TYPE);
-        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.remove(TYPE);
+        queryParams.put(MONIKER_LIKE, "moniker");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker o");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MONIKER_LIKE, "moniker o");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 1);
 
-        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker three");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MONIKER_LIKE, "moniker three");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 1);
 
-        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker z");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MONIKER_LIKE, "moniker z");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
-        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "oniker");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MONIKER_LIKE, "oniker");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
     }
 
     @Test
-    public void findByQueryParametersLastModified() throws Exception
-    {
+    public void findByQueryParametersLastModified() throws Exception {
         final UUID accountUuid = UuidUtil.getNewUuid();
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
-        Map<String, Object> queryParams = new HashMap<>();
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
 
         Long firstDate = new Date().getTime();
         Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
@@ -250,31 +241,26 @@ public class ObjectPersistenceServiceTest {
 
         Long fourthDate = new Date().getTime();
 
-        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, firstDate);
-        List<ObjectResponse> response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MODIFIED_AFTER, firstDate);
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, secondDate);
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MODIFIED_AFTER, secondDate);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 2);
 
-        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, thirdDate);
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MODIFIED_AFTER, thirdDate);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 1);
 
-        queryParams.put(ObjectPersistenceService.MODIFIED_AFTER, fourthDate);
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
+        queryParams.put(MODIFIED_AFTER, fourthDate);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 0);
 
     }
 
     // used by findByQueryParametersStringParameters()
-    private void populateQueryData() throws Exception
-    {
+    private void populateQueryData() throws Exception {
 
         final UUID accountUuid = UuidUtil.getNewUuid();
 
