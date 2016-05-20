@@ -85,8 +85,10 @@ public class ObjectPersistenceServiceTest {
         assertEquals("urn:fakeUrn", response.getObjectUrn());
     }
 
+    // region Update
+
     @Test
-    public void updateByObjectUrn() {
+    public void thatUpdateByObjectUrnSucceeds() {
 
         String objectUrn = "urn:fakeUrn-update";
         String name = "name";
@@ -132,7 +134,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void updateByUrn() {
+    public void thatUpdateByUrnSucceeds() {
 
         String objectUrn = "urn:fakeUrn-update2";
         String name = "name";
@@ -178,7 +180,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void updateNonexistent() {
+    public void thatUpdateNonexistentFails() {
         ObjectUpdate update = ObjectUpdate.builder()
             .objectUrn("urn:DOES-NOT-EXIST")
             .name("new name")
@@ -189,7 +191,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test(expected=ConstraintViolationException.class)
-    public void updateInvalid() {
+    public void thatUpdateWithoutIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update3";
         String name = "name";
@@ -225,7 +227,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test(expected=ConstraintViolationException.class)
-    public void updateOverspecified() {
+    public void thatUpdateByOverspecifiedIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update4";
         String name = "name";
@@ -263,7 +265,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test(expected=ConstraintViolationException.class)
-    public void updateOverspecifiedConflict() {
+    public void thatUpdateByOverspecifiedAndConflictingIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update5";
         String name = "name";
@@ -300,6 +302,8 @@ public class ObjectPersistenceServiceTest {
 
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
     }
+
+    // endregion
 
     @Test
     public void findByObjectUrn() throws Exception {
