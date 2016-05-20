@@ -9,7 +9,6 @@ import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.util.UuidUtil;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,13 +24,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author voor
@@ -190,7 +188,7 @@ public class ObjectPersistenceServiceTest {
         assertFalse(responseUpdate.isPresent());
     }
 
-    @Test
+    @Test(expected=ConstraintViolationException.class)
     public void updateInvalid() {
 
         String objectUrn = "urn:fakeUrn-update3";
@@ -224,11 +222,9 @@ public class ObjectPersistenceServiceTest {
             .name(newName)
             .build();
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
-
-        assertFalse(responseUpdate.isPresent());
     }
 
-    @Test
+    @Test(expected=ConstraintViolationException.class)
     public void updateOverspecified() {
 
         String objectUrn = "urn:fakeUrn-update4";
@@ -264,11 +260,9 @@ public class ObjectPersistenceServiceTest {
             .name(newName)
             .build();
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
-
-        assertFalse(responseUpdate.isPresent());
     }
 
-    @Test
+    @Test(expected=ConstraintViolationException.class)
     public void updateOverspecifiedConflict() {
 
         String objectUrn = "urn:fakeUrn-update5";
@@ -304,12 +298,7 @@ public class ObjectPersistenceServiceTest {
             .name(newName)
             .build();
 
-        try {
-            Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
-            Assert.fail();
-        } catch (IllegalArgumentException e) {
-            assertEquals("urn and objectUrn do not match", e.getMessage());
-        }
+        Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
     }
 
     @Test
