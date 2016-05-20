@@ -182,11 +182,6 @@ public class ObjectPersistenceServiceTest {
             .findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        queryParams.put(ObjectPersistenceService.TYPE, "type t");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 3);
-
         queryParams.put(ObjectPersistenceService.TYPE, "type z");
         response = objectPersistenceService
             .findByQueryParameters(accountUrn, queryParams);
@@ -207,11 +202,6 @@ public class ObjectPersistenceServiceTest {
         response = objectPersistenceService
             .findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 1);
-
-        queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker t");
-        response = objectPersistenceService
-            .findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 2);
 
         queryParams.put(ObjectPersistenceService.MONIKER_LIKE, "moniker three");
         response = objectPersistenceService
