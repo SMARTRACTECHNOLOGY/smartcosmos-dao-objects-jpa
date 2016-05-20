@@ -2,7 +2,6 @@ package net.smartcosmos.dao.objects.util;
 
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dto.objects.ObjectUpdate;
-import net.smartcosmos.util.UuidUtil;
 import org.springframework.util.StringUtils;
 
 public class ObjectsPersistenceUtil {
