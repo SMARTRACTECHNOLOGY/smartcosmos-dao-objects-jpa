@@ -3,25 +3,18 @@ package net.smartcosmos.dao.objects.util;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
+import org.springframework.util.StringUtils;
 
 public class ObjectsPersistenceUtil {
 
     public static ObjectEntity merge(ObjectEntity objectEntity, ObjectUpdate updateObject) {
 
-        if (updateObject.getObjectUrn() != null) {
-            objectEntity.setObjectUrn(updateObject.getObjectUrn());
-        }
-
-        if (updateObject.getUrn() != null) {
-            objectEntity.setId(UuidUtil.getUuidFromUrn(updateObject.getUrn()));
-        }
-
-        if (updateObject.getName() != null && !updateObject.getName().isEmpty()) {
+        if (!StringUtils.isEmpty(updateObject.getName())) {
             objectEntity.setName(updateObject.getName());
         }
 
-        if (updateObject.getActiveFlag() != null) {
-            objectEntity.setActiveFlag(updateObject.getActiveFlag());
+        if (!StringUtils.isEmpty(updateObject.getType())) {
+            objectEntity.setType(updateObject.getType());
         }
 
         if (updateObject.getDescription() != null) {
@@ -30,6 +23,10 @@ public class ObjectsPersistenceUtil {
 
         if (updateObject.getMoniker() != null) {
             objectEntity.setMoniker(updateObject.getMoniker());
+        }
+
+        if (updateObject.getActiveFlag() != null) {
+            objectEntity.setActiveFlag(updateObject.getActiveFlag());
         }
 
         return objectEntity;
