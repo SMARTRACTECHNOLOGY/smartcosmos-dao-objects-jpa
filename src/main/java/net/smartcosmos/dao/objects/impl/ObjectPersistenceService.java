@@ -151,13 +151,11 @@ public class ObjectPersistenceService implements IObjectDao {
 
         Iterable<ObjectEntity> queryResult =  objectRepository.findAll(example);
         List<ObjectResponse> returnValue = new ArrayList<>();
+
         for (ObjectEntity singleResult : queryResult)
         {
             // created is set at object creation time, and lastModified is not
             Long singleResultLastModified = singleResult.getLastModified();
-            if (singleResultLastModified == null){
-                singleResultLastModified = singleResult.getCreated();
-            }
             if(modifiedAfterDate == null || singleResultLastModified > modifiedAfterDate)
             {
                 returnValue.add(conversionService.convert(singleResult, ObjectResponse.class));
