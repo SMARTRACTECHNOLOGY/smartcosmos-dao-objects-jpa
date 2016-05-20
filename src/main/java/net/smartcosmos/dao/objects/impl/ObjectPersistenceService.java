@@ -14,9 +14,10 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.Validator;
-import org.springframework.validation.annotation.Validated;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,12 +38,14 @@ public class ObjectPersistenceService implements IObjectDao {
 
     private final IObjectRepository objectRepository;
     private final ConversionService conversionService;
+    private final Validator validator;
 
     @Autowired
     public ObjectPersistenceService(IObjectRepository objectRepository,
-            ConversionService conversionService) {
+            ConversionService conversionService, Validator basicValidator) {
         this.objectRepository = objectRepository;
         this.conversionService = conversionService;
+        this.validator = basicValidator;
     }
 
     @Override
@@ -55,7 +58,9 @@ public class ObjectPersistenceService implements IObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws IllegalArgumentException {
+    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws ConstraintViolationException {
+
+        validate(updateObject);
 
         Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
 
@@ -196,5 +201,13 @@ public class ObjectPersistenceService implements IObjectDao {
         }
 
         return entity;
+    }
+
+    private <T> void validate(T object) throws ConstraintViolationException {
+
+        Set<ConstraintViolation<T>> violations = validator.validate(object);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException("Instance of " + object.getClass().getName() + " violates constraints", violations);
+        }
     }
 }
