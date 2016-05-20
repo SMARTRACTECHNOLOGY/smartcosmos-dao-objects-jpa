@@ -8,22 +8,19 @@ import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionException;
 import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
@@ -57,7 +54,7 @@ public class ObjectPersistenceService implements IObjectDao {
     public ObjectResponse create(String accountUrn, ObjectCreate createObject) {
 
         ObjectEntity entity = conversionService.convert(createObject, ObjectEntity.class);
-        entity = objectRepository.save(entity);
+        entity = persist(entity);
 
         return conversionService.convert(entity, ObjectResponse.class);
     }
@@ -71,7 +68,8 @@ public class ObjectPersistenceService implements IObjectDao {
 
         if (entity.isPresent()) {
             ObjectEntity updateEntity = ObjectsPersistenceUtil.merge(entity.get(), updateObject);
-            updateEntity = objectRepository.save(updateEntity);
+
+            updateEntity = persist(updateEntity);
 
             final ObjectResponse response = conversionService.convert(updateEntity, ObjectResponse.class);
             return Optional.ofNullable(response);
@@ -206,6 +204,28 @@ public class ObjectPersistenceService implements IObjectDao {
         }
 
         return entity;
+    }
+
+    /**
+     * Saves an object entity in an {@link IObjectRepository}.
+     *
+     * @param objectEntity the object entity to persist
+     * @return the persisted object entity
+     * @throws ConstraintViolationException if the transaction fails due to violated constraints
+     * @throws TransactionException if the transaction fails because of something else
+     */
+    private ObjectEntity persist(ObjectEntity objectEntity) throws ConstraintViolationException, TransactionException {
+        try {
+            return objectRepository.save(objectEntity);
+        } catch (TransactionException e) {
+            // we expect constraint violations to be the root cause for exceptions here,
+            // so we throw this particular exception back to the caller
+            if (ExceptionUtils.getRootCause(e) instanceof ConstraintViolationException) {
+                throw (ConstraintViolationException) ExceptionUtils.getRootCause(e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     private <T> void validate(T object) throws ConstraintViolationException {
