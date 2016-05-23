@@ -20,7 +20,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.endsWith;
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.regex;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
 
 /**
@@ -28,12 +31,6 @@ import static org.springframework.data.domain.ExampleMatcher.StringMatcher.START
  */
 @Service
 public class ObjectPersistenceService implements IObjectDao {
-
-    public static final String OBJECT_URN_LIKE = "objectUrnLike";
-    public static final String TYPE = "type";
-    public static final String NAME_LIKE = "nameLike";
-    public static final String MONIKER_LIKE = "monikerLike";
-    public static final String MODIFIED_AFTER = "modifiedAfter";
 
     private final IObjectRepository objectRepository;
     private final ConversionService conversionService;
@@ -127,23 +124,23 @@ public class ObjectPersistenceService implements IObjectDao {
      * directly from the Objects V2 specification.
      *
      */
-    public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<String, Object> queryParameters) {
+    public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
         ObjectEntity.ObjectEntityBuilder builder = ObjectEntity.builder();
         ExampleMatcher matcher = ExampleMatcher.matching()
-            .withStringMatcher(STARTING)
-            .withMatcher(TYPE, exact());
+            .withStringMatcher(STARTING);
+            //.withMatcher(QueryParameterType.TYPE.typeName(), exact()) // would be nice, but broken in Spring
 
-        builder.objectUrn(MapUtils.getString(queryParameters, OBJECT_URN_LIKE));
-        builder.type(MapUtils.getString(queryParameters, TYPE));
-        builder.name(MapUtils.getString(queryParameters, NAME_LIKE));
-        builder.moniker(MapUtils.getString(queryParameters, MONIKER_LIKE));
+        builder.objectUrn(MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE));
+        builder.type(MapUtils.getString(queryParameters, QueryParameterType.TYPE));
+        builder.name(MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE));
+        builder.moniker(MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE));
 
         // findByExample doesn't deal with dates, so we have to do it ourselves
         Long modifiedAfterDate = null;
 
-        if (queryParameters.containsKey(MODIFIED_AFTER)){
-            modifiedAfterDate = (Long) queryParameters.get(MODIFIED_AFTER);
+        if (MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER) != null){
+            modifiedAfterDate = (Long) queryParameters.get(QueryParameterType.MODIFIED_AFTER);
         }
         ObjectEntity exampleEntity = builder.build();
 

@@ -138,11 +138,24 @@ public class ObjectPersistenceServiceTest {
         assertTrue(response.isPresent());
     }
 
+    // no query data should return an empty response
     @Test
-    public void getObjects() throws Exception {
+    public void findByQueryParameters_NoQueryParameters() throws Exception {
 
-        // TODO to.. do...
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
 
+        expectedSize = 0;
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // should also be OK to pass in a null as parameter map
+        expectedSize = 0;
+        response = objectPersistenceService.findByQueryParameters(accountUrn, null);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
     @Test
@@ -189,9 +202,9 @@ public class ObjectPersistenceServiceTest {
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
-        expectedSize = 6;
+        expectedSize = 3;
         queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
-        queryParams.put(TYPE, "type");
+        queryParams.put(QueryParameterType.TYPE, "type one");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
@@ -202,18 +215,37 @@ public class ObjectPersistenceServiceTest {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
 
-        queryParams.put(TYPE, "type o");
+        queryParams.put(QueryParameterType.TYPE, "type one");
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        queryParams.put(TYPE, "type z");
+        // The next two tests should verify that type does exact matching, unlike objectUrn, name, and moniker, and
+        // in a perfect world the first of the two tests would also return 0.
+        // Unfortunately, the exact() matcher is broken in Spring. If they ever fix it, uncomment the line containing
+        // "exact()" in ObjectPersistenceService.java
+        // Only one field-specific matcher per field, unfortunately, so a combination of startsWith() and EndsWith()
+        // doesn't work either.
+        expectedSize = 3;
+        queryParams.put(QueryParameterType.TYPE, "type o");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
-        queryParams.put(TYPE, "ype");
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.TYPE, "ype one");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.TYPE, "type z");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
     }
 
     @Test
@@ -221,34 +253,50 @@ public class ObjectPersistenceServiceTest {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
 
-        queryParams.remove(TYPE);
+        expectedSize = 3;
+        queryParams.remove(QueryParameterType.TYPE);
         queryParams.put(MONIKER_LIKE, "moniker");
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 3);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
-        queryParams.put(MONIKER_LIKE, "moniker o");
+        expectedSize = 1;
+        queryParams.put(QueryParameterType.MONIKER_LIKE, "moniker o");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 1);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
-        queryParams.put(MONIKER_LIKE, "moniker three");
+        expectedSize = 1;
+        queryParams.put(QueryParameterType.MONIKER_LIKE, "moniker three");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 1);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
-        queryParams.put(MONIKER_LIKE, "moniker z");
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.MONIKER_LIKE, "moniker z");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
-        queryParams.put(MONIKER_LIKE, "oniker");
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.MONIKER_LIKE, "oniker");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
     @Test
     public void findByQueryParameters_LastModified() throws Exception {
+
         final UUID accountUuid = UuidUtil.getNewUuid();
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
+
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
 
         Long firstDate = new Date().getTime();
         Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
@@ -273,21 +321,29 @@ public class ObjectPersistenceServiceTest {
 
         Long fourthDate = new Date().getTime();
 
+        expectedSize = 3;
         queryParams.put(MODIFIED_AFTER, firstDate);
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 3);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
+        expectedSize = 2;
         queryParams.put(MODIFIED_AFTER, secondDate);
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 2);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
+        expectedSize = 1;
         queryParams.put(MODIFIED_AFTER, thirdDate);
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 1);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
+        expectedSize = 0;
         queryParams.put(MODIFIED_AFTER, fourthDate);
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 0);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
     // used by findByQueryParametersStringParameters()
