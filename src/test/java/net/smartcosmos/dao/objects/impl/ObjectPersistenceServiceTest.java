@@ -1,16 +1,6 @@
 package net.smartcosmos.dao.objects.impl;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.*;
-import org.junit.runner.*;
-import org.mockito.*;
+import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
 import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
 import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
@@ -20,6 +10,7 @@ import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.util.UuidUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,24 +26,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
-import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
-import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
-import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectResponse;
-import net.smartcosmos.security.user.SmartCosmosUser;
-import net.smartcosmos.util.UuidUtil;
 import javax.validation.ConstraintViolationException;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MODIFIED_AFTER;
 import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MONIKER_LIKE;
-import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.TYPE;
-import static org.junit.Assert.*;
 import static org.junit.Assert.*;
 
 /**
