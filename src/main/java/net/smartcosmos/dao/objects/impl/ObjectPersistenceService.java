@@ -4,10 +4,10 @@ import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.dto.objects.ObjectResponse;
-import org.apache.commons.collections4.MapUtils;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
@@ -20,10 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.endsWith;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.regex;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
 
 /**
@@ -81,6 +77,16 @@ public class ObjectPersistenceService implements IObjectDao {
         else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrn) {
+
+        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
+
+        return entityList.stream()
+            .map(o -> conversionService.convert(o, ObjectResponse.class))
+            .collect(Collectors.toList());
     }
 
     @Override
