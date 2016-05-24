@@ -7,6 +7,7 @@ import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
+import org.apache.commons.collections4.MapUtils;
 import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,10 @@ import javax.validation.Validator;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.endsWith;
 import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.regex;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
 
 /**
@@ -31,12 +35,6 @@ import static org.springframework.data.domain.ExampleMatcher.StringMatcher.START
  */
 @Service
 public class ObjectPersistenceService implements IObjectDao {
-
-    public static final String OBJECT_URN_LIKE = "objectUrnLike";
-    public static final String TYPE = "type";
-    public static final String NAME_LIKE = "nameLike";
-    public static final String MONIKER_LIKE = "monikerLike";
-    public static final String MODIFIED_AFTER = "modifiedAfter";
 
     private final IObjectRepository objectRepository;
     private final ConversionService conversionService;
@@ -135,31 +133,23 @@ public class ObjectPersistenceService implements IObjectDao {
      * directly from the Objects V2 specification.
      *
      */
-    public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<String, Object> queryParameters) {
+    public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
         ObjectEntity.ObjectEntityBuilder builder = ObjectEntity.builder();
         ExampleMatcher matcher = ExampleMatcher.matching()
-            .withStringMatcher(STARTING)
-            .withMatcher(TYPE, exact());
+            .withStringMatcher(STARTING);
+            //.withMatcher(QueryParameterType.TYPE.typeName(), exact()) // would be nice, but broken in Spring
 
-        if (queryParameters.containsKey(OBJECT_URN_LIKE)){
-            builder.objectUrn((String)queryParameters.get(OBJECT_URN_LIKE));
-        }
-        if (queryParameters.containsKey(TYPE)){
-            builder.type((String)queryParameters.get(TYPE));
-        }
-        if (queryParameters.containsKey(NAME_LIKE)){
-            builder.name((String)queryParameters.get(NAME_LIKE));
-        }
-        if (queryParameters.containsKey(MONIKER_LIKE)){
-            builder.moniker((String)queryParameters.get(MONIKER_LIKE));
-        }
+        builder.objectUrn(MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE));
+        builder.type(MapUtils.getString(queryParameters, QueryParameterType.TYPE));
+        builder.name(MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE));
+        builder.moniker(MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE));
 
         // findByExample doesn't deal with dates, so we have to do it ourselves
         Long modifiedAfterDate = null;
 
-        if (queryParameters.containsKey(MODIFIED_AFTER)){
-            modifiedAfterDate = (Long) queryParameters.get(MODIFIED_AFTER);
+        if (MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER) != null){
+            modifiedAfterDate = (Long) queryParameters.get(QueryParameterType.MODIFIED_AFTER);
         }
         ObjectEntity exampleEntity = builder.build();
 
@@ -167,13 +157,11 @@ public class ObjectPersistenceService implements IObjectDao {
 
         Iterable<ObjectEntity> queryResult =  objectRepository.findAll(example);
         List<ObjectResponse> returnValue = new ArrayList<>();
+
         for (ObjectEntity singleResult : queryResult)
         {
             // created is set at object creation time, and lastModified is not
             Long singleResultLastModified = singleResult.getLastModified();
-            if (singleResultLastModified == null){
-                singleResultLastModified = singleResult.getCreated();
-            }
             if(modifiedAfterDate == null || singleResultLastModified > modifiedAfterDate)
             {
                 returnValue.add(conversionService.convert(singleResult, ObjectResponse.class));
