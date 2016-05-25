@@ -1,16 +1,19 @@
 package net.smartcosmos.dao.objects.impl;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.*;
-import org.junit.runner.*;
-import org.mockito.*;
+import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
+import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
+import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
+import net.smartcosmos.dao.objects.domain.ObjectEntity;
+import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dto.objects.ObjectCreate;
+import net.smartcosmos.dto.objects.ObjectResponse;
+import net.smartcosmos.security.user.SmartCosmosUser;
+import net.smartcosmos.util.UuidUtil;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -22,20 +25,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
-import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
-import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
-import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectResponse;
-import net.smartcosmos.security.user.SmartCosmosUser;
-import net.smartcosmos.util.UuidUtil;
+import java.util.*;
 
 import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MODIFIED_AFTER;
 import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MONIKER_LIKE;
-import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.TYPE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author voor
@@ -121,6 +116,8 @@ public class ObjectPersistenceServiceTest {
         assertEquals("urn:fakeUrn", response.getObjectUrn());
     }
 
+    // region Find By Object URN
+
     @Test
     public void findByObjectUrn() throws Exception {
 
@@ -137,6 +134,28 @@ public class ObjectPersistenceServiceTest {
 
         assertTrue(response.isPresent());
     }
+
+    @Test
+    public void findByObjectUrnStartsWithNonexistent() throws Exception {
+        populateQueryData();
+
+        List<ObjectResponse> response = objectPersistenceService.findByObjectUrnStartsWith(accountUrn, "no-such-urn");
+
+        assertTrue(response.isEmpty());
+    }
+
+    @Test
+    public void findByObjectUrnStartsWith() throws Exception {
+        populateQueryData();
+
+        List<ObjectResponse> response = objectPersistenceService.findByObjectUrnStartsWith(accountUrn, OBJECT_URN_QUERY_PARAMS);
+
+        assertEquals(12, response.size());
+    }
+
+    // endregion
+
+    // region Find by Query Parameters
 
     // no query data should return an empty response
     @Test
@@ -346,45 +365,70 @@ public class ObjectPersistenceServiceTest {
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
+    /**
+     * Test case for OBJECTS-725 findByQueryParams ignores account
+     * @throws Exception
+     */
+    @Test
+    public void findByQueryParametersDifferentAccountUrns() throws Exception {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
+
+        final UUID newAccountUuid = UuidUtil.getNewUuid();
+        final String newAccountUrn = UuidUtil.getAccountUrnFromUuid(newAccountUuid);
+
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(newAccountUrn, queryParams);
+        actualSize = response.size();
+
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    // endregion
+
+    // region Helper Methods
+
     // used by findByQueryParametersStringParameters()
     private void populateQueryData() throws Exception {
 
-        final UUID accountUuid = UuidUtil.getNewUuid();
-
-        ObjectEntity entityNameOneTypeOne = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameOneTypeOne = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_01).name(NAME_ONE).type(TYPE_ONE).build();
 
-        ObjectEntity entityNameTwoTypeOne = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameTwoTypeOne = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_02).name(NAME_TWO).type(TYPE_ONE).build();
 
-        ObjectEntity entityNameThreeTypeOne = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameThreeTypeOne = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_03).name(NAME_THREE).type(TYPE_ONE).build();
 
-        ObjectEntity entityNameOneTypeTwo = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameOneTypeTwo = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_04).name(NAME_ONE).type(TYPE_TWO).build();
 
-        ObjectEntity entityNameTwoTypeTwo = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameTwoTypeTwo = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_05).name(NAME_TWO).type(TYPE_TWO).build();
 
-        ObjectEntity entityNameThreeTypeTwo = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameThreeTypeTwo = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_06).name(NAME_THREE).type(TYPE_TWO).build();
 
-        ObjectEntity entityNameOneMonikerOne = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameOneMonikerOne = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_07).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_ONE).build();
 
-        ObjectEntity entityNameOneMonikerTwo = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameOneMonikerTwo = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_08).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_TWO).build();
 
-        ObjectEntity entityNameOneMonikerThree = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityNameOneMonikerThree = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_09).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_THREE).build();
 
-        ObjectEntity entityObjectUrn10 = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityObjectUrn10 = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_10).name(WHATEVER).type(WHATEVER).build();
 
-        ObjectEntity entityObjectUrn11 = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityObjectUrn11 = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_11).name(WHATEVER).type(WHATEVER).build();
 
-        ObjectEntity entityObjectUrn12 = ObjectEntity.builder().accountId(accountUuid)
+        ObjectEntity entityObjectUrn12 = ObjectEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_12).name(WHATEVER).type(WHATEVER).build();
 
         objectRepository.save(entityNameOneTypeOne);
@@ -400,5 +444,7 @@ public class ObjectPersistenceServiceTest {
         objectRepository.save(entityObjectUrn11);
         objectRepository.save(entityObjectUrn12);
     }
+
+    // endregion
 
 }

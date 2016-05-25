@@ -4,10 +4,10 @@ import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.dto.objects.ObjectResponse;
-import org.apache.commons.collections4.MapUtils;
+import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Example;
@@ -20,10 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.endsWith;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.regex;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
 
 /**
@@ -81,6 +77,23 @@ public class ObjectPersistenceService implements IObjectDao {
         else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Finds objects matching a specified object URN start.
+     *
+     * @param accountUrn the account URN
+     * @param objectUrnStartsWith the first characters of the object URN
+     * @return all objects whose {@code objectUrn} starts with {@code objectUrnStartsWith}
+     */
+    @Override
+    public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
+
+        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrnStartsWith);
+
+        return entityList.stream()
+            .map(o -> conversionService.convert(o, ObjectResponse.class))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -142,7 +155,7 @@ public class ObjectPersistenceService implements IObjectDao {
         if (MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER) != null){
             modifiedAfterDate = (Long) queryParameters.get(QueryParameterType.MODIFIED_AFTER);
         }
-        ObjectEntity exampleEntity = builder.build();
+        ObjectEntity exampleEntity = builder.accountId(UuidUtil.getUuidFromAccountUrn(accountUrn)).build();
 
         Example<ObjectEntity> example = Example.of(exampleEntity, matcher);
 
