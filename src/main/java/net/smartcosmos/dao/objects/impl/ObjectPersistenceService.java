@@ -155,7 +155,7 @@ public class ObjectPersistenceService implements IObjectDao {
         if (MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER) != null){
             modifiedAfterDate = (Long) queryParameters.get(QueryParameterType.MODIFIED_AFTER);
         }
-        ObjectEntity exampleEntity = builder.build();
+        ObjectEntity exampleEntity = builder.accountId(UuidUtil.getUuidFromAccountUrn(accountUrn)).build();
 
         Example<ObjectEntity> example = Example.of(exampleEntity, matcher);
 
