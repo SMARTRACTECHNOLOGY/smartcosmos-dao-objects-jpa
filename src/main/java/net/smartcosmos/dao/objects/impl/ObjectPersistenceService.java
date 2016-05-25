@@ -24,10 +24,6 @@ import javax.validation.Validator;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.startsWith;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.endsWith;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.regex;
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
 
 /**
@@ -92,6 +88,23 @@ public class ObjectPersistenceService implements IObjectDao {
         }
     }
 
+    /**
+     * Finds objects matching a specified object URN start.
+     *
+     * @param accountUrn the account URN
+     * @param objectUrnStartsWith the first characters of the object URN
+     * @return all objects whose {@code objectUrn} starts with {@code objectUrnStartsWith}
+     */
+    @Override
+    public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
+
+        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrnStartsWith);
+
+        return entityList.stream()
+            .map(o -> conversionService.convert(o, ObjectResponse.class))
+            .collect(Collectors.toList());
+    }
+
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
@@ -151,7 +164,7 @@ public class ObjectPersistenceService implements IObjectDao {
         if (MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER) != null){
             modifiedAfterDate = (Long) queryParameters.get(QueryParameterType.MODIFIED_AFTER);
         }
-        ObjectEntity exampleEntity = builder.build();
+        ObjectEntity exampleEntity = builder.accountId(UuidUtil.getUuidFromAccountUrn(accountUrn)).build();
 
         Example<ObjectEntity> example = Example.of(exampleEntity, matcher);
 
