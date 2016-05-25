@@ -11,7 +11,6 @@ import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.util.UuidUtil;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -370,7 +369,6 @@ public class ObjectPersistenceServiceTest {
      * Test case for OBJECTS-725 findByQueryParams ignores account
      * @throws Exception
      */
-    @Ignore
     @Test
     public void findByQueryParametersDifferentAccountUrns() throws Exception {
         populateQueryData();
