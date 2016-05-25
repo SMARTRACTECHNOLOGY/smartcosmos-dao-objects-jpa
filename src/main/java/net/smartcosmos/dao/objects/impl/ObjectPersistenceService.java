@@ -79,10 +79,17 @@ public class ObjectPersistenceService implements IObjectDao {
         }
     }
 
+    /**
+     * Finds objects matching a specified object URN start.
+     *
+     * @param accountUrn the account URN
+     * @param objectUrnStartsWith the first characters of the object URN
+     * @return all objects whose {@code objectUrn} starts with {@code objectUrnStartsWith}
+     */
     @Override
-    public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrn) {
+    public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
 
-        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
+        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrnStartsWith);
 
         return entityList.stream()
             .map(o -> conversionService.convert(o, ObjectResponse.class))
