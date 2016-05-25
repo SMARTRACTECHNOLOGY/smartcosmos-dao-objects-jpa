@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -56,13 +57,13 @@ public class ObjectEntity implements Serializable {
     @Column(name = "systemUuid", length = UUID_LENGTH)
     private UUID id;
 
-    @NotNull
-    @Size(min = 1, max = OBJECT_URN_LENGTH)
+    @NotEmpty
+    @Size(max = OBJECT_URN_LENGTH)
     @Column(name="objectUrn", length = OBJECT_URN_LENGTH, nullable = false, updatable = false)
     private String objectUrn;
 
-    @NotNull
-    @Size(min = 1, max = TYPE_LENGTH)
+    @NotEmpty
+    @Size(max = TYPE_LENGTH)
     @Column(name = "type", length = TYPE_LENGTH, nullable = false)
     private String type;
 
@@ -85,8 +86,8 @@ public class ObjectEntity implements Serializable {
     @Column(name = "moniker", length = MONIKER_LENGTH, nullable = true, updatable = true)
     private String moniker;
 
-    @NotNull
-    @Size(min = 1, max = NAME_LENGTH)
+    @NotEmpty
+    @Size(max = NAME_LENGTH)
     @Column(name = "name", length = NAME_LENGTH, nullable = false)
     private String name;
 
