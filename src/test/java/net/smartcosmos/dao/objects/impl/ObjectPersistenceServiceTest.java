@@ -148,7 +148,7 @@ public class ObjectPersistenceServiceTest {
     public void findByObjectUrnStartsWith() throws Exception {
         populateQueryData();
 
-        List<ObjectResponse> response = objectPersistenceService.findByObjectUrnStartsWith(accountUrn, "objectUrn");
+        List<ObjectResponse> response = objectPersistenceService.findByObjectUrnStartsWith(accountUrn, OBJECT_URN_QUERY_PARAMS);
 
         assertEquals(12, response.size());
     }
@@ -362,6 +362,29 @@ public class ObjectPersistenceServiceTest {
         queryParams.put(MODIFIED_AFTER, fourthDate);
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    /**
+     * Test case for OBJECTS-725 findByQueryParams ignores account
+     * @throws Exception
+     */
+    @Test
+    public void findByQueryParametersDifferentAccountUrns() throws Exception {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS);
+
+        final UUID newAccountUuid = UuidUtil.getNewUuid();
+        final String newAccountUrn = UuidUtil.getAccountUrnFromUuid(newAccountUuid);
+
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(newAccountUrn, queryParams);
+        actualSize = response.size();
+
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
