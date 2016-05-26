@@ -8,6 +8,9 @@ import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author voor
  */
@@ -35,6 +38,14 @@ public class ObjectEntityToObjectResponseConverter
                 .description(entity.getDescription())
                 // Don't forget to build it!
                 .build();
+    }
+
+    public List convertAll(Iterable<ObjectEntity> entities) {
+        List<ObjectResponse> convertedList = new ArrayList<>();
+        for (ObjectEntity entity: entities) {
+            convertedList.add(convert(entity));
+        }
+        return convertedList;
     }
 
     @Override
