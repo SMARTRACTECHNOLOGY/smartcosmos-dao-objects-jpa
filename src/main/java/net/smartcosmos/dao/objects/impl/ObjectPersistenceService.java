@@ -7,8 +7,8 @@ import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
-import org.apache.commons.collections4.MapUtils;
 import net.smartcosmos.util.UuidUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -18,15 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 import org.springframework.util.StringUtils;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
@@ -61,7 +55,6 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws ConstraintViolationException {
 
-        validate(updateObject);
         checkIdentifiers(updateObject);
 
         Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
@@ -232,14 +225,6 @@ public class ObjectPersistenceService implements IObjectDao {
             } else {
                 throw e;
             }
-        }
-    }
-
-    private <T> void validate(T object) throws ConstraintViolationException {
-
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException("Instance of " + object.getClass().getName() + " violates constraints", violations);
         }
     }
 
