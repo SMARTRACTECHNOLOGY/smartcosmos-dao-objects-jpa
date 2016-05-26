@@ -12,9 +12,11 @@ import javax.validation.ValidatorFactory;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("Duplicates")
 public class ObjectEntityTest {
 
     private static Validator validator;
@@ -77,6 +79,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
@@ -96,6 +101,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
@@ -115,6 +123,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("size must be between 0 and 767", violationSet.iterator().next().getMessage());
+        assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -138,6 +149,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
@@ -157,13 +171,16 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     public void thatNameInvalidFails() {
 
         ObjectEntity objectEntity = ObjectEntity.builder()
-            .objectUrn(OBJECT_URN_INVALID)
+            .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
             .name(NAME_INVALID)
@@ -176,6 +193,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("size must be between 0 and 255", violationSet.iterator().next().getMessage());
+        assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -199,6 +219,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
@@ -218,13 +241,16 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     public void thatTypeInvalidFails() {
 
         ObjectEntity objectEntity = ObjectEntity.builder()
-            .objectUrn(OBJECT_URN_INVALID)
+            .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE_INVALID)
             .name(NAME)
@@ -237,6 +263,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("size must be between 0 and 255", violationSet.iterator().next().getMessage());
+        assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -285,7 +314,7 @@ public class ObjectEntityTest {
     public void thatDescriptionInvalidFails() {
 
         ObjectEntity objectEntity = ObjectEntity.builder()
-            .objectUrn(OBJECT_URN_INVALID)
+            .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
             .name(NAME)
@@ -298,6 +327,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("size must be between 0 and 1024", violationSet.iterator().next().getMessage());
+        assertEquals("description", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -346,10 +378,10 @@ public class ObjectEntityTest {
     public void thatMonikerInvalidFails() {
 
         ObjectEntity objectEntity = ObjectEntity.builder()
-            .objectUrn(OBJECT_URN_INVALID)
+            .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
-            .name(NAME_INVALID)
+            .name(NAME)
             .description(DESCRIPTION)
             .moniker(MONIKER_INVALID)
             .activeFlag(ACTIVE)
@@ -359,6 +391,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("size must be between 0 and 2048", violationSet.iterator().next().getMessage());
+        assertEquals("moniker", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -382,6 +417,9 @@ public class ObjectEntityTest {
         Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
+        assertEquals(1, violationSet.size());
+        assertEquals("may not be null", violationSet.iterator().next().getMessage());
+        assertEquals("accountId", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
