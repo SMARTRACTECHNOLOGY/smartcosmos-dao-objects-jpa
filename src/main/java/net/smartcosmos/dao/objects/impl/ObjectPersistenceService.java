@@ -1,6 +1,6 @@
 package net.smartcosmos.dao.objects.impl;
 
-import net.smartcosmos.dao.objects.IObjectDao;
+import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
@@ -29,7 +29,7 @@ import static org.springframework.data.domain.ExampleMatcher.StringMatcher.START
  * @author voor
  */
 @Service
-public class ObjectPersistenceService implements IObjectDao {
+public class ObjectPersistenceService implements ObjectDao {
 
     private final IObjectRepository objectRepository;
     private final ConversionService conversionService;

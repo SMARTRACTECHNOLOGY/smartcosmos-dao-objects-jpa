@@ -1,6 +1,6 @@
 package net.smartcosmos.dao.objects.impl;
 
-import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
+import net.smartcosmos.dao.objects.ObjectDao.QueryParameterType;
 import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
 import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MODIFIED_AFTER;
-import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MONIKER_LIKE;
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MODIFIED_AFTER;
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MONIKER_LIKE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
