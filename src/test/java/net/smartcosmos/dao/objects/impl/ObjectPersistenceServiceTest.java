@@ -504,7 +504,7 @@ public class ObjectPersistenceServiceTest {
         assertFalse(responseUpdate.isPresent());
     }
 
-    @Test(expected=ConstraintViolationException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void thatUpdateWithoutIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update3";
@@ -540,7 +540,7 @@ public class ObjectPersistenceServiceTest {
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
     }
 
-    @Test(expected=ConstraintViolationException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void thatUpdateByOverspecifiedIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update4";
@@ -578,7 +578,7 @@ public class ObjectPersistenceServiceTest {
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
     }
 
-    @Test(expected=ConstraintViolationException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void thatUpdateByOverspecifiedAndConflictingIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update5";

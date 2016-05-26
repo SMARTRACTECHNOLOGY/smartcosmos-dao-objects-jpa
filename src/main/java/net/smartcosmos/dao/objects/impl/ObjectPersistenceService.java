@@ -62,6 +62,7 @@ public class ObjectPersistenceService implements IObjectDao {
     public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws ConstraintViolationException {
 
         validate(updateObject);
+        checkIdentifiers(updateObject);
 
         Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
 
@@ -239,6 +240,16 @@ public class ObjectPersistenceService implements IObjectDao {
         Set<ConstraintViolation<T>> violations = validator.validate(object);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException("Instance of " + object.getClass().getName() + " violates constraints", violations);
+        }
+    }
+
+    private void checkIdentifiers(ObjectUpdate updateObject) throws IllegalArgumentException {
+        if (StringUtils.isEmpty(updateObject.getUrn()) && StringUtils.isEmpty(updateObject.getObjectUrn())) {
+            throw new IllegalArgumentException(String.format("urn and objectUrn may not be null: %s", updateObject.toString()));
+        }
+
+        if (updateObject.getUrn() != null && updateObject.getObjectUrn() != null) {
+            throw new IllegalArgumentException(String.format("either urn or objectUrn may be defined: %s", updateObject.toString()));
         }
     }
 }
