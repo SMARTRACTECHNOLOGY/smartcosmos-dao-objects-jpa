@@ -1,4 +1,4 @@
-package net.smartcosmos.dao.objects.impl;
+package net.smartcosmos.dao.objects.util;
 
 import org.springframework.data.jpa.domain.Specification;
 

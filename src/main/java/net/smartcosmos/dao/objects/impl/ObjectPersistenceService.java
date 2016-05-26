@@ -4,6 +4,7 @@ import net.smartcosmos.dao.objects.IObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
+import net.smartcosmos.dao.objects.util.SearchSpecifications;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
