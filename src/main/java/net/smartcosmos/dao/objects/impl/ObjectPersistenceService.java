@@ -10,21 +10,19 @@ import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
-import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -214,12 +212,12 @@ public class ObjectPersistenceService implements ObjectDao {
         if (id != null) {
             entity = objectRepository.findByAccountIdAndId(accountId, id);
 
-            if (entity.isPresent() && !StringUtils.isEmpty(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
+            if (entity.isPresent() && !StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
                 throw new IllegalArgumentException("urn and objectUrn do not match");
             }
         }
 
-        if (!StringUtils.isEmpty(objectUrn)) {
+        if (!StringUtils.isNotBlank(objectUrn)) {
             entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
 
             if (entity.isPresent() && id != null && !id.equals(entity.get().getId())) {
