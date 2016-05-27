@@ -109,6 +109,13 @@ public class ObjectPersistenceService implements ObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
+        try {
+            UUID uuid = UuidUtil.getUuidFromUrn(urn);
+        }
+        catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+
         Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn),
             UuidUtil.getUuidFromUrn(urn));
 
