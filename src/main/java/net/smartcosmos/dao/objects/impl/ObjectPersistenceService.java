@@ -212,12 +212,12 @@ public class ObjectPersistenceService implements ObjectDao {
         if (id != null) {
             entity = objectRepository.findByAccountIdAndId(accountId, id);
 
-            if (entity.isPresent() && !StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
+            if (entity.isPresent() && StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
                 throw new IllegalArgumentException("urn and objectUrn do not match");
             }
         }
 
-        if (!StringUtils.isNotBlank(objectUrn)) {
+        if (StringUtils.isNotBlank(objectUrn)) {
             entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
 
             if (entity.isPresent() && id != null && !id.equals(entity.get().getId())) {
@@ -251,11 +251,11 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     private void checkIdentifiers(ObjectUpdate updateObject) throws IllegalArgumentException {
-        if (StringUtils.isEmpty(updateObject.getUrn()) && StringUtils.isEmpty(updateObject.getObjectUrn())) {
+        if (StringUtils.isBlank(updateObject.getUrn()) && StringUtils.isBlank(updateObject.getObjectUrn())) {
             throw new IllegalArgumentException(String.format("urn and objectUrn may not be null: %s", updateObject.toString()));
         }
 
-        if (updateObject.getUrn() != null && updateObject.getObjectUrn() != null) {
+        if (StringUtils.isNotBlank(updateObject.getUrn()) && StringUtils.isNotBlank(updateObject.getObjectUrn())) {
             throw new IllegalArgumentException(String.format("either urn or objectUrn may be defined: %s", updateObject.toString()));
         }
     }
