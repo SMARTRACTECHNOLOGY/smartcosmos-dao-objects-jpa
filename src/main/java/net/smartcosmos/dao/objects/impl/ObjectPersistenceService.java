@@ -215,9 +215,9 @@ public class ObjectPersistenceService implements ObjectDao {
     private Optional<ObjectEntity> findEntity(UUID accountId, String urn, String objectUrn) throws IllegalArgumentException {
 
         Optional<ObjectEntity> entity = Optional.empty();
-        UUID id = UuidUtil.getUuidFromUrn(urn);
 
-        if (id != null) {
+        if (StringUtils.isNotBlank(urn)) {
+            UUID id = UuidUtil.getUuidFromUrn(urn);
             entity = objectRepository.findByAccountIdAndId(accountId, id);
 
             if (entity.isPresent() && StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
@@ -228,8 +228,13 @@ public class ObjectPersistenceService implements ObjectDao {
         if (StringUtils.isNotBlank(objectUrn)) {
             entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
 
-            if (entity.isPresent() && id != null && !id.equals(entity.get().getId())) {
-                throw new IllegalArgumentException("urn and objectUrn do not match");
+            if (entity.isPresent()) {
+                ObjectEntity objectEntity = entity.get();
+                String entityUrn = UuidUtil.getUrnFromUuid(objectEntity.getId());
+
+                if (StringUtils.isNotBlank(urn) && !urn.equals(entityUrn)) {
+                    throw new IllegalArgumentException("urn and objectUrn do not match");
+                }
             }
         }
 
