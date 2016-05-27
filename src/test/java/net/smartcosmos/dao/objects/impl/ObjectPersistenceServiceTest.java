@@ -744,13 +744,8 @@ public class ObjectPersistenceServiceTest {
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        // The next two tests should verify that type does exact matching, unlike objectUrn, name, and moniker, and
-        // in a perfect world the first of the two tests would also return 0.
-        // Unfortunately, the exact() matcher is broken in Spring. If they ever fix it, uncomment the line containing
-        // "exact()" in ObjectPersistenceService.java
-        // Only one field-specific matcher per field, unfortunately, so a combination of startsWith() and EndsWith()
-        // doesn't work either.
-        expectedSize = 3;
+        // verify that matching of the type field is exact
+        expectedSize = 0;
         queryParams.put(QueryParameterType.TYPE, "type o");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         actualSize = response.size();
