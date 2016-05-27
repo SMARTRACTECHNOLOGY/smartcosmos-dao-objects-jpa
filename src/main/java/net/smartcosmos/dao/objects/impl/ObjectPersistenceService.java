@@ -150,44 +150,44 @@ public class ObjectPersistenceService implements ObjectDao {
      */
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
-        SearchSpecifications searchSpecifications = new SearchSpecifications<ObjectEntity>();
+        SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
 
-        Specification accountUrnSpecification = null;
+        Specification<ObjectEntity> accountUrnSpecification = null;
         if (accountUrn != null) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
             accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
-        };
+        }
 
-        Specification objectUrnSpecification = null;
+        Specification<ObjectEntity> objectUrnSpecification = null;
         String objectUrnLike = MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE);
         if (objectUrnLike != null) {
             objectUrnSpecification = searchSpecifications.stringStartsWith(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification nameLikeSpecification = null;
+        Specification<ObjectEntity> nameLikeSpecification = null;
         String nameLike = MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE);
         if (nameLike != null) {
             nameLikeSpecification = searchSpecifications.stringStartsWith(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification typeSpecification = null;
+        Specification<ObjectEntity> typeSpecification = null;
         String type = MapUtils.getString(queryParameters, QueryParameterType.TYPE);
         if (type != null) {
             typeSpecification = searchSpecifications.stringMatchesExactly(type, QueryParameterType.TYPE_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification monikerLikeSpecification = null;
+        Specification<ObjectEntity> monikerLikeSpecification = null;
         String monikerLike = MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE);
         if (monikerLike != null) {
             monikerLikeSpecification = searchSpecifications.stringStartsWith(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification lastModifedAfterSpecification = null;
+        Specification<ObjectEntity> lastModifedAfterSpecification = null;
         Long lastModifedAfter = MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER);
         if (lastModifedAfter != null) {
             lastModifedAfterSpecification = searchSpecifications.numberGreaterThan(lastModifedAfter,
                 QueryParameterType.MODIFIED_AFTER_FIELD_NAME.typeName());
-        };
+        }
 
         Iterable<ObjectEntity> returnedValues = objectRepository.findAll(where(objectUrnSpecification)
             .and(accountUrnSpecification)
