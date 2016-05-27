@@ -35,8 +35,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.EXACT;
 import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MODIFIED_AFTER;
 import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MONIKER_LIKE;
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.NAME_LIKE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -766,6 +768,46 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
+    public void findByQueryParameters_NameLike() throws Exception {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        expectedSize = 9;
+        queryParams.remove(QueryParameterType.TYPE);
+        queryParams.put(NAME_LIKE, "name");
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 5;
+        queryParams.put(QueryParameterType.NAME_LIKE, "name o");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 2;
+        queryParams.put(QueryParameterType.NAME_LIKE, "name three");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.NAME_LIKE, "name z");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.NAME_LIKE, "ame");
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    @Test
     public void findByQueryParameters_MonikerLike() throws Exception {
         populateQueryData();
 
@@ -774,7 +816,7 @@ public class ObjectPersistenceServiceTest {
         int actualSize = 0;
 
         expectedSize = 3;
-        queryParams.remove(QueryParameterType.TYPE);
+        queryParams.remove(QueryParameterType.NAME_LIKE);
         queryParams.put(MONIKER_LIKE, "moniker");
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         actualSize = response.size();
