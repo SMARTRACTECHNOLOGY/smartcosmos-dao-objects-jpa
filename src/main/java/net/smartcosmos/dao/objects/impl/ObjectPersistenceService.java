@@ -166,16 +166,34 @@ public class ObjectPersistenceService implements ObjectDao {
             accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
         }
 
+        // this is only here so direct testing of this method doesn't need to include exact in the queryParameters,
+        // since neither does the GetObjectResource
+        Boolean exact = false;
+        if (MapUtils.getBoolean(queryParameters, QueryParameterType.EXACT) != null)
+        {
+            exact = MapUtils.getBoolean(queryParameters, QueryParameterType.EXACT);
+        }
+
         Specification<ObjectEntity> objectUrnSpecification = null;
         String objectUrnLike = MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE);
         if (objectUrnLike != null) {
-            objectUrnSpecification = searchSpecifications.stringStartsWith(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
+            if (exact) {
+                objectUrnSpecification = searchSpecifications.stringMatchesExactly(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
+            }
+            else {
+                objectUrnSpecification = searchSpecifications.stringStartsWith(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
+            }
         }
 
         Specification<ObjectEntity> nameLikeSpecification = null;
         String nameLike = MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE);
         if (nameLike != null) {
-            nameLikeSpecification = searchSpecifications.stringStartsWith(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
+            if (exact) {
+                nameLikeSpecification = searchSpecifications.stringMatchesExactly(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
+            }
+            else {
+                nameLikeSpecification = searchSpecifications.stringStartsWith(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
+            }
         }
 
         Specification<ObjectEntity> typeSpecification = null;
@@ -187,7 +205,12 @@ public class ObjectPersistenceService implements ObjectDao {
         Specification<ObjectEntity> monikerLikeSpecification = null;
         String monikerLike = MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE);
         if (monikerLike != null) {
-            monikerLikeSpecification = searchSpecifications.stringStartsWith(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
+            if (exact) {
+                monikerLikeSpecification = searchSpecifications.stringMatchesExactly(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
+            }
+            else  {
+                monikerLikeSpecification = searchSpecifications.stringStartsWith(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
+            }
         }
 
         Specification<ObjectEntity> lastModifedAfterSpecification = null;
