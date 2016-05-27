@@ -19,7 +19,6 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,14 +32,12 @@ public class ObjectPersistenceService implements ObjectDao {
 
     private final ObjectRepository objectRepository;
     private final ConversionService conversionService;
-    private final Validator validator;
 
     @Autowired
     public ObjectPersistenceService(ObjectRepository objectRepository,
-            ConversionService conversionService, Validator basicValidator) {
+            ConversionService conversionService) {
         this.objectRepository = objectRepository;
         this.conversionService = conversionService;
-        this.validator = basicValidator;
     }
 
     @Override
