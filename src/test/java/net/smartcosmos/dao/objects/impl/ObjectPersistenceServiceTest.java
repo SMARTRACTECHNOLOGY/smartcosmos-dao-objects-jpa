@@ -1,6 +1,6 @@
 package net.smartcosmos.dao.objects.impl;
 
-import net.smartcosmos.dao.objects.IObjectDao.QueryParameterType;
+import net.smartcosmos.dao.objects.ObjectDao.QueryParameterType;
 import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
 import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MODIFIED_AFTER;
-import static net.smartcosmos.dao.objects.IObjectDao.QueryParameterType.MONIKER_LIKE;
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MODIFIED_AFTER;
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MONIKER_LIKE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -504,8 +504,8 @@ public class ObjectPersistenceServiceTest {
         assertFalse(responseUpdate.isPresent());
     }
 
-    @Test(expected=ConstraintViolationException.class)
-    public void thatUpdateWithoutIdThrowsException() {
+    @Test
+    public void thatUpdateWithoutIdReturnsNothing() {
 
         String objectUrn = "urn:fakeUrn-update3";
         String name = "name";
@@ -538,10 +538,11 @@ public class ObjectPersistenceServiceTest {
             .name(newName)
             .build();
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
+        assertFalse(responseUpdate.isPresent());
     }
 
-    @Test(expected=ConstraintViolationException.class)
-    public void thatUpdateByOverspecifiedIdThrowsException() {
+    @Test
+    public void thatUpdateByOverspecifiedIdIsOkIfUrnAndObjectUrnMatch() {
 
         String objectUrn = "urn:fakeUrn-update4";
         String name = "name";
@@ -578,7 +579,7 @@ public class ObjectPersistenceServiceTest {
         Optional<ObjectResponse> responseUpdate = objectPersistenceService.update(accountUrn, update);
     }
 
-    @Test(expected=ConstraintViolationException.class)
+    @Test(expected=IllegalArgumentException.class)
     public void thatUpdateByOverspecifiedAndConflictingIdThrowsException() {
 
         String objectUrn = "urn:fakeUrn-update5";
@@ -744,13 +745,8 @@ public class ObjectPersistenceServiceTest {
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         assertTrue(response.size() == 3);
 
-        // The next two tests should verify that type does exact matching, unlike objectUrn, name, and moniker, and
-        // in a perfect world the first of the two tests would also return 0.
-        // Unfortunately, the exact() matcher is broken in Spring. If they ever fix it, uncomment the line containing
-        // "exact()" in ObjectPersistenceService.java
-        // Only one field-specific matcher per field, unfortunately, so a combination of startsWith() and EndsWith()
-        // doesn't work either.
-        expectedSize = 3;
+        // verify that matching of the type field is exact
+        expectedSize = 0;
         queryParams.put(QueryParameterType.TYPE, "type o");
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         actualSize = response.size();

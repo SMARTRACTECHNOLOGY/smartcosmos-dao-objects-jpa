@@ -2,6 +2,8 @@ package net.smartcosmos.dao.objects.repository;
 
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.QueryByExampleExecutor;
 
 import java.util.List;
@@ -11,7 +13,8 @@ import java.util.UUID;
 /**
  * @author voor
  */
-public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID>, QueryByExampleExecutor<ObjectEntity>
+public interface IObjectRepository
+    extends JpaRepository<ObjectEntity, UUID>, QueryByExampleExecutor<ObjectEntity>, JpaSpecificationExecutor<ObjectEntity>
 {
 
     Optional<ObjectEntity> findByAccountIdAndObjectUrn(UUID accountId, String objectUrn);
@@ -19,4 +22,5 @@ public interface IObjectRepository extends JpaRepository<ObjectEntity, UUID>, Qu
     Optional<ObjectEntity> findByAccountIdAndId(UUID accountId, UUID id);
 
     List<ObjectEntity> findByAccountIdAndObjectUrnStartsWith(UUID accountId, String objectUrn);
+
 }

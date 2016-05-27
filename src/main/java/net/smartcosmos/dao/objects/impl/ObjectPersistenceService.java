@@ -1,19 +1,19 @@
 package net.smartcosmos.dao.objects.impl;
 
-import net.smartcosmos.dao.objects.IObjectDao;
+import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.IObjectRepository;
 import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
+import net.smartcosmos.dao.objects.util.SearchSpecifications;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
-import org.apache.commons.collections4.MapUtils;
 import net.smartcosmos.util.UuidUtil;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 import org.springframework.util.StringUtils;
@@ -29,13 +29,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.springframework.data.domain.ExampleMatcher.StringMatcher.STARTING;
+import static org.springframework.data.jpa.domain.Specifications.where;
 
 /**
  * @author voor
  */
 @Service
-public class ObjectPersistenceService implements IObjectDao {
+public class ObjectPersistenceService implements ObjectDao {
 
     private final IObjectRepository objectRepository;
     private final ConversionService conversionService;
@@ -43,7 +43,7 @@ public class ObjectPersistenceService implements IObjectDao {
 
     @Autowired
     public ObjectPersistenceService(IObjectRepository objectRepository,
-            ConversionService conversionService, Validator basicValidator) {
+                                    ConversionService conversionService, Validator basicValidator) {
         this.objectRepository = objectRepository;
         this.conversionService = conversionService;
         this.validator = basicValidator;
@@ -85,7 +85,7 @@ public class ObjectPersistenceService implements IObjectDao {
 
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
-                    ObjectResponse.class);
+                ObjectResponse.class);
             return Optional.ofNullable(response);
         }
         else {
@@ -103,7 +103,8 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
 
-        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrnStartsWith);
+        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
+            objectUrnStartsWith);
 
         return entityList.stream()
             .map(o -> conversionService.convert(o, ObjectResponse.class))
@@ -113,7 +114,8 @@ public class ObjectPersistenceService implements IObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), UuidUtil.getUuidFromUrn(urn));
+        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn),
+            UuidUtil.getUuidFromUrn(urn));
 
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
@@ -137,8 +139,8 @@ public class ObjectPersistenceService implements IObjectDao {
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
         return objectRepository.findAll().stream()
-                .map(o -> conversionService.convert(o, ObjectResponse.class))
-                .collect(Collectors.toList());
+            .map(o -> conversionService.convert(o, ObjectResponse.class))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -153,39 +155,58 @@ public class ObjectPersistenceService implements IObjectDao {
      */
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
-        ObjectEntity.ObjectEntityBuilder builder = ObjectEntity.builder();
-        ExampleMatcher matcher = ExampleMatcher.matching()
-            .withStringMatcher(STARTING);
-            //.withMatcher(QueryParameterType.TYPE.typeName(), exact()) // would be nice, but broken in Spring
+        SearchSpecifications searchSpecifications = new SearchSpecifications<ObjectEntity>();
 
-        builder.objectUrn(MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE));
-        builder.type(MapUtils.getString(queryParameters, QueryParameterType.TYPE));
-        builder.name(MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE));
-        builder.moniker(MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE));
+        Specification accountUrnSpecification = null;
+        if (accountUrn != null) {
+            UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
+            accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
+        };
 
-        // findByExample doesn't deal with dates, so we have to do it ourselves
-        Long modifiedAfterDate = null;
+        Specification objectUrnSpecification = null;
+        String objectUrnLike = MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE);
+        if (objectUrnLike != null) {
+            objectUrnSpecification = searchSpecifications.stringStartsWith(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
+        };
 
-        if (MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER) != null){
-            modifiedAfterDate = (Long) queryParameters.get(QueryParameterType.MODIFIED_AFTER);
+        Specification nameLikeSpecification = null;
+        String nameLike = MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE);
+        if (nameLike != null) {
+            nameLikeSpecification = searchSpecifications.stringStartsWith(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
+        };
+
+        Specification typeSpecification = null;
+        String type = MapUtils.getString(queryParameters, QueryParameterType.TYPE);
+        if (type != null) {
+            typeSpecification = searchSpecifications.stringMatchesExactly(type, QueryParameterType.TYPE_FIELD_NAME.typeName());
+        };
+
+        Specification monikerLikeSpecification = null;
+        String monikerLike = MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE);
+        if (monikerLike != null) {
+            monikerLikeSpecification = searchSpecifications.stringStartsWith(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
+        };
+
+        Specification lastModifedAfterSpecification = null;
+        Long lastModifedAfter = MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER);
+        if (lastModifedAfter != null) {
+            lastModifedAfterSpecification = searchSpecifications.numberGreaterThan(lastModifedAfter,
+                QueryParameterType.MODIFIED_AFTER_FIELD_NAME.typeName());
+        };
+
+        Iterable<ObjectEntity> returnedValues = objectRepository.findAll(where(objectUrnSpecification)
+            .and(accountUrnSpecification)
+            .and(nameLikeSpecification)
+            .and(typeSpecification)
+            .and(monikerLikeSpecification)
+            .and(lastModifedAfterSpecification));
+
+        List<ObjectResponse> convertedList = new ArrayList<>();
+        for (ObjectEntity entity: returnedValues) {
+            convertedList.add(conversionService.convert(entity, ObjectResponse.class));
         }
-        ObjectEntity exampleEntity = builder.accountId(UuidUtil.getUuidFromAccountUrn(accountUrn)).build();
+        return convertedList;
 
-        Example<ObjectEntity> example = Example.of(exampleEntity, matcher);
-
-        Iterable<ObjectEntity> queryResult =  objectRepository.findAll(example);
-        List<ObjectResponse> returnValue = new ArrayList<>();
-
-        for (ObjectEntity singleResult : queryResult)
-        {
-            // created is set at object creation time, and lastModified is not
-            Long singleResultLastModified = singleResult.getLastModified();
-            if(modifiedAfterDate == null || singleResultLastModified > modifiedAfterDate)
-            {
-                returnValue.add(conversionService.convert(singleResult, ObjectResponse.class));
-            }
-        }
-        return returnValue;
     }
 
     private Optional<ObjectEntity> findEntity(UUID accountId, String urn, String objectUrn) throws IllegalArgumentException {
