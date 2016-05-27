@@ -13,8 +13,7 @@ import java.util.UUID;
 /**
  * @author voor
  */
-public interface IObjectRepository
-    extends JpaRepository<ObjectEntity, UUID>, QueryByExampleExecutor<ObjectEntity>, JpaSpecificationExecutor<ObjectEntity>
+public interface ObjectRepository extends JpaRepository<ObjectEntity, UUID>, QueryByExampleExecutor<ObjectEntity>, JpaSpecificationExecutor<ObjectEntity>
 {
 
     Optional<ObjectEntity> findByAccountIdAndObjectUrn(UUID accountId, String objectUrn);

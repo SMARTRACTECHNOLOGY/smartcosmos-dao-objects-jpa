@@ -2,7 +2,7 @@ package net.smartcosmos.dao.objects.impl;
 
 import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dao.objects.repository.ObjectRepository;
 import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
 import net.smartcosmos.dao.objects.util.SearchSpecifications;
 import net.smartcosmos.dto.objects.ObjectCreate;
@@ -10,22 +10,19 @@ import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
-import org.springframework.util.StringUtils;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,16 +34,14 @@ import static org.springframework.data.jpa.domain.Specifications.where;
 @Service
 public class ObjectPersistenceService implements ObjectDao {
 
-    private final IObjectRepository objectRepository;
+    private final ObjectRepository objectRepository;
     private final ConversionService conversionService;
-    private final Validator validator;
 
     @Autowired
-    public ObjectPersistenceService(IObjectRepository objectRepository,
-                                    ConversionService conversionService, Validator basicValidator) {
+    public ObjectPersistenceService(ObjectRepository objectRepository,
+            ConversionService conversionService) {
         this.objectRepository = objectRepository;
         this.conversionService = conversionService;
-        this.validator = basicValidator;
     }
 
     @Override
@@ -61,7 +56,7 @@ public class ObjectPersistenceService implements ObjectDao {
     @Override
     public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws ConstraintViolationException {
 
-        validate(updateObject);
+        checkIdentifiers(updateObject);
 
         Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
 
@@ -155,44 +150,44 @@ public class ObjectPersistenceService implements ObjectDao {
      */
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
-        SearchSpecifications searchSpecifications = new SearchSpecifications<ObjectEntity>();
+        SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
 
-        Specification accountUrnSpecification = null;
+        Specification<ObjectEntity> accountUrnSpecification = null;
         if (accountUrn != null) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
             accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
-        };
+        }
 
-        Specification objectUrnSpecification = null;
+        Specification<ObjectEntity> objectUrnSpecification = null;
         String objectUrnLike = MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE);
         if (objectUrnLike != null) {
             objectUrnSpecification = searchSpecifications.stringStartsWith(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification nameLikeSpecification = null;
+        Specification<ObjectEntity> nameLikeSpecification = null;
         String nameLike = MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE);
         if (nameLike != null) {
             nameLikeSpecification = searchSpecifications.stringStartsWith(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification typeSpecification = null;
+        Specification<ObjectEntity> typeSpecification = null;
         String type = MapUtils.getString(queryParameters, QueryParameterType.TYPE);
         if (type != null) {
             typeSpecification = searchSpecifications.stringMatchesExactly(type, QueryParameterType.TYPE_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification monikerLikeSpecification = null;
+        Specification<ObjectEntity> monikerLikeSpecification = null;
         String monikerLike = MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE);
         if (monikerLike != null) {
             monikerLikeSpecification = searchSpecifications.stringStartsWith(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
-        };
+        }
 
-        Specification lastModifedAfterSpecification = null;
+        Specification<ObjectEntity> lastModifedAfterSpecification = null;
         Long lastModifedAfter = MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER);
         if (lastModifedAfter != null) {
             lastModifedAfterSpecification = searchSpecifications.numberGreaterThan(lastModifedAfter,
                 QueryParameterType.MODIFIED_AFTER_FIELD_NAME.typeName());
-        };
+        }
 
         Iterable<ObjectEntity> returnedValues = objectRepository.findAll(where(objectUrnSpecification)
             .and(accountUrnSpecification)
@@ -217,12 +212,12 @@ public class ObjectPersistenceService implements ObjectDao {
         if (id != null) {
             entity = objectRepository.findByAccountIdAndId(accountId, id);
 
-            if (entity.isPresent() && !StringUtils.isEmpty(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
+            if (entity.isPresent() && StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
                 throw new IllegalArgumentException("urn and objectUrn do not match");
             }
         }
 
-        if (!StringUtils.isEmpty(objectUrn)) {
+        if (StringUtils.isNotBlank(objectUrn)) {
             entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
 
             if (entity.isPresent() && id != null && !id.equals(entity.get().getId())) {
@@ -234,7 +229,7 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     /**
-     * Saves an object entity in an {@link IObjectRepository}.
+     * Saves an object entity in an {@link ObjectRepository}.
      *
      * @param objectEntity the object entity to persist
      * @return the persisted object entity
@@ -255,11 +250,13 @@ public class ObjectPersistenceService implements ObjectDao {
         }
     }
 
-    private <T> void validate(T object) throws ConstraintViolationException {
+    private void checkIdentifiers(ObjectUpdate updateObject) throws IllegalArgumentException {
+        if (StringUtils.isBlank(updateObject.getUrn()) && StringUtils.isBlank(updateObject.getObjectUrn())) {
+            throw new IllegalArgumentException(String.format("urn and objectUrn may not be null: %s", updateObject.toString()));
+        }
 
-        Set<ConstraintViolation<T>> violations = validator.validate(object);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException("Instance of " + object.getClass().getName() + " violates constraints", violations);
+        if (StringUtils.isNotBlank(updateObject.getUrn()) && StringUtils.isNotBlank(updateObject.getObjectUrn())) {
+            throw new IllegalArgumentException(String.format("either urn or objectUrn may be defined: %s", updateObject.toString()));
         }
     }
 }

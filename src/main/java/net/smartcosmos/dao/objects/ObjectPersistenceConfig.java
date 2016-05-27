@@ -2,17 +2,14 @@ package net.smartcosmos.dao.objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.orm.jpa.EntityScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import javax.validation.Validator;
 import java.util.Map;
 
 /**
@@ -33,10 +30,5 @@ public class ObjectPersistenceConfig extends WebMvcConfigurerAdapter {
         for (FormatterRegistrar registrar : formatterRegistrarMap.values()) {
             registrar.registerFormatters(registry);
         }
-    }
-
-    @Bean
-    public Validator basicValidator() {
-        return new LocalValidatorFactoryBean();
     }
 }
