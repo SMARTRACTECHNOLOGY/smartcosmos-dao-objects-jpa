@@ -1,5 +1,6 @@
 package net.smartcosmos.dao.objects.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
 import net.smartcosmos.dao.objects.repository.ObjectRepository;
@@ -31,6 +32,7 @@ import static org.springframework.data.jpa.domain.Specifications.where;
 /**
  * @author voor
  */
+@Slf4j
 @Service
 public class ObjectPersistenceService implements ObjectDao {
 
@@ -109,17 +111,23 @@ public class ObjectPersistenceService implements ObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn),
-            UuidUtil.getUuidFromUrn(urn));
+        Optional<ObjectEntity> entity = Optional.empty();
+        try {
+            UUID uuid = UuidUtil.getUuidFromUrn(urn);
+            entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+        }
+        catch (IllegalArgumentException e) {
+            // Optional.empty() will be returned anyway
+            log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
+        }
 
         if (entity.isPresent()) {
             final ObjectResponse response = conversionService.convert(entity.get(),
                 ObjectResponse.class);
             return Optional.ofNullable(response);
         }
-        else {
-            return Optional.empty();
-        }
+        return Optional.empty();
+
     }
 
     /**
