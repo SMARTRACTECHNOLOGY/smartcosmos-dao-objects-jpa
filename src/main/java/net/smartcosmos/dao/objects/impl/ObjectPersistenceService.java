@@ -2,7 +2,7 @@ package net.smartcosmos.dao.objects.impl;
 
 import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dao.objects.repository.ObjectRepository;
 import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
@@ -31,12 +31,12 @@ import static org.springframework.data.domain.ExampleMatcher.StringMatcher.START
 @Service
 public class ObjectPersistenceService implements ObjectDao {
 
-    private final IObjectRepository objectRepository;
+    private final ObjectRepository objectRepository;
     private final ConversionService conversionService;
     private final Validator validator;
 
     @Autowired
-    public ObjectPersistenceService(IObjectRepository objectRepository,
+    public ObjectPersistenceService(ObjectRepository objectRepository,
             ConversionService conversionService, Validator basicValidator) {
         this.objectRepository = objectRepository;
         this.conversionService = conversionService;
@@ -207,7 +207,7 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     /**
-     * Saves an object entity in an {@link IObjectRepository}.
+     * Saves an object entity in an {@link ObjectRepository}.
      *
      * @param objectEntity the object entity to persist
      * @return the persisted object entity

@@ -4,7 +4,7 @@ import net.smartcosmos.dao.objects.ObjectDao.QueryParameterType;
 import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
 import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.IObjectRepository;
+import net.smartcosmos.dao.objects.repository.ObjectRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
@@ -85,7 +85,7 @@ public class ObjectPersistenceServiceTest {
     ObjectPersistenceService objectPersistenceService;
 
     @Autowired
-    IObjectRepository objectRepository;
+    ObjectRepository objectRepository;
 
     @Before
     public void setUp() throws Exception {

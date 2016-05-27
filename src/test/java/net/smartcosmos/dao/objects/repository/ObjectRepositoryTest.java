@@ -34,7 +34,7 @@ public class ObjectRepositoryTest {
 
     final UUID accountId = UUID.randomUUID();
     @Autowired
-    IObjectRepository objectRepository;
+    ObjectRepository objectRepository;
     private UUID id;
 
     @Before
