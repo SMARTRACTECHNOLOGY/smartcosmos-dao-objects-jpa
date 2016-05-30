@@ -51,32 +51,32 @@ public class SearchSpecifications<T>
     //
     // The private methods, which return Predicates
     //
-    private Predicate uuidMatches(Root root, CriteriaQuery<?> query,
+    private Predicate uuidMatches(Root<T> root, CriteriaQuery<?> query,
                                   CriteriaBuilder builder, UUID matches, String queryParameter) {
         return builder.equal(root.get(queryParameter), matches);
     }
 
-    private Predicate stringStartsWith(Root root, CriteriaQuery<?> query,
+    private Predicate stringStartsWith(Root<T> root, CriteriaQuery<?> query,
                                        CriteriaBuilder builder, String startsWith, String queryParameter) {
         return builder.like(root.get(queryParameter), startsWith + "%");
     }
 
-    private Predicate stringEndsWith(Root root, CriteriaQuery<?> query,
+    private Predicate stringEndsWith(Root<T> root, CriteriaQuery<?> query,
                                      CriteriaBuilder builder, String endsWith, String queryParameter) {
         return builder.like(root.get(queryParameter), "%" + endsWith);
     }
 
-    private Predicate stringMatchesExactly(Root root, CriteriaQuery<?> query,
+    private Predicate stringMatchesExactly(Root<T> root, CriteriaQuery<?> query,
                                            CriteriaBuilder builder, String matchesExactly, String queryParameter) {
         return builder.equal(root.get(queryParameter), matchesExactly);
     }
 
-    private Predicate numberLessThan(Root root, CriteriaQuery<?> query,
+    private Predicate numberLessThan(Root<T> root, CriteriaQuery<?> query,
                                      CriteriaBuilder builder, Number numberLessThan, String queryParameter) {
         return builder.lt(root.get(queryParameter), numberLessThan);
     }
 
-    private Predicate numberGreaterThan(Root root, CriteriaQuery<?> query,
+    private Predicate numberGreaterThan(Root<T> root, CriteriaQuery<?> query,
                                         CriteriaBuilder builder, Number numberGreaterThan, String queryParameter) {
         return builder.gt(root.get(queryParameter), numberGreaterThan);
     }
