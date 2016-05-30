@@ -732,6 +732,40 @@ public class ObjectPersistenceServiceTest {
         response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+    }
+
+    @Test
+    public void findByQueryParameters_ObjectUrnLike_Exact() throws Exception
+    {
+        populateQueryData();
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        // baseline - no exact flag
+        expectedSize = 9;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_0);
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // exact = false, which should be a noop
+        expectedSize = 9;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_0);
+        queryParams.put(QueryParameterType.EXACT, false);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // exact = true should return no elements, since there's no exact match
+        expectedSize = 0;
+        queryParams.put(QueryParameterType.OBJECT_URN_LIKE, OBJECT_URN_QUERY_PARAMS_0);
+        queryParams.put(QueryParameterType.EXACT, true);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
     }
 
     @Test
@@ -742,9 +776,12 @@ public class ObjectPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
+        expectedSize = 3;
         queryParams.put(QueryParameterType.TYPE, "type one");
         List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
-        assertTrue(response.size() == 3);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
 
         // verify that matching of the type field is exact
         expectedSize = 0;
@@ -808,6 +845,43 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
+    public void findByQueryParameters_NameLike_Exact() throws Exception
+    {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        // baseline - no exact flag
+        expectedSize = 9;
+        queryParams.remove(QueryParameterType.TYPE);
+        queryParams.put(NAME_LIKE, "name");
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // exact = false, which should be a noop
+        expectedSize = 9;
+        queryParams.remove(QueryParameterType.TYPE);
+        queryParams.put(NAME_LIKE, "name");
+        queryParams.put(QueryParameterType.EXACT, false);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // exact = true should return no elements, since there's no exact match
+        expectedSize = 0;
+        queryParams.remove(QueryParameterType.TYPE);
+        queryParams.put(NAME_LIKE, "name");
+        queryParams.put(QueryParameterType.EXACT, true);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+    }
+
+    @Test
     public void findByQueryParameters_MonikerLike() throws Exception {
         populateQueryData();
 
@@ -848,6 +922,45 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
+    public void findByQueryParameters_MonikerLike_Exact() throws Exception
+    {
+        populateQueryData();
+
+        Map<QueryParameterType, Object> queryParams = new HashMap<>();
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        // baseline - no exact flag
+        expectedSize = 3;
+        queryParams.remove(QueryParameterType.NAME_LIKE);
+        queryParams.put(MONIKER_LIKE, "moniker");
+        List<ObjectResponse> response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // exact = false, which should be a noop
+        expectedSize = 3;
+        queryParams.remove(QueryParameterType.NAME_LIKE);
+        queryParams.put(MONIKER_LIKE, "moniker");
+        queryParams.put(QueryParameterType.EXACT, false);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+        // exact = true should return no elements, since there's no exact match
+        expectedSize = 0;
+        queryParams.remove(QueryParameterType.NAME_LIKE);
+        queryParams.put(MONIKER_LIKE, "moniker");
+        queryParams.put(QueryParameterType.EXACT, true);
+        response = objectPersistenceService.findByQueryParameters(accountUrn, queryParams);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+
+
+    }
+
+        @Test
     public void findByQueryParameters_LastModified() throws Exception {
 
         final UUID accountUuid = UuidUtil.getNewUuid();
