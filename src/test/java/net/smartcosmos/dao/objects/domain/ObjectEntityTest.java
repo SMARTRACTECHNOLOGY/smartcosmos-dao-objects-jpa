@@ -80,7 +80,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -102,7 +103,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -124,7 +126,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("size must be between 0 and 767", violationSet.iterator().next().getMessage());
+        assertEquals("{javax.validation.constraints.Size.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -150,7 +153,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -172,7 +176,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -194,7 +199,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("size must be between 0 and 255", violationSet.iterator().next().getMessage());
+        assertEquals("{javax.validation.constraints.Size.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -220,7 +226,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -242,7 +249,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be empty", violationSet.iterator().next().getMessage());
+        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -264,7 +272,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("size must be between 0 and 255", violationSet.iterator().next().getMessage());
+        assertEquals("{javax.validation.constraints.Size.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -328,7 +337,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("size must be between 0 and 1024", violationSet.iterator().next().getMessage());
+        assertEquals("{javax.validation.constraints.Size.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("description", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -392,7 +402,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("size must be between 0 and 2048", violationSet.iterator().next().getMessage());
+        assertEquals("{javax.validation.constraints.Size.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("moniker", violationSet.iterator().next().getPropertyPath().toString());
     }
 
@@ -418,7 +429,8 @@ public class ObjectEntityTest {
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
-        assertEquals("may not be null", violationSet.iterator().next().getMessage());
+        assertEquals("{javax.validation.constraints.NotNull.message}",
+            violationSet.iterator().next().getMessageTemplate());
         assertEquals("accountId", violationSet.iterator().next().getPropertyPath().toString());
     }
 
