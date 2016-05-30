@@ -38,6 +38,7 @@ public class ObjectPersistenceService implements ObjectDao {
 
     private final ObjectRepository objectRepository;
     private final ConversionService conversionService;
+    private final SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
 
     @Autowired
     public ObjectPersistenceService(ObjectRepository objectRepository,
@@ -158,8 +159,6 @@ public class ObjectPersistenceService implements ObjectDao {
      */
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
-        SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
-
         Specification<ObjectEntity> accountUrnSpecification = null;
         if (accountUrn != null) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
@@ -215,7 +214,6 @@ public class ObjectPersistenceService implements ObjectDao {
     private Specification<ObjectEntity> getSearchSpecification(QueryParameterType queryParameterType,
                                                                String query,
                                                                Boolean exact) {
-        SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
         Specification<ObjectEntity> specification = null;
 
         if (StringUtils.isNotBlank(query)) {
