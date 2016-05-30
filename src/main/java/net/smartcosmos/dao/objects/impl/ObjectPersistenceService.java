@@ -38,6 +38,7 @@ public class ObjectPersistenceService implements ObjectDao {
 
     private final ObjectRepository objectRepository;
     private final ConversionService conversionService;
+    private final SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
 
     @Autowired
     public ObjectPersistenceService(ObjectRepository objectRepository,
@@ -158,42 +159,40 @@ public class ObjectPersistenceService implements ObjectDao {
      */
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
-        SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
-
         Specification<ObjectEntity> accountUrnSpecification = null;
         if (accountUrn != null) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
             accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
         }
 
-        Specification<ObjectEntity> objectUrnSpecification = null;
-        String objectUrnLike = MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE);
-        if (objectUrnLike != null) {
-            objectUrnSpecification = searchSpecifications.stringStartsWith(objectUrnLike, QueryParameterType.OBJECT_URN_FIELD_NAME.typeName());
-        }
+        // this is only here so direct testing of this method doesn't need to include exact in the queryParameters,
+        // since neither does the GetObjectResource
+        Boolean exact = MapUtils.getBoolean(queryParameters, QueryParameterType.EXACT, false);
 
-        Specification<ObjectEntity> nameLikeSpecification = null;
-        String nameLike = MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE);
-        if (nameLike != null) {
-            nameLikeSpecification = searchSpecifications.stringStartsWith(nameLike, QueryParameterType.NAME_FIELD_NAME.typeName());
-        }
+        Specification<ObjectEntity> objectUrnSpecification = getSearchSpecification(
+            QueryParameterType.OBJECT_URN_FIELD_NAME,
+            MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE),
+            exact);
 
-        Specification<ObjectEntity> typeSpecification = null;
-        String type = MapUtils.getString(queryParameters, QueryParameterType.TYPE);
-        if (type != null) {
-            typeSpecification = searchSpecifications.stringMatchesExactly(type, QueryParameterType.TYPE_FIELD_NAME.typeName());
-        }
+        Specification<ObjectEntity> nameLikeSpecification = getSearchSpecification(
+            QueryParameterType.NAME_FIELD_NAME,
+            MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE),
+            exact);
 
-        Specification<ObjectEntity> monikerLikeSpecification = null;
-        String monikerLike = MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE);
-        if (monikerLike != null) {
-            monikerLikeSpecification = searchSpecifications.stringStartsWith(monikerLike, QueryParameterType.MONIKER_FIELD_NAME.typeName());
-        }
+        Specification<ObjectEntity> typeSpecification = getSearchSpecification(
+            QueryParameterType.TYPE_FIELD_NAME,
+            MapUtils.getString(queryParameters, QueryParameterType.TYPE),
+            true);
 
-        Specification<ObjectEntity> lastModifedAfterSpecification = null;
-        Long lastModifedAfter = MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER);
-        if (lastModifedAfter != null) {
-            lastModifedAfterSpecification = searchSpecifications.numberGreaterThan(lastModifedAfter,
+        Specification<ObjectEntity> monikerLikeSpecification = getSearchSpecification(
+            QueryParameterType.MONIKER_FIELD_NAME,
+            MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE),
+            exact);
+
+        Specification<ObjectEntity> lastModifiedAfterSpecification = null;
+        Long lastModifiedAfter = MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER);
+        if (lastModifiedAfter != null) {
+            lastModifiedAfterSpecification = searchSpecifications.numberGreaterThan(lastModifiedAfter,
                 QueryParameterType.MODIFIED_AFTER_FIELD_NAME.typeName());
         }
 
@@ -202,14 +201,31 @@ public class ObjectPersistenceService implements ObjectDao {
             .and(nameLikeSpecification)
             .and(typeSpecification)
             .and(monikerLikeSpecification)
-            .and(lastModifedAfterSpecification));
+            .and(lastModifiedAfterSpecification));
 
         List<ObjectResponse> convertedList = new ArrayList<>();
         for (ObjectEntity entity: returnedValues) {
             convertedList.add(conversionService.convert(entity, ObjectResponse.class));
         }
-        return convertedList;
 
+        return convertedList;
+    }
+
+    private Specification<ObjectEntity> getSearchSpecification(QueryParameterType queryParameterType,
+                                                               String query,
+                                                               Boolean exact) {
+        Specification<ObjectEntity> specification = null;
+
+        if (StringUtils.isNotBlank(query)) {
+            if (exact) {
+                specification = searchSpecifications.stringMatchesExactly(query, queryParameterType.typeName());
+            }
+            else {
+                specification = searchSpecifications.stringStartsWith(query, queryParameterType.typeName());
+            }
+        }
+
+        return specification;
     }
 
     private Optional<ObjectEntity> findEntity(UUID accountId, String urn, String objectUrn) throws IllegalArgumentException {
