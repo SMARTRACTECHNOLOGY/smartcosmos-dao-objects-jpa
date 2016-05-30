@@ -1,5 +1,6 @@
 package net.smartcosmos.dao.objects.impl;
 
+import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import lombok.extern.slf4j.Slf4j;
 import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
@@ -13,6 +14,7 @@ import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.bouncycastle.asn1.cmp.OOBCertHash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +23,7 @@ import org.springframework.transaction.TransactionException;
 
 import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -110,25 +113,58 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> findByUrn(String accountUrn, String urn) {
+    public Optional<ObjectResponse> findByUrn(String accountUrn, String urn)
+    {
 
         Optional<ObjectEntity> entity = Optional.empty();
-        try {
+        try
+        {
             UUID uuid = UuidUtil.getUuidFromUrn(urn);
             entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e)
+        {
             // Optional.empty() will be returned anyway
             log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
         }
 
-        if (entity.isPresent()) {
-            final ObjectResponse response = conversionService.convert(entity.get(),
-                ObjectResponse.class);
+        if (entity.isPresent())
+        {
+            final ObjectResponse response = conversionService.convert(entity.get(), ObjectResponse.class);
             return Optional.ofNullable(response);
         }
         return Optional.empty();
+    }
 
+    @Override
+    public List<ObjectResponse> findByUrns(String accountUrn, Collection<String> urns)
+    {
+
+        List<ObjectResponse> entities = new ArrayList<>();
+
+        for (String urn: urns)
+        {
+            Optional<ObjectEntity> entity = Optional.empty();
+            try
+            {
+                UUID uuid = UuidUtil.getUuidFromUrn(urn);
+                entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+            } catch (IllegalArgumentException e)
+            {
+                // If there's a bad value, we return an empty list TODO: really?
+                log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
+                return new ArrayList<>();
+            }
+
+            if (entity.isPresent())
+            {
+                final ObjectResponse response = conversionService.convert(entity.get(), ObjectResponse.class);
+                entities.add(response);
+            }
+            else {
+                return new ArrayList<>();
+            }
+        }
+        return entities;
     }
 
     /**
