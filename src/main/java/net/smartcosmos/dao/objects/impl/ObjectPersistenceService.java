@@ -160,7 +160,7 @@ public class ObjectPersistenceService implements ObjectDao {
 
             } catch (IllegalArgumentException e)
             {
-                // If there's a bad value, we return an empty list TODO: really?
+                // If there's a bad value, we return an empty list
                 log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
                 entities.add(Optional.empty());
             }
