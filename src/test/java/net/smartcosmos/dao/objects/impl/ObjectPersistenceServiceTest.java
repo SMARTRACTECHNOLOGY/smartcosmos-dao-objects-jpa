@@ -27,7 +27,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -624,7 +626,7 @@ public class ObjectPersistenceServiceTest {
     // region Find By Object URN
 
     @Test
-    public void findByObjectUrn() throws Exception {
+    public void testFindByObjectUrn() throws Exception {
 
         final UUID accountUuid = UUID.randomUUID();
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
@@ -641,7 +643,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByObjectUrnStartsWithNonexistent() throws Exception {
+    public void testFindByObjectUrnStartsWithNonexistent() throws Exception {
         populateQueryData();
 
         List<ObjectResponse> response = objectPersistenceService.findByObjectUrnStartsWith(accountUrn, "no-such-urn");
@@ -650,7 +652,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByObjectUrnStartsWith() throws Exception {
+    public void testFindByObjectUrnStartsWith() throws Exception {
         populateQueryData();
 
         List<ObjectResponse> response = objectPersistenceService.findByObjectUrnStartsWith(accountUrn, OBJECT_URN_QUERY_PARAMS);
@@ -664,7 +666,7 @@ public class ObjectPersistenceServiceTest {
 
     // no query data should return an empty response
     @Test
-    public void findByQueryParameters_NoQueryParameters() throws Exception {
+    public void testFindByQueryParameters_NoQueryParameters() throws Exception {
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
         int expectedSize = 0;
@@ -683,7 +685,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_ObjectUrnLike() throws Exception {
+    public void testFindByQueryParameters_ObjectUrnLike() throws Exception {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -736,7 +738,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_ObjectUrnLike_Exact() throws Exception
+    public void testFindByQueryParameters_ObjectUrnLike_Exact() throws Exception
     {
         populateQueryData();
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -769,7 +771,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_Type() throws Exception {
+    public void testFindByQueryParameters_Type() throws Exception {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -805,7 +807,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_NameLike() throws Exception {
+    public void testFindByQueryParameters_NameLike() throws Exception {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -845,7 +847,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_NameLike_Exact() throws Exception
+    public void testFindByQueryParameters_NameLike_Exact() throws Exception
     {
         populateQueryData();
 
@@ -882,7 +884,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_MonikerLike() throws Exception {
+    public void testFindByQueryParameters_MonikerLike() throws Exception {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -922,7 +924,7 @@ public class ObjectPersistenceServiceTest {
     }
 
     @Test
-    public void findByQueryParameters_MonikerLike_Exact() throws Exception
+    public void testFindByQueryParameters_MonikerLike_Exact() throws Exception
     {
         populateQueryData();
 
@@ -961,7 +963,7 @@ public class ObjectPersistenceServiceTest {
     }
 
         @Test
-    public void findByQueryParameters_LastModified() throws Exception {
+    public void testFindByQueryParameters_LastModified() throws Exception {
 
         final UUID accountUuid = UuidUtil.getNewUuid();
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
@@ -1023,7 +1025,7 @@ public class ObjectPersistenceServiceTest {
      * @throws Exception
      */
     @Test
-    public void findByQueryParametersDifferentAccountUrns() throws Exception {
+    public void testFindByQueryParametersDifferentAccountUrns() throws Exception {
         populateQueryData();
 
         Map<QueryParameterType, Object> queryParams = new HashMap<>();
@@ -1039,6 +1041,78 @@ public class ObjectPersistenceServiceTest {
         actualSize = response.size();
 
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    @Test
+    public void testFindByUrns() throws Exception
+    {
+        populateQueryData();
+
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        String firstUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
+        String secondUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_02).get().getUrn();
+        String thirdUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+
+        Collection<String> urns = new ArrayList<>();
+        urns.add(firstUrn);
+        urns.add(secondUrn);
+        urns.add(thirdUrn);
+
+        expectedSize = 3;
+        List<Optional<ObjectResponse>> response = objectPersistenceService.findByUrns(accountUrn, urns);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+    }
+
+    @Test
+    public void thatFindByUrnsReturnsPartialResultsWithNonexistentUrn() throws Exception
+    {
+        populateQueryData();
+
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        String firstUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
+        String secondUrn = UuidUtil.getUrnFromUuid(UuidUtil.getNewUuid());
+        String thirdUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+
+        Collection<String> urns = new ArrayList<>();
+        urns.add(firstUrn);
+        urns.add(secondUrn);
+        urns.add(thirdUrn);
+
+        expectedSize = 3;
+        List<Optional<ObjectResponse>> response = objectPersistenceService.findByUrns(accountUrn, urns);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
+    }
+
+    @Test
+    public void thatFindByUrnsReturnsPartialResultsWithUnparseableUrn() throws Exception
+    {
+        populateQueryData();
+
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        String firstUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
+        String secondUrn = "cannot be parsed as URN";
+        String thirdUrn = objectPersistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+
+        Collection<String> urns = new ArrayList<>();
+        urns.add(firstUrn);
+        urns.add(secondUrn);
+        urns.add(thirdUrn);
+
+        expectedSize = 3;
+        List<Optional<ObjectResponse>> response = objectPersistenceService.findByUrns(accountUrn, urns);
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+
     }
 
     // endregion
