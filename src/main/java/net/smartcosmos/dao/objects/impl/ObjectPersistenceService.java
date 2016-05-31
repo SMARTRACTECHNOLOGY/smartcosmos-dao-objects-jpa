@@ -136,10 +136,10 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     @Override
-    public List<ObjectResponse> findByUrns(String accountUrn, Collection<String> urns)
+    public List<Optional<ObjectResponse>> findByUrns(String accountUrn, Collection<String> urns)
     {
 
-        List<ObjectResponse> entities = new ArrayList<>();
+        List<Optional<ObjectResponse>> entities = new ArrayList<>();
 
         for (String urn: urns)
         {
@@ -148,21 +148,23 @@ public class ObjectPersistenceService implements ObjectDao {
             {
                 UUID uuid = UuidUtil.getUuidFromUrn(urn);
                 entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+
+                if (entity.isPresent())
+                {
+                    final ObjectResponse response = conversionService.convert(entity.get(), ObjectResponse.class);
+                    entities.add(Optional.ofNullable(response));
+                }
+                else {
+                    entities.add(Optional.empty());
+                }
+
             } catch (IllegalArgumentException e)
             {
                 // If there's a bad value, we return an empty list TODO: really?
                 log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
-                return new ArrayList<>();
+                entities.add(Optional.empty());
             }
 
-            if (entity.isPresent())
-            {
-                final ObjectResponse response = conversionService.convert(entity.get(), ObjectResponse.class);
-                entities.add(response);
-            }
-            else {
-                return new ArrayList<>();
-            }
         }
         return entities;
     }

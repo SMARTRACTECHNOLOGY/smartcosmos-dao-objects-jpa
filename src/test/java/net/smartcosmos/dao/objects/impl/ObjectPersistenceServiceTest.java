@@ -1061,14 +1061,14 @@ public class ObjectPersistenceServiceTest {
         urns.add(thirdUrn);
 
         expectedSize = 3;
-        List<ObjectResponse> response = objectPersistenceService.findByUrns(accountUrn, urns);
+        List<Optional<ObjectResponse>> response = objectPersistenceService.findByUrns(accountUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
     }
 
     @Test
-    public void thatFindByUrnsReturnsEmptyWithNonexistentUrn() throws Exception
+    public void thatFindByUrnsReturnsPartialResultsWithNonexistentUrn() throws Exception
     {
         populateQueryData();
 
@@ -1084,15 +1084,15 @@ public class ObjectPersistenceServiceTest {
         urns.add(secondUrn);
         urns.add(thirdUrn);
 
-        expectedSize = 0;
-        List<ObjectResponse> response = objectPersistenceService.findByUrns(accountUrn, urns);
+        expectedSize = 3;
+        List<Optional<ObjectResponse>> response = objectPersistenceService.findByUrns(accountUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
     }
 
     @Test
-    public void thatFindByUrnsReturnsEmptyWithUnparseableUrn() throws Exception
+    public void thatFindByUrnsReturnsPartialResultsWithUnparseableUrn() throws Exception
     {
         populateQueryData();
 
@@ -1108,8 +1108,8 @@ public class ObjectPersistenceServiceTest {
         urns.add(secondUrn);
         urns.add(thirdUrn);
 
-        expectedSize = 0;
-        List<ObjectResponse> response = objectPersistenceService.findByUrns(accountUrn, urns);
+        expectedSize = 3;
+        List<Optional<ObjectResponse>> response = objectPersistenceService.findByUrns(accountUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
