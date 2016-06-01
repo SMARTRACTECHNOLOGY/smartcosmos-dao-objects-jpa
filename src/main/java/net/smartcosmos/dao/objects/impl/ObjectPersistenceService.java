@@ -113,12 +113,13 @@ public class ObjectPersistenceService implements ObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn)
     {
-
+        UUID accountId = UuidUtil.getUuidFromAccountUrn(accountUrn);
+        
         Optional<ObjectEntity> entity = Optional.empty();
         try
         {
             UUID uuid = UuidUtil.getUuidFromUrn(urn);
-            entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+            entity = objectRepository.findByAccountIdAndId(accountId, uuid);
         } catch (IllegalArgumentException e)
         {
             // Optional.empty() will be returned anyway
@@ -137,6 +138,8 @@ public class ObjectPersistenceService implements ObjectDao {
     public List<Optional<ObjectResponse>> findByUrns(String accountUrn, Collection<String> urns)
     {
 
+        UUID accountId = UuidUtil.getUuidFromAccountUrn(accountUrn);
+
         List<Optional<ObjectResponse>> entities = new ArrayList<>();
 
         for (String urn: urns)
@@ -145,7 +148,7 @@ public class ObjectPersistenceService implements ObjectDao {
             try
             {
                 UUID uuid = UuidUtil.getUuidFromUrn(urn);
-                entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+                entity = objectRepository.findByAccountIdAndId(accountId, uuid);
 
                 if (entity.isPresent())
                 {
