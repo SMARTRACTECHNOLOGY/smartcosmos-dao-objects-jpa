@@ -27,23 +27,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.EXACT;
-import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MODIFIED_AFTER;
-import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.MONIKER_LIKE;
-import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.NAME_LIKE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static net.smartcosmos.dao.objects.ObjectDao.QueryParameterType.*;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -116,7 +103,7 @@ public class ObjectPersistenceServiceTest {
             .moniker("moniker").description("description").name("name").type("type")
             .build();
         ObjectResponse response = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, "urn:fakeUrn");
@@ -149,7 +136,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -195,7 +182,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -241,7 +228,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -287,7 +274,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -333,7 +320,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -379,7 +366,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -425,7 +412,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -471,7 +458,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -528,7 +515,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -564,7 +551,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
@@ -602,7 +589,7 @@ public class ObjectPersistenceServiceTest {
             .build();
 
         ObjectResponse responseCreate = objectPersistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(accountUrn, create);
 
         Optional<ObjectEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
