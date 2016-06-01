@@ -196,7 +196,7 @@ public class ObjectPersistenceService implements ObjectDao {
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
         Specification<ObjectEntity> accountUrnSpecification = null;
-        if (accountUrn != null) {
+        if (StringUtils.isNotBlank(accountUrn)) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
             accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
         }
