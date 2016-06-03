@@ -1,6 +1,5 @@
 package net.smartcosmos.dao.objects.impl;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import lombok.extern.slf4j.Slf4j;
 import net.smartcosmos.dao.objects.ObjectDao;
 import net.smartcosmos.dao.objects.domain.ObjectEntity;
@@ -14,7 +13,6 @@ import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.bouncycastle.asn1.cmp.OOBCertHash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.jpa.domain.Specification;
@@ -32,9 +30,6 @@ import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.Specifications.where;
 
-/**
- * @author voor
- */
 @Slf4j
 @Service
 public class ObjectPersistenceService implements ObjectDao {
@@ -53,7 +48,10 @@ public class ObjectPersistenceService implements ObjectDao {
     @Override
     public ObjectResponse create(String accountUrn, ObjectCreate createObject) {
 
+        UUID accountId = UuidUtil.getUuidFromAccountUrn(accountUrn);
+
         ObjectEntity entity = conversionService.convert(createObject, ObjectEntity.class);
+        entity.setAccountId(accountId);
         entity = persist(entity);
 
         return conversionService.convert(entity, ObjectResponse.class);
@@ -115,12 +113,13 @@ public class ObjectPersistenceService implements ObjectDao {
     @Override
     public Optional<ObjectResponse> findByUrn(String accountUrn, String urn)
     {
-
+        UUID accountId = UuidUtil.getUuidFromAccountUrn(accountUrn);
+        
         Optional<ObjectEntity> entity = Optional.empty();
         try
         {
             UUID uuid = UuidUtil.getUuidFromUrn(urn);
-            entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+            entity = objectRepository.findByAccountIdAndId(accountId, uuid);
         } catch (IllegalArgumentException e)
         {
             // Optional.empty() will be returned anyway
@@ -139,6 +138,8 @@ public class ObjectPersistenceService implements ObjectDao {
     public List<Optional<ObjectResponse>> findByUrns(String accountUrn, Collection<String> urns)
     {
 
+        UUID accountId = UuidUtil.getUuidFromAccountUrn(accountUrn);
+
         List<Optional<ObjectResponse>> entities = new ArrayList<>();
 
         for (String urn: urns)
@@ -147,7 +148,7 @@ public class ObjectPersistenceService implements ObjectDao {
             try
             {
                 UUID uuid = UuidUtil.getUuidFromUrn(urn);
-                entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+                entity = objectRepository.findByAccountIdAndId(accountId, uuid);
 
                 if (entity.isPresent())
                 {
@@ -198,7 +199,7 @@ public class ObjectPersistenceService implements ObjectDao {
     public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
         Specification<ObjectEntity> accountUrnSpecification = null;
-        if (accountUrn != null) {
+        if (StringUtils.isNotBlank(accountUrn)) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
             accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
         }
