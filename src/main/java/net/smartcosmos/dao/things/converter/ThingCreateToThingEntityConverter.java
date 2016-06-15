@@ -11,9 +11,6 @@ import net.smartcosmos.security.user.SmartCosmosUser;
 import net.smartcosmos.security.user.SmartCosmosUserHolder;
 import net.smartcosmos.util.UuidUtil;
 
-/**
- * @author voor
- */
 @Component
 public class ThingCreateToThingEntityConverter
         implements Converter<ThingCreate, ThingEntity>, FormatterRegistrar {
@@ -26,10 +23,10 @@ public class ThingCreateToThingEntityConverter
 
         return ThingEntity.builder()
                 // Required
-                .objectUrn(objectCreate.getUrn()).type(objectCreate.getType())
-                .accountId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
+                .urn(objectCreate.getUrn()).type(objectCreate.getType())
+                .tenantId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
                 // Optional
-                .activeFlag(objectCreate.getActive())
+                .active(objectCreate.getActive())
                 .build();
     }
 

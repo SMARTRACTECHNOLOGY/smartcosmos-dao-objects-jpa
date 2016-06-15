@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author voor
- */
 @Component
 public class ThingEntityToThingResponseConverter
         implements Converter<ThingEntity, ThingResponse>, FormatterRegistrar {
