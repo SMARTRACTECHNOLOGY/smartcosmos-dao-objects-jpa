@@ -5,14 +5,14 @@ import net.smartcosmos.dto.things.ThingUpdate;
 
 public class ThingPersistenceUtil {
 
-    public static ThingEntity merge(ThingEntity thingEntity, ThingUpdate updateObject) {
+    public static ThingEntity merge(ThingEntity thingEntity, ThingUpdate updateThing) {
 
-        if (updateObject.getType() != null) {
-            thingEntity.setType(updateObject.getType());
+        if (updateThing.getType() != null) {
+            thingEntity.setType(updateThing.getType());
         }
 
-        if (updateObject.getActive() != null) {
-            thingEntity.setActive(updateObject.getActive());
+        if (updateThing.getActive() != null) {
+            thingEntity.setActive(updateThing.getActive());
         }
 
         return thingEntity;

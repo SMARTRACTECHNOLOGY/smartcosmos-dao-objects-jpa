@@ -18,13 +18,9 @@ public class ThingCreateToThingEntityConverter
     @Override
     public ThingEntity convert(ThingCreate objectCreate) {
 
-        // Retrieve current user.
-        SmartCosmosUser user = SmartCosmosUserHolder.getCurrentUser();
-
         return ThingEntity.builder()
                 // Required
                 .urn(objectCreate.getUrn()).type(objectCreate.getType())
-                .tenantId(UuidUtil.getUuidFromAccountUrn(user.getAccountUrn()))
                 // Optional
                 .active(objectCreate.getActive())
                 .build();
