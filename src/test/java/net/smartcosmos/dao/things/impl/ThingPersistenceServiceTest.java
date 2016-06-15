@@ -283,6 +283,66 @@ public class ThingPersistenceServiceTest {
 
     // endregion
 
+    // region Delete
+
+    @Test
+    public void testDeleteById() throws Exception {
+
+        String urn = "urn:fakeUrn-delete";
+        String type = "type";
+
+        ThingCreate create = ThingCreate.builder()
+            .urn(urn)
+            .type(type)
+            .build();
+
+        ThingResponse responseCreate = persistenceService
+            .create(tenantUrn, create);
+
+        Optional<ThingEntity> entity = repository
+            .findByTenantIdAndUrn(tenantId, urn);
+
+        assertTrue(entity.isPresent());
+
+        String id = entity.get().getId().toString();
+
+        List<ThingResponse> responseDelete = persistenceService.deleteById(tenantUrn, id);
+
+        assertFalse(responseDelete.isEmpty());
+        assertEquals(1, responseDelete.size());
+        assertEquals(id, responseDelete.get(0).getId());
+    }
+
+    @Test
+    public void testDeleteByTypeAndUrn() throws Exception {
+
+        String urn = "urn:fakeUrn-delete2";
+        String type = "type";
+
+        ThingCreate create = ThingCreate.builder()
+            .urn(urn)
+            .type(type)
+            .build();
+
+        ThingResponse responseCreate = persistenceService
+            .create(tenantUrn, create);
+
+        Optional<ThingEntity> entity = repository
+            .findByTenantIdAndUrn(tenantId, urn);
+
+        assertTrue(entity.isPresent());
+
+        String id = entity.get().getId().toString();
+
+        List<ThingResponse> responseDelete = persistenceService.deleteByTypeAndUrn(tenantUrn, type, urn);
+
+        assertFalse(responseDelete.isEmpty());
+        assertEquals(1, responseDelete.size());
+        assertEquals(id, responseDelete.get(0).getId());
+    }
+
+    // endregion
+
     // region Find By Object URN
 
     @Test
