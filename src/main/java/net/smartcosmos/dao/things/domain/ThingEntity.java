@@ -90,7 +90,7 @@ public class ThingEntity implements Serializable {
     @Builder
     @ConstructorProperties({"id", "urn", "type", "tenantId", "created", "lastModified", "active"})
     protected ThingEntity(UUID id,
-                          String objectUrn,
+                          String urn,
                           String type,
                           UUID tenantId,
                           Long created,
@@ -98,7 +98,7 @@ public class ThingEntity implements Serializable {
                           Boolean active)
     {
         this.id = id;
-        this.urn = objectUrn;
+        this.urn = urn;
         this.type = type;
         this.tenantId = tenantId;
         this.created = created;
