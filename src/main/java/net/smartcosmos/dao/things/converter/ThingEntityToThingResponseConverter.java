@@ -27,8 +27,7 @@ public class ThingEntityToThingResponseConverter
                 .urn(entity.getUrn())
                 .type(entity.getType())
                 .active(entity.getActive())
-            // TODO: Add TenantID to ThingResponse
-//                .tenantId(entity.getTenantId().toString())
+                .tenantId(entity.getTenantId().toString())
                 // Don't forget to build it!
                 .build();
     }
