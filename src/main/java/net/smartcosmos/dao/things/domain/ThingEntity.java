@@ -58,7 +58,7 @@ public class ThingEntity implements Serializable {
 
     @NotEmpty
     @Size(max = TYPE_LENGTH)
-    @Column(name = "type", length = TYPE_LENGTH, nullable = false)
+    @Column(name = "type", length = TYPE_LENGTH, nullable = false, updatable = false)
     private String type;
 
     @NotNull
