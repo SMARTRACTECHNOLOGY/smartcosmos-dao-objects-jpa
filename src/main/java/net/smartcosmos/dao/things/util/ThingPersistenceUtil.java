@@ -1,11 +1,11 @@
-package net.smartcosmos.dao.objects.util;
+package net.smartcosmos.dao.things.util;
 
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
+import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dto.objects.ObjectUpdate;
 
-public class ObjectsPersistenceUtil {
+public class ThingPersistenceUtil {
 
-    public static ObjectEntity merge(ObjectEntity objectEntity, ObjectUpdate updateObject) {
+    public static ThingEntity merge(ThingEntity objectEntity, ObjectUpdate updateObject) {
 
         if (updateObject.getName() != null) {
             objectEntity.setName(updateObject.getName());
@@ -24,7 +24,7 @@ public class ObjectsPersistenceUtil {
         }
 
         if (updateObject.getActiveFlag() != null) {
-            objectEntity.setActiveFlag(updateObject.getActiveFlag());
+            objectEntity.setActive(updateObject.getActiveFlag());
         }
 
         return objectEntity;

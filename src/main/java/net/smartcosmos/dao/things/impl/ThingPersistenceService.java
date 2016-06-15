@@ -1,20 +1,18 @@
-package net.smartcosmos.dao.objects.impl;
+package net.smartcosmos.dao.things.impl;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.OPCode;
 import lombok.extern.slf4j.Slf4j;
-import net.smartcosmos.dao.objects.ObjectDao;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.ObjectRepository;
-import net.smartcosmos.dao.objects.util.ObjectsPersistenceUtil;
-import net.smartcosmos.dao.objects.util.SearchSpecifications;
-import net.smartcosmos.dto.objects.ObjectCreate;
-import net.smartcosmos.dto.objects.ObjectResponse;
-import net.smartcosmos.dto.objects.ObjectUpdate;
+import net.smartcosmos.dao.things.ThingDao;
+import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.repository.ThingRepository;
+import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
+import net.smartcosmos.dao.things.util.SearchSpecifications;
+import net.smartcosmos.dto.things.ThingCreate;
+import net.smartcosmos.dto.things.ThingResponse;
+import net.smartcosmos.dto.things.ThingUpdate;
 import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.bouncycastle.asn1.cmp.OOBCertHash;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,53 +23,49 @@ import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.data.jpa.domain.Specifications.where;
 
-/**
- * @author voor
- */
 @Slf4j
 @Service
-public class ObjectPersistenceService implements ObjectDao {
+public class ThingPersistenceService implements ThingDao {
 
-    private final ObjectRepository objectRepository;
+    private final ThingRepository repository;
     private final ConversionService conversionService;
-    private final SearchSpecifications<ObjectEntity> searchSpecifications = new SearchSpecifications<ObjectEntity>();
+    private final SearchSpecifications<ThingEntity> searchSpecifications = new SearchSpecifications<>();
 
     @Autowired
-    public ObjectPersistenceService(ObjectRepository objectRepository,
-            ConversionService conversionService) {
-        this.objectRepository = objectRepository;
+    public ThingPersistenceService(ThingRepository repository,
+                                   ConversionService conversionService) {
+        this.repository = repository;
         this.conversionService = conversionService;
     }
 
     @Override
-    public ObjectResponse create(String accountUrn, ObjectCreate createObject) {
+    public ThingResponse create(String accountUrn, ThingCreate createObject) {
 
-        ObjectEntity entity = conversionService.convert(createObject, ObjectEntity.class);
+        ThingEntity entity = conversionService.convert(createObject, ThingEntity.class);
         entity = persist(entity);
 
-        return conversionService.convert(entity, ObjectResponse.class);
+        return conversionService.convert(entity, ThingResponse.class);
     }
 
     @Override
-    public Optional<ObjectResponse> update(String accountUrn, ObjectUpdate updateObject) throws ConstraintViolationException {
+    public Optional<ThingResponse> update(String accountUrn, ThingUpdate updateThing) throws ConstraintViolationException {
 
-        checkIdentifiers(updateObject);
+        checkIdentifiers(updateThing);
 
-        Optional<ObjectEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateObject.getUrn(), updateObject.getObjectUrn());
+        Optional<ThingEntity> entity = findEntity(UuidUtil.getUuidFromAccountUrn(accountUrn), updateThing.getUrn(), updateThing.getObjectUrn());
 
         if (entity.isPresent()) {
-            ObjectEntity updateEntity = ObjectsPersistenceUtil.merge(entity.get(), updateObject);
+            ThingEntity updateEntity = ThingPersistenceUtil.merge(entity.get(), updateThing);
 
             updateEntity = persist(updateEntity);
 
-            final ObjectResponse response = conversionService.convert(updateEntity, ObjectResponse.class);
+            final ThingResponse response = conversionService.convert(updateEntity, ThingResponse.class);
             return Optional.ofNullable(response);
         }
         else {
@@ -80,13 +74,13 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     @Override
-    public Optional<ObjectResponse> findByObjectUrn(String accountUrn, String objectUrn) {
+    public Optional<ThingResponse> findByObjectUrn(String accountUrn, String objectUrn) {
 
-        Optional<ObjectEntity> entity = objectRepository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
+        Optional<ThingEntity> entity = repository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
 
         if (entity.isPresent()) {
-            final ObjectResponse response = conversionService.convert(entity.get(),
-                ObjectResponse.class);
+            final ThingResponse response = conversionService.convert(entity.get(),
+                ThingResponse.class);
             return Optional.ofNullable(response);
         }
         else {
@@ -99,28 +93,28 @@ public class ObjectPersistenceService implements ObjectDao {
      *
      * @param accountUrn the account URN
      * @param objectUrnStartsWith the first characters of the object URN
-     * @return all objects whose {@code objectUrn} starts with {@code objectUrnStartsWith}
+     * @return all objects whose {@code urn} starts with {@code objectUrnStartsWith}
      */
     @Override
-    public List<ObjectResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
+    public List<ThingResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
 
-        List<ObjectEntity> entityList = objectRepository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
+        List<ThingEntity> entityList = repository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
             objectUrnStartsWith);
 
         return entityList.stream()
-            .map(o -> conversionService.convert(o, ObjectResponse.class))
+            .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<ObjectResponse> findByUrn(String accountUrn, String urn)
+    public Optional<ThingResponse> findByUrn(String accountUrn, String urn)
     {
 
-        Optional<ObjectEntity> entity = Optional.empty();
+        Optional<ThingEntity> entity = Optional.empty();
         try
         {
             UUID uuid = UuidUtil.getUuidFromUrn(urn);
-            entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+            entity = repository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
         } catch (IllegalArgumentException e)
         {
             // Optional.empty() will be returned anyway
@@ -129,29 +123,29 @@ public class ObjectPersistenceService implements ObjectDao {
 
         if (entity.isPresent())
         {
-            final ObjectResponse response = conversionService.convert(entity.get(), ObjectResponse.class);
+            final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
             return Optional.ofNullable(response);
         }
         return Optional.empty();
     }
 
     @Override
-    public List<Optional<ObjectResponse>> findByUrns(String accountUrn, Collection<String> urns)
+    public List<Optional<ThingResponse>> findByUrns(String accountUrn, Collection<String> urns)
     {
 
-        List<Optional<ObjectResponse>> entities = new ArrayList<>();
+        List<Optional<ThingResponse>> entities = new ArrayList<>();
 
         for (String urn: urns)
         {
-            Optional<ObjectEntity> entity = Optional.empty();
+            Optional<ThingEntity> entity = Optional.empty();
             try
             {
                 UUID uuid = UuidUtil.getUuidFromUrn(urn);
-                entity = objectRepository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+                entity = repository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
 
                 if (entity.isPresent())
                 {
-                    final ObjectResponse response = conversionService.convert(entity.get(), ObjectResponse.class);
+                    final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
                     entities.add(Optional.ofNullable(response));
                 }
                 else {
@@ -176,12 +170,12 @@ public class ObjectPersistenceService implements ObjectDao {
      *
      * @return All the objects.
      */
-    public List<ObjectResponse> getObjects() {
+    public List<ThingResponse> getObjects() {
         // You could theoretically create a conversion function to handle this, since
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
-        return objectRepository.findAll().stream()
-            .map(o -> conversionService.convert(o, ObjectResponse.class))
+        return repository.findAll().stream()
+            .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
     }
 
@@ -195,64 +189,64 @@ public class ObjectPersistenceService implements ObjectDao {
      * directly from the Objects V2 specification.
      *
      */
-    public List<ObjectResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
+    public List<ThingResponse> findByQueryParameters(String accountUrn, Map<QueryParameterType, Object> queryParameters) {
 
-        Specification<ObjectEntity> accountUrnSpecification = null;
+        Specification<ThingEntity> accountUrnSpecification = null;
         if (accountUrn != null) {
             UUID accountUuid = UuidUtil.getUuidFromAccountUrn(accountUrn);
-            accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "accountId");
+            accountUrnSpecification = searchSpecifications.matchUuid(accountUuid, "tenantId");
         }
 
         // this is only here so direct testing of this method doesn't need to include exact in the queryParameters,
         // since neither does the GetObjectResource
         Boolean exact = MapUtils.getBoolean(queryParameters, QueryParameterType.EXACT, false);
 
-        Specification<ObjectEntity> objectUrnSpecification = getSearchSpecification(
+        Specification<ThingEntity> objectUrnSpecification = getSearchSpecification(
             QueryParameterType.OBJECT_URN_FIELD_NAME,
             MapUtils.getString(queryParameters, QueryParameterType.OBJECT_URN_LIKE),
             exact);
 
-        Specification<ObjectEntity> nameLikeSpecification = getSearchSpecification(
+        Specification<ThingEntity> nameLikeSpecification = getSearchSpecification(
             QueryParameterType.NAME_FIELD_NAME,
             MapUtils.getString(queryParameters, QueryParameterType.NAME_LIKE),
             exact);
 
-        Specification<ObjectEntity> typeSpecification = getSearchSpecification(
+        Specification<ThingEntity> typeSpecification = getSearchSpecification(
             QueryParameterType.TYPE_FIELD_NAME,
             MapUtils.getString(queryParameters, QueryParameterType.TYPE),
             true);
 
-        Specification<ObjectEntity> monikerLikeSpecification = getSearchSpecification(
+        Specification<ThingEntity> monikerLikeSpecification = getSearchSpecification(
             QueryParameterType.MONIKER_FIELD_NAME,
             MapUtils.getString(queryParameters, QueryParameterType.MONIKER_LIKE),
             exact);
 
-        Specification<ObjectEntity> lastModifiedAfterSpecification = null;
+        Specification<ThingEntity> lastModifiedAfterSpecification = null;
         Long lastModifiedAfter = MapUtils.getLong(queryParameters, QueryParameterType.MODIFIED_AFTER);
         if (lastModifiedAfter != null) {
             lastModifiedAfterSpecification = searchSpecifications.numberGreaterThan(lastModifiedAfter,
                 QueryParameterType.MODIFIED_AFTER_FIELD_NAME.typeName());
         }
 
-        Iterable<ObjectEntity> returnedValues = objectRepository.findAll(where(objectUrnSpecification)
+        Iterable<ThingEntity> returnedValues = repository.findAll(where(objectUrnSpecification)
             .and(accountUrnSpecification)
             .and(nameLikeSpecification)
             .and(typeSpecification)
             .and(monikerLikeSpecification)
             .and(lastModifiedAfterSpecification));
 
-        List<ObjectResponse> convertedList = new ArrayList<>();
-        for (ObjectEntity entity: returnedValues) {
-            convertedList.add(conversionService.convert(entity, ObjectResponse.class));
+        List<ThingResponse> convertedList = new ArrayList<>();
+        for (ThingEntity entity: returnedValues) {
+            convertedList.add(conversionService.convert(entity, ThingResponse.class));
         }
 
         return convertedList;
     }
 
-    private Specification<ObjectEntity> getSearchSpecification(QueryParameterType queryParameterType,
-                                                               String query,
-                                                               Boolean exact) {
-        Specification<ObjectEntity> specification = null;
+    private Specification<ThingEntity> getSearchSpecification(QueryParameterType queryParameterType,
+                                                              String query,
+                                                              Boolean exact) {
+        Specification<ThingEntity> specification = null;
 
         if (StringUtils.isNotBlank(query)) {
             if (exact) {
@@ -266,28 +260,28 @@ public class ObjectPersistenceService implements ObjectDao {
         return specification;
     }
 
-    private Optional<ObjectEntity> findEntity(UUID accountId, String urn, String objectUrn) throws IllegalArgumentException {
+    private Optional<ThingEntity> findEntity(UUID accountId, String urn, String objectUrn) throws IllegalArgumentException {
 
-        Optional<ObjectEntity> entity = Optional.empty();
+        Optional<ThingEntity> entity = Optional.empty();
 
         if (StringUtils.isNotBlank(urn)) {
             UUID id = UuidUtil.getUuidFromUrn(urn);
-            entity = objectRepository.findByAccountIdAndId(accountId, id);
+            entity = repository.findByAccountIdAndId(accountId, id);
 
-            if (entity.isPresent() && StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getObjectUrn())) {
-                throw new IllegalArgumentException("urn and objectUrn do not match");
+            if (entity.isPresent() && StringUtils.isNotBlank(objectUrn) && !objectUrn.equals(entity.get().getUrn())) {
+                throw new IllegalArgumentException("urn and urn do not match");
             }
         }
 
         if (StringUtils.isNotBlank(objectUrn)) {
-            entity = objectRepository.findByAccountIdAndObjectUrn(accountId, objectUrn);
+            entity = repository.findByAccountIdAndObjectUrn(accountId, objectUrn);
 
             if (entity.isPresent()) {
-                ObjectEntity objectEntity = entity.get();
+                ThingEntity objectEntity = entity.get();
                 String entityUrn = UuidUtil.getUrnFromUuid(objectEntity.getId());
 
                 if (StringUtils.isNotBlank(urn) && !urn.equals(entityUrn)) {
-                    throw new IllegalArgumentException("urn and objectUrn do not match");
+                    throw new IllegalArgumentException("urn and urn do not match");
                 }
             }
         }
@@ -296,16 +290,16 @@ public class ObjectPersistenceService implements ObjectDao {
     }
 
     /**
-     * Saves an object entity in an {@link ObjectRepository}.
+     * Saves an object entity in an {@link ThingRepository}.
      *
      * @param objectEntity the object entity to persist
      * @return the persisted object entity
      * @throws ConstraintViolationException if the transaction fails due to violated constraints
      * @throws TransactionException if the transaction fails because of something else
      */
-    private ObjectEntity persist(ObjectEntity objectEntity) throws ConstraintViolationException, TransactionException {
+    private ThingEntity persist(ThingEntity objectEntity) throws ConstraintViolationException, TransactionException {
         try {
-            return objectRepository.save(objectEntity);
+            return repository.save(objectEntity);
         } catch (TransactionException e) {
             // we expect constraint violations to be the root cause for exceptions here,
             // so we throw this particular exception back to the caller
@@ -317,13 +311,13 @@ public class ObjectPersistenceService implements ObjectDao {
         }
     }
 
-    private void checkIdentifiers(ObjectUpdate updateObject) throws IllegalArgumentException {
+    private void checkIdentifiers(ThingUpdate updateObject) throws IllegalArgumentException {
         if (StringUtils.isBlank(updateObject.getUrn()) && StringUtils.isBlank(updateObject.getObjectUrn())) {
-            throw new IllegalArgumentException(String.format("urn and objectUrn may not be null: %s", updateObject.toString()));
+            throw new IllegalArgumentException(String.format("urn and urn may not be null: %s", updateObject.toString()));
         }
 
         if (StringUtils.isNotBlank(updateObject.getUrn()) && StringUtils.isNotBlank(updateObject.getObjectUrn())) {
-            throw new IllegalArgumentException(String.format("either urn or objectUrn may be defined: %s", updateObject.toString()));
+            throw new IllegalArgumentException(String.format("either urn or urn may be defined: %s", updateObject.toString()));
         }
     }
 }

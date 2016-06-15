@@ -1,8 +1,9 @@
 package net.smartcosmos.dao.objects.repository;
 
-import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
+import net.smartcosmos.dao.things.ThingPersistenceConfig;
 import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
+import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.repository.ThingRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,12 +22,12 @@ import static org.junit.Assert.assertTrue;
  *
  * Sometimes these runtime created methods have issues that don't come up until they're
  * actually called. It's a minor setback with Spring, one that just requires some diligent
- * testing.accountId
+ * testing.tenantId
  * @author voor
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { ObjectPersistenceTestApplication.class,
-        ObjectPersistenceConfig.class })
+        ThingPersistenceConfig.class })
 @ActiveProfiles("test")
 @WebAppConfiguration
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
@@ -34,13 +35,13 @@ public class ObjectRepositoryTest {
 
     final UUID accountId = UUID.randomUUID();
     @Autowired
-    ObjectRepository objectRepository;
+    ThingRepository objectRepository;
     private UUID id;
 
     @Before
     public void setUp() throws Exception {
-        ObjectEntity entity = objectRepository
-                .save(ObjectEntity.builder().objectUrn("objectUrn").accountId(accountId)
+        ThingEntity entity = objectRepository
+                .save(ThingEntity.builder().objectUrn("urn").accountId(accountId)
                         .type("type").name("name").build());
         id = entity.getId();
     }
@@ -48,7 +49,7 @@ public class ObjectRepositoryTest {
     @Test
     public void findByAccountIdAndObjectUrn() throws Exception {
         assertTrue(this.objectRepository
-                .findByAccountIdAndObjectUrn(accountId, "objectUrn").isPresent());
+                .findByAccountIdAndObjectUrn(accountId, "urn").isPresent());
     }
 
     @Test

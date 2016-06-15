@@ -1,4 +1,4 @@
-package net.smartcosmos.dao.objects.domain;
+package net.smartcosmos.dao.things.domain;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,22 +25,16 @@ import java.beans.ConstructorProperties;
 import java.io.Serializable;
 import java.util.UUID;
 
-/**
- * @author voor
- */
-@Entity(name = "object")
+@Entity(name = "thing")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "object", uniqueConstraints = @UniqueConstraint(columnNames = { "objectUrn", "accountUuid" }) )
-public class ObjectEntity implements Serializable {
+@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "urn", "tenantId" }) )
+public class ThingEntity implements Serializable {
 
     private static final int UUID_LENGTH = 16;
-    private static final int OBJECT_URN_LENGTH = 767;
+    private static final int URN_LENGTH = 767;
     private static final int TYPE_LENGTH = 255;
-    private static final int MONIKER_LENGTH = 2048;
-    private static final int NAME_LENGTH = 255;
-    private static final int DESCRIPTION_LENGTH = 1024;
 
     /*
         Without setting an appropriate Hibernate naming strategy, the column names specified in the @Column annotations below will be converted
@@ -58,9 +52,9 @@ public class ObjectEntity implements Serializable {
     private UUID id;
 
     @NotEmpty
-    @Size(max = OBJECT_URN_LENGTH)
-    @Column(name="objectUrn", length = OBJECT_URN_LENGTH, nullable = false, updatable = false)
-    private String objectUrn;
+    @Size(max = URN_LENGTH)
+    @Column(name="urn", length = URN_LENGTH, nullable = false, updatable = false)
+    private String urn;
 
     @NotEmpty
     @Size(max = TYPE_LENGTH)
@@ -70,7 +64,7 @@ public class ObjectEntity implements Serializable {
     @NotNull
     @Type(type = "uuid-binary")
     @Column(name = "accountUuid", length = UUID_LENGTH, nullable = false, updatable = false)
-    private UUID accountId;
+    private UUID tenantId;
 
     @CreatedDate
     @Column(name = "createdTimestamp", insertable = true, updatable = false)
@@ -82,23 +76,10 @@ public class ObjectEntity implements Serializable {
     @Column(name = "lastModifiedTimestamp", nullable = false, insertable = true, updatable = true)
     private Long lastModified;
 
-    @Size(max = MONIKER_LENGTH)
-    @Column(name = "moniker", length = MONIKER_LENGTH, nullable = true, updatable = true)
-    private String moniker;
-
-    @NotEmpty
-    @Size(max = NAME_LENGTH)
-    @Column(name = "name", length = NAME_LENGTH, nullable = false)
-    private String name;
-
-    @Size(max = DESCRIPTION_LENGTH)
-    @Column(name = "description", length = DESCRIPTION_LENGTH)
-    private String description;
-
     @Basic
     @NotNull
-    @Column(name="activeFlag", nullable = false)
-    private Boolean activeFlag;
+    @Column(name="active", nullable = false)
+    private Boolean active;
 
     /*
         Lombok's @Builder is not able to deal with field initialization default values. That's a known issue which won't get fixed:
@@ -107,28 +88,21 @@ public class ObjectEntity implements Serializable {
         We therefore provide our own AllArgsConstructor that is used by the generated builder and takes care of field initialization.
      */
     @Builder
-    @ConstructorProperties({"id", "objectUrn", "type", "accountId", "created", "lastModified", "moniker", "name", "description",
-        "activeFlag"})
-    protected ObjectEntity(UUID id,
-                           String objectUrn,
-                           String type,
-                           UUID accountId,
-                           Long created,
-                           Long lastModified,
-                           String moniker,
-                           String name,
-                           String description,
-                           Boolean activeFlag)
+    @ConstructorProperties({"id", "urn", "type", "tenantId", "created", "lastModified", "active"})
+    protected ThingEntity(UUID id,
+                          String objectUrn,
+                          String type,
+                          UUID tenantId,
+                          Long created,
+                          Long lastModified,
+                          Boolean active)
     {
         this.id = id;
-        this.objectUrn = objectUrn;
+        this.urn = objectUrn;
         this.type = type;
-        this.accountId = accountId;
+        this.tenantId = tenantId;
         this.created = created;
         this.lastModified = lastModified;
-        this.moniker = moniker;
-        this.name = name;
-        this.description = description;
-        this.activeFlag = activeFlag != null ? activeFlag : true;
+        this.active = active != null ? active : true;
     }
 }

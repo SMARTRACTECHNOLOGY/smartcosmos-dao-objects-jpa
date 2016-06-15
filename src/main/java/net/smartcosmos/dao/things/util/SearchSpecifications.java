@@ -1,4 +1,4 @@
-package net.smartcosmos.dao.objects.util;
+package net.smartcosmos.dao.things.util;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Initially created by SMART COSMOS Team on May 26, 2016.
  *
- * T is the Entity type (e.g., net.smartcosmos.dao.objects.domain.ObjectEntity)
+ * T is the Entity type (e.g., ObjectEntity)
  */
 public class SearchSpecifications<T>
 {

@@ -1,10 +1,11 @@
 package net.smartcosmos.dao.objects.impl;
 
 import net.smartcosmos.dao.objects.ObjectDao.QueryParameterType;
-import net.smartcosmos.dao.objects.ObjectPersistenceConfig;
+import net.smartcosmos.dao.things.ThingPersistenceConfig;
 import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
-import net.smartcosmos.dao.objects.domain.ObjectEntity;
-import net.smartcosmos.dao.objects.repository.ObjectRepository;
+import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.impl.ThingPersistenceService;
+import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dto.objects.ObjectCreate;
 import net.smartcosmos.dto.objects.ObjectResponse;
 import net.smartcosmos.dto.objects.ObjectUpdate;
@@ -48,7 +49,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("Duplicates")
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { ObjectPersistenceTestApplication.class,
-                                            ObjectPersistenceConfig.class })
+                                            ThingPersistenceConfig.class })
 @ActiveProfiles("test")
 @WebAppConfiguration
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
@@ -86,10 +87,10 @@ public class ObjectPersistenceServiceTest {
     private final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountId);
 
     @Autowired
-    ObjectPersistenceService objectPersistenceService;
+    ThingPersistenceService objectPersistenceService;
 
     @Autowired
-    ObjectRepository objectRepository;
+    ThingRepository objectRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -118,12 +119,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse response = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, "urn:fakeUrn");
 
         assertTrue(entity.isPresent());
 
-        assertEquals("urn:fakeUrn", entity.get().getObjectUrn());
+        assertEquals("urn:fakeUrn", entity.get().getUrn());
         assertEquals("urn:fakeUrn", response.getObjectUrn());
     }
 
@@ -151,12 +152,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -197,12 +198,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -243,12 +244,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -289,12 +290,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -335,12 +336,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -381,12 +382,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -427,12 +428,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -473,12 +474,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -530,12 +531,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -566,12 +567,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -604,12 +605,12 @@ public class ObjectPersistenceServiceTest {
         ObjectResponse responseCreate = objectPersistenceService
             .create("urn:account:URN-IN-AUDIT-TRAIL", create);
 
-        Optional<ObjectEntity> entity = objectRepository
+        Optional<ThingEntity> entity = objectRepository
             .findByAccountIdAndObjectUrn(accountId, objectUrn);
 
         assertTrue(entity.isPresent());
 
-        assertEquals(objectUrn, entity.get().getObjectUrn());
+        assertEquals(objectUrn, entity.get().getUrn());
         assertEquals(objectUrn, responseCreate.getObjectUrn());
 
         ObjectUpdate update = ObjectUpdate.builder()
@@ -631,13 +632,13 @@ public class ObjectPersistenceServiceTest {
         final UUID accountUuid = UUID.randomUUID();
         final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
 
-        ObjectEntity entity = ObjectEntity.builder().accountId(accountUuid)
-            .objectUrn("objectUrn").name("my object name").type("some type").build();
+        ThingEntity entity = ThingEntity.builder().accountId(accountUuid)
+            .objectUrn("urn").name("my object name").type("some type").build();
 
         this.objectRepository.save(entity);
 
         Optional<ObjectResponse> response = objectPersistenceService
-            .findByObjectUrn(accountUrn, "objectUrn");
+            .findByObjectUrn(accountUrn, "urn");
 
         assertTrue(response.isPresent());
     }
@@ -975,21 +976,21 @@ public class ObjectPersistenceServiceTest {
         Long firstDate = new Date().getTime();
         Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
 
-        ObjectEntity firstObject = ObjectEntity.builder().accountId(accountUuid)
+        ThingEntity firstObject = ThingEntity.builder().accountId(accountUuid)
             .objectUrn("objectUrnLastModTest1").name("last mod test 1").type("anythingIsFine").build();
         this.objectRepository.save(firstObject);
 
         Long secondDate = new Date().getTime();
         Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
 
-        ObjectEntity secondObject = ObjectEntity.builder().accountId(accountUuid)
+        ThingEntity secondObject = ThingEntity.builder().accountId(accountUuid)
             .objectUrn("objectUrnLastModTest2").name("last mod test 2").type("anythingIsFine").build();
         this.objectRepository.save(secondObject);
 
         Long thirdDate = new Date().getTime();
         Thread.sleep(DELAY_BETWEEN_LAST_MODIFIED_DATES);
 
-        ObjectEntity thirdObject = ObjectEntity.builder().accountId(accountUuid)
+        ThingEntity thirdObject = ThingEntity.builder().accountId(accountUuid)
             .objectUrn("objectUrnLastModTest3").name("last mod test 3").type("anythingIsFine").build();
         this.objectRepository.save(thirdObject);
 
@@ -1122,40 +1123,40 @@ public class ObjectPersistenceServiceTest {
     // used by findByQueryParametersStringParameters()
     private void populateQueryData() throws Exception {
 
-        ObjectEntity entityNameOneTypeOne = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameOneTypeOne = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_01).name(NAME_ONE).type(TYPE_ONE).build();
 
-        ObjectEntity entityNameTwoTypeOne = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameTwoTypeOne = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_02).name(NAME_TWO).type(TYPE_ONE).build();
 
-        ObjectEntity entityNameThreeTypeOne = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameThreeTypeOne = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_03).name(NAME_THREE).type(TYPE_ONE).build();
 
-        ObjectEntity entityNameOneTypeTwo = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameOneTypeTwo = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_04).name(NAME_ONE).type(TYPE_TWO).build();
 
-        ObjectEntity entityNameTwoTypeTwo = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameTwoTypeTwo = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_05).name(NAME_TWO).type(TYPE_TWO).build();
 
-        ObjectEntity entityNameThreeTypeTwo = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameThreeTypeTwo = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_06).name(NAME_THREE).type(TYPE_TWO).build();
 
-        ObjectEntity entityNameOneMonikerOne = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameOneMonikerOne = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_07).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_ONE).build();
 
-        ObjectEntity entityNameOneMonikerTwo = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameOneMonikerTwo = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_08).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_TWO).build();
 
-        ObjectEntity entityNameOneMonikerThree = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityNameOneMonikerThree = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_09).name(NAME_ONE).type(WHATEVER).moniker(MONIKER_THREE).build();
 
-        ObjectEntity entityObjectUrn10 = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityObjectUrn10 = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_10).name(WHATEVER).type(WHATEVER).build();
 
-        ObjectEntity entityObjectUrn11 = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityObjectUrn11 = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_11).name(WHATEVER).type(WHATEVER).build();
 
-        ObjectEntity entityObjectUrn12 = ObjectEntity.builder().accountId(accountId)
+        ThingEntity entityObjectUrn12 = ThingEntity.builder().accountId(accountId)
             .objectUrn(OBJECT_URN_QUERY_PARAMS_12).name(WHATEVER).type(WHATEVER).build();
 
         objectRepository.save(entityNameOneTypeOne);

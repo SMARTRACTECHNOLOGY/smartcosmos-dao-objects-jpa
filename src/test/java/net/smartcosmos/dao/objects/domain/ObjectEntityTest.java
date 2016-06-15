@@ -1,5 +1,6 @@
 package net.smartcosmos.dao.objects.domain;
 
+import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.BeforeClass;
@@ -44,7 +45,7 @@ public class ObjectEntityTest {
     @Test
     public void thatEverythingIsOk() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -55,7 +56,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertTrue(violationSet.isEmpty());
     }
@@ -65,8 +66,8 @@ public class ObjectEntityTest {
     @Test
     public void thatObjectUrnIsNotNull() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
-//            .objectUrn(OBJECT_URN)
+        ThingEntity objectEntity = ThingEntity.builder()
+//            .urn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
             .name(NAME)
@@ -76,19 +77,19 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
             violationSet.iterator().next().getMessageTemplate());
-        assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
+        assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     public void thatObjectUrnIsNotEmpty() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn("")
             .id(ID)
             .type(TYPE)
@@ -99,19 +100,19 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
             violationSet.iterator().next().getMessageTemplate());
-        assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
+        assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     public void thatObjectUrnInvalidFails() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN_INVALID)
             .id(ID)
             .type(TYPE)
@@ -122,13 +123,13 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{javax.validation.constraints.Size.message}",
             violationSet.iterator().next().getMessageTemplate());
-        assertEquals("objectUrn", violationSet.iterator().next().getPropertyPath().toString());
+        assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -138,7 +139,7 @@ public class ObjectEntityTest {
     @Test
     public void thatNameIsNotNull() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -149,7 +150,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -161,7 +162,7 @@ public class ObjectEntityTest {
     @Test
     public void thatNameIsNotEmpty() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -172,7 +173,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -184,7 +185,7 @@ public class ObjectEntityTest {
     @Test
     public void thatNameInvalidFails() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -195,7 +196,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -211,7 +212,7 @@ public class ObjectEntityTest {
     @Test
     public void thatTypeIsNotNull() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
 //            .type(TYPE)
@@ -222,7 +223,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -234,7 +235,7 @@ public class ObjectEntityTest {
     @Test
     public void thatTypeIsNotEmpty() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type("")
@@ -245,7 +246,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -257,7 +258,7 @@ public class ObjectEntityTest {
     @Test
     public void thatTypeInvalidFails() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE_INVALID)
@@ -268,7 +269,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -284,7 +285,7 @@ public class ObjectEntityTest {
     @Test
     public void thatDescriptionMayBeNull() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -295,7 +296,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertTrue(violationSet.isEmpty());
     }
@@ -303,7 +304,7 @@ public class ObjectEntityTest {
     @Test
     public void thatDescriptionMayBeEmpty() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -314,7 +315,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertTrue(violationSet.isEmpty());
     }
@@ -322,7 +323,7 @@ public class ObjectEntityTest {
     @Test
     public void thatDescriptionInvalidFails() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -333,7 +334,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -349,7 +350,7 @@ public class ObjectEntityTest {
     @Test
     public void thatMonikerMayBeNull() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -360,7 +361,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertTrue(violationSet.isEmpty());
     }
@@ -368,7 +369,7 @@ public class ObjectEntityTest {
     @Test
     public void thatMonikerMayBeEmpty() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -379,7 +380,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertTrue(violationSet.isEmpty());
     }
@@ -387,7 +388,7 @@ public class ObjectEntityTest {
     @Test
     public void thatMonikerInvalidFails() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -398,7 +399,7 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
@@ -414,7 +415,7 @@ public class ObjectEntityTest {
     @Test
     public void thatAccountIdIsNotNull() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -422,22 +423,22 @@ public class ObjectEntityTest {
             .description(DESCRIPTION)
             .moniker(MONIKER)
             .activeFlag(ACTIVE)
-//            .accountId(ACCOUNT_ID)
+//            .tenantId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{javax.validation.constraints.NotNull.message}",
             violationSet.iterator().next().getMessageTemplate());
-        assertEquals("accountId", violationSet.iterator().next().getPropertyPath().toString());
+        assertEquals("tenantId", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     @Test
     public void thatActiveFlagIsNotNullable() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
@@ -448,27 +449,27 @@ public class ObjectEntityTest {
             .accountId(ACCOUNT_ID)
             .build();
 
-        Set<ConstraintViolation<ObjectEntity>> violationSet = validator.validate(objectEntity);
+        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
 
         assertTrue(violationSet.isEmpty());
-        assertTrue(objectEntity.getActiveFlag());
+        assertTrue(objectEntity.getActive());
     }
 
     @Test
     public void thatActiveFlagDefaultsToTrue() {
 
-        ObjectEntity objectEntity = ObjectEntity.builder()
+        ThingEntity objectEntity = ThingEntity.builder()
             .objectUrn(OBJECT_URN)
             .id(ID)
             .type(TYPE)
             .name(NAME)
             .description(DESCRIPTION)
             .moniker(MONIKER)
-//            .activeFlag(ACTIVE)
+//            .active(ACTIVE)
             .accountId(ACCOUNT_ID)
             .build();
 
-        assertTrue(objectEntity.getActiveFlag());
+        assertTrue(objectEntity.getActive());
     }
 
     // endregion
