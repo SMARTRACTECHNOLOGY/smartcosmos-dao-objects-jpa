@@ -20,7 +20,7 @@
         <dependencies>
             <dependency>
                 <groupId>net.smartcosmos</groupId>
-                <artifactId>smartcosmos-dao-objects</artifactId>
+                <artifactId>smartcosmos-dao-things</artifactId>
                 <version>3.0.0-SNAPSHOT</version>
             </dependency>
         </dependencies>
@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>net.smartcosmos</groupId>
-            <artifactId>smartcosmos-dao-objects</artifactId>
+            <artifactId>smartcosmos-dao-things</artifactId>
         </dependency>
         <dependency>
             <groupId>net.smartcosmos</groupId>
