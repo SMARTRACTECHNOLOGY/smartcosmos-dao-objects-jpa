@@ -48,7 +48,7 @@ public class ThingEntity implements Serializable {
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Type(type = "uuid-binary")
-    @Column(name = "systemUuid", length = UUID_LENGTH)
+    @Column(name = "id", length = UUID_LENGTH)
     private UUID id;
 
     @NotEmpty
@@ -63,7 +63,7 @@ public class ThingEntity implements Serializable {
 
     @NotNull
     @Type(type = "uuid-binary")
-    @Column(name = "accountUuid", length = UUID_LENGTH, nullable = false, updatable = false)
+    @Column(name = "tenantId", length = UUID_LENGTH, nullable = false, updatable = false)
     private UUID tenantId;
 
     @CreatedDate
