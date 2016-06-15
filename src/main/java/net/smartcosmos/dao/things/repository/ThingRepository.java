@@ -14,16 +14,11 @@ import java.util.UUID;
  */
 public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, QueryByExampleExecutor<ThingEntity>, JpaSpecificationExecutor<ThingEntity>
 {
-    List<ThingEntity> deleteByTenantIdAndId(UUID tenantId, UUID id);
 
-    List<ThingEntity> deleteByTenantIdAndTypeAndUrn(UUID tenantId, String type, String urn);
+    Optional<ThingEntity> findByAccountIdAndObjectUrn(UUID accountId, String objectUrn);
 
-    Optional<ThingEntity> findByTenantIdAndUrn(UUID tenantId, String urn);
+    Optional<ThingEntity> findByAccountIdAndId(UUID accountId, UUID id);
 
-    Optional<ThingEntity> findByTenantIdAndTypeAndUrn(UUID tenantId, String type, String urn);
-
-    Optional<ThingEntity> findByTenantIdAndId(UUID tenantId, UUID id);
-
-    List<ThingEntity> findByTenantIdAndUrnStartsWith(UUID tenantId, String urn);
+    List<ThingEntity> findByAccountIdAndObjectUrnStartsWith(UUID accountId, String objectUrn);
 
 }

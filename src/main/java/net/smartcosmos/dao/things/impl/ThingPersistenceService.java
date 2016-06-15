@@ -39,11 +39,9 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public ThingResponse create(String tenantId, ThingCreate createThing) {
+    public ThingResponse create(String accountUrn, ThingCreate createObject) {
 
-        ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-        entity.setTenantId(UUID.fromString(tenantId));
-
+        ThingEntity entity = conversionService.convert(createObject, ThingEntity.class);
         entity = persist(entity);
 
         return conversionService.convert(entity, ThingResponse.class);
@@ -74,26 +72,6 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> deleteById(String tenantId, String id) {
-
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(UUID.fromString(tenantId), UUID.fromString(id));
-
-        return deleteList.stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<ThingResponse> deleteByTypeAndUrn(String tenantId, String type, String urn) {
-
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(UUID.fromString(tenantId), type, urn);
-
-        return deleteList.stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
-    }
-
-    @Override
     public Optional<ThingResponse> findByTypeAndUrn(String tenantId, String type, String urn) {
         return null;
     }
@@ -121,7 +99,7 @@ public class ThingPersistenceService implements ThingDao {
     @Deprecated
     public Optional<ThingResponse> findByObjectUrn(String accountUrn, String objectUrn) {
 
-        Optional<ThingEntity> entity = repository.findByTenantIdAndUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
+        Optional<ThingEntity> entity = repository.findByAccountIdAndObjectUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
 
         if (entity.isPresent()) {
             final ThingResponse response = conversionService.convert(entity.get(),
@@ -143,7 +121,7 @@ public class ThingPersistenceService implements ThingDao {
     @Deprecated
     public List<ThingResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
 
-        List<ThingEntity> entityList = repository.findByTenantIdAndUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
+        List<ThingEntity> entityList = repository.findByAccountIdAndObjectUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
             objectUrnStartsWith);
 
         return entityList.stream()
@@ -159,7 +137,7 @@ public class ThingPersistenceService implements ThingDao {
         try
         {
             UUID uuid = UuidUtil.getUuidFromUrn(urn);
-            entity = repository.findByTenantIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+            entity = repository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
         } catch (IllegalArgumentException e)
         {
             // Optional.empty() will be returned anyway
@@ -186,7 +164,7 @@ public class ThingPersistenceService implements ThingDao {
             try
             {
                 UUID uuid = UuidUtil.getUuidFromUrn(urn);
-                entity = repository.findByTenantIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
+                entity = repository.findByAccountIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
 
                 if (entity.isPresent())
                 {
@@ -230,7 +208,7 @@ public class ThingPersistenceService implements ThingDao {
 
         if (StringUtils.isNotBlank(urn)) {
 //            UUID id = UuidUtil.getUuidFromUrn(urn);
-            entity = repository.findByTenantIdAndId(tenantId, id);
+            entity = repository.findByAccountIdAndId(tenantId, id);
 
             if (entity.isPresent() && StringUtils.isNotBlank(urn) && !urn.equals(entity.get().getUrn())) {
                 throw new IllegalArgumentException("urn and urn do not match");
@@ -238,7 +216,7 @@ public class ThingPersistenceService implements ThingDao {
         }
 
         if (StringUtils.isNotBlank(urn)) {
-            entity = repository.findByTenantIdAndUrn(tenantId, urn);
+            entity = repository.findByAccountIdAndObjectUrn(tenantId, urn);
 
             if (entity.isPresent()) {
                 ThingEntity objectEntity = entity.get();

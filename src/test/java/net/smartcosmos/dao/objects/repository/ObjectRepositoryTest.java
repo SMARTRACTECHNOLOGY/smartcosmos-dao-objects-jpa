@@ -1,7 +1,7 @@
 package net.smartcosmos.dao.objects.repository;
 
-import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
 import net.smartcosmos.dao.things.ThingPersistenceConfig;
+import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
 import org.junit.Before;
@@ -14,11 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -36,49 +33,28 @@ import static org.junit.Assert.assertTrue;
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
 public class ObjectRepositoryTest {
 
-    final UUID tenantId = UUID.randomUUID();
+    final UUID accountId = UUID.randomUUID();
     @Autowired
-    ThingRepository repository;
+    ThingRepository objectRepository;
     private UUID id;
 
     @Before
     public void setUp() throws Exception {
-        ThingEntity entity = repository
-                .save(ThingEntity.builder()
-                    .urn("urn")
-                    .tenantId(tenantId)
-                    .type("type").build());
-
+        ThingEntity entity = objectRepository
+                .save(ThingEntity.builder().objectUrn("urn").accountId(accountId)
+                        .type("type").name("name").build());
         id = entity.getId();
     }
 
     @Test
-    public void deleteByTenantIdAndId() throws Exception {
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, id);
-
-        assertFalse(deleteList.isEmpty());
-        assertEquals(1, deleteList.size());
-        assertEquals(id, deleteList.get(0).getId());
-    }
-
-    @Test
-    public void deleteByTenantIdAndTypeAndUrn() throws Exception {
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantId, "type", "urn");
-
-        assertFalse(deleteList.isEmpty());
-        assertEquals(1, deleteList.size());
-        assertEquals(id, deleteList.get(0).getId());
-    }
-
-    @Test
     public void findByAccountIdAndObjectUrn() throws Exception {
-        assertTrue(this.repository
-                .findByTenantIdAndUrn(tenantId, "urn").isPresent());
+        assertTrue(this.objectRepository
+                .findByAccountIdAndObjectUrn(accountId, "urn").isPresent());
     }
 
     @Test
     public void findByAccountIdAndId() throws Exception {
-        assertTrue(this.repository.findByTenantIdAndId(tenantId, id).isPresent());
+        assertTrue(this.objectRepository.findByAccountIdAndId(accountId, id).isPresent());
     }
 
 }
