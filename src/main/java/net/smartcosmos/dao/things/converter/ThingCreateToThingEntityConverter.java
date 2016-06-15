@@ -1,5 +1,6 @@
 package net.smartcosmos.dao.things.converter;
 
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
