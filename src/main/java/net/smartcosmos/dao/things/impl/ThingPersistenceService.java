@@ -41,8 +41,10 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public ThingResponse create(String tenantUrn, ThingCreate createThing) {
 
+        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+
         ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-        entity.setTenantId(UUID.fromString(tenantUrn));
+        entity.setTenantId(tenantId);
 
         entity = persist(entity);
 
@@ -52,10 +54,12 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> update(String tenantUrn, ThingUpdate updateThing) throws ConstraintViolationException {
 
+        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+
 //        checkIdentifiers(updateThing);
 
         Optional<ThingEntity> entity = findEntity(
-            UUID.fromString(tenantUrn),
+            tenantId,
             UUID.fromString(updateThing.getId()),
             updateThing.getType(),
             updateThing.getUrn());
@@ -76,7 +80,9 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public List<ThingResponse> deleteById(String tenantUrn, String id) {
 
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(UUID.fromString(tenantUrn), UUID.fromString(id));
+        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+
+        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, UUID.fromString(id));
 
         return deleteList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
@@ -86,7 +92,9 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public List<ThingResponse> deleteByTypeAndUrn(String tenantUrn, String type, String urn) {
 
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(UUID.fromString(tenantUrn), type, urn);
+        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+
+        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantId, type, urn);
 
         return deleteList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
@@ -224,13 +232,13 @@ public class ThingPersistenceService implements ThingDao {
             .collect(Collectors.toList());
     }
 
-    private Optional<ThingEntity> findEntity(UUID tenantUrn, UUID id, String type, String urn) throws IllegalArgumentException {
+    private Optional<ThingEntity> findEntity(UUID tenantId, UUID id, String type, String urn) throws IllegalArgumentException {
 
         Optional<ThingEntity> entity = Optional.empty();
 
         if (StringUtils.isNotBlank(urn)) {
 //            UUID id = UuidUtil.getUuidFromUrn(urn);
-            entity = repository.findByTenantIdAndId(tenantUrn, id);
+            entity = repository.findByTenantIdAndId(tenantId, id);
 
             if (entity.isPresent() && StringUtils.isNotBlank(urn) && !urn.equals(entity.get().getUrn())) {
                 throw new IllegalArgumentException("urn and urn do not match");
@@ -238,7 +246,7 @@ public class ThingPersistenceService implements ThingDao {
         }
 
         if (StringUtils.isNotBlank(urn)) {
-            entity = repository.findByTenantIdAndUrn(tenantUrn, urn);
+            entity = repository.findByTenantIdAndUrn(tenantId, urn);
 
             if (entity.isPresent()) {
                 ThingEntity objectEntity = entity.get();
