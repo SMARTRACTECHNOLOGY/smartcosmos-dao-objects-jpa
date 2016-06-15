@@ -1,9 +1,8 @@
-package net.smartcosmos.dao.objects.repository;
+package net.smartcosmos.dao.things.repository;
 
-import net.smartcosmos.dao.objects.ObjectPersistenceTestApplication;
+import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.ThingPersistenceConfig;
 import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.dao.things.repository.ThingRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,12 +28,12 @@ import static org.junit.Assert.assertTrue;
  * @author voor
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = { ObjectPersistenceTestApplication.class,
+@SpringApplicationConfiguration(classes = { ThingsPersistenceTestApplication.class,
         ThingPersistenceConfig.class })
 @ActiveProfiles("test")
 @WebAppConfiguration
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
-public class ObjectRepositoryTest {
+public class ThingRepositoryTest {
 
     final UUID tenantId = UUID.randomUUID();
     @Autowired

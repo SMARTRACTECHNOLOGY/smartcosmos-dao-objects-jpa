@@ -1,4 +1,4 @@
-package net.smartcosmos.dao.objects.domain;
+package net.smartcosmos.dao.things.domain;
 
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.util.UuidUtil;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("Duplicates")
-public class ObjectEntityTest {
+public class ThingEntityTest {
 
     private static Validator validator;
 
