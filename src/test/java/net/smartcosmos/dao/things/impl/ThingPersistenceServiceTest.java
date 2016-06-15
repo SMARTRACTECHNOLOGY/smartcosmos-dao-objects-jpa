@@ -65,9 +65,9 @@ public class ThingPersistenceServiceTest {
     public static final String OBJECT_URN_QUERY_PARAMS_1 = "urnQueryParams1";
     public static final String OBJECT_URN_QUERY_PARAMS_99 = "urnQueryParams99";
     public static final String BJECT_URN_QUERY_PARAMS = "bjectUrnQueryParams";
-    private final UUID accountId = UUID.randomUUID();
+    private final UUID tenantId = UUID.randomUUID();
 
-    private final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountId);
+    private final String tenantUrn = UuidUtil.getTenantUrnFromUuid(tenantId);
 
     @Autowired
     ThingPersistenceService persistenceService;
@@ -82,7 +82,7 @@ public class ThingPersistenceServiceTest {
         // Might be a good candidate for a test package util.
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal())
-            .thenReturn(new SmartCosmosUser(accountUrn, "urn:userUrn", "username",
+            .thenReturn(new SmartCosmosUser(tenantUrn, "urn:userUrn", "username",
                                             "password", Arrays.asList(new SimpleGrantedAuthority("USER"))));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -101,10 +101,10 @@ public class ThingPersistenceServiceTest {
             .type("type")
             .build();
         ThingResponse response = persistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(tenantUrn, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(accountId, "urn:fakeUrn");
+            .findByTenantIdAndUrn(tenantId, "urn:fakeUrn");
 
         assertTrue(entity.isPresent());
 
@@ -126,10 +126,10 @@ public class ThingPersistenceServiceTest {
             .build();
 
         ThingResponse responseCreate = persistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(tenantUrn, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(accountId, urn);
+            .findByTenantIdAndUrn(tenantId, urn);
 
         assertTrue(entity.isPresent());
 
@@ -140,7 +140,7 @@ public class ThingPersistenceServiceTest {
             .urn(urn)
             .active(false)
             .build();
-        Optional<ThingResponse> responseUpdate = persistenceService.update(accountUrn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, update);
 
         assertTrue(responseUpdate.isPresent());
 
@@ -162,10 +162,10 @@ public class ThingPersistenceServiceTest {
             .build();
 
         ThingResponse responseCreate = persistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(tenantUrn, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(accountId, urn);
+            .findByTenantIdAndUrn(tenantId, urn);
 
         assertTrue(entity.isPresent());
 
@@ -176,7 +176,7 @@ public class ThingPersistenceServiceTest {
             .urn(responseCreate.getUrn())
             .active(false)
             .build();
-        Optional<ThingResponse> responseUpdate = persistenceService.update(accountUrn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, update);
 
         assertTrue(responseUpdate.isPresent());
 
@@ -191,7 +191,7 @@ public class ThingPersistenceServiceTest {
         ThingUpdate update = ThingUpdate.builder()
             .urn("urn:DOES-NOT-EXIST")
             .build();
-        Optional<ThingResponse> responseUpdate = persistenceService.update(accountUrn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, update);
 
         assertFalse(responseUpdate.isPresent());
     }
@@ -208,10 +208,10 @@ public class ThingPersistenceServiceTest {
             .build();
 
         ThingResponse responseCreate = persistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(tenantUrn, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(accountId, urn);
+            .findByTenantIdAndUrn(tenantId, urn);
 
         assertTrue(entity.isPresent());
 
@@ -221,7 +221,7 @@ public class ThingPersistenceServiceTest {
         ThingUpdate update = ThingUpdate.builder()
             .active(false)
             .build();
-        Optional<ThingResponse> responseUpdate = persistenceService.update(accountUrn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, update);
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -234,10 +234,10 @@ public class ThingPersistenceServiceTest {
             .build();
 
         ThingResponse responseCreate = persistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(tenantUrn, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(accountId, urn);
+            .findByTenantIdAndUrn(tenantId, urn);
 
         assertTrue(entity.isPresent());
 
@@ -249,7 +249,7 @@ public class ThingPersistenceServiceTest {
             .id(urn)
             .active(false)
             .build();
-        Optional<ThingResponse> responseUpdate = persistenceService.update(accountUrn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, update);
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -262,10 +262,10 @@ public class ThingPersistenceServiceTest {
             .build();
 
         ThingResponse responseCreate = persistenceService
-            .create("urn:account:URN-IN-AUDIT-TRAIL", create);
+            .create(tenantUrn, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(accountId, urn);
+            .findByTenantIdAndUrn(tenantId, urn);
 
         assertTrue(entity.isPresent());
 
@@ -278,7 +278,7 @@ public class ThingPersistenceServiceTest {
             .active(false)
             .build();
 
-        Optional<ThingResponse> responseUpdate = persistenceService.update(accountUrn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, update);
     }
 
     // endregion
@@ -306,7 +306,7 @@ public class ThingPersistenceServiceTest {
     public void testFindByObjectUrnStartsWithNonexistent() throws Exception {
         populateQueryData();
 
-        List<ThingResponse> response = persistenceService.findByObjectUrnStartsWith(accountUrn, "no-such-urn");
+        List<ThingResponse> response = persistenceService.findByObjectUrnStartsWith(tenantUrn, "no-such-urn");
 
         assertTrue(response.isEmpty());
     }
@@ -315,7 +315,7 @@ public class ThingPersistenceServiceTest {
     public void testFindByObjectUrnStartsWith() throws Exception {
         populateQueryData();
 
-        List<ThingResponse> response = persistenceService.findByObjectUrnStartsWith(accountUrn, OBJECT_URN_QUERY_PARAMS);
+        List<ThingResponse> response = persistenceService.findByObjectUrnStartsWith(tenantUrn, OBJECT_URN_QUERY_PARAMS);
 
         assertEquals(12, response.size());
     }
@@ -330,9 +330,9 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
-        String secondUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_02).get().getUrn();
-        String thirdUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+        String firstUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
+        String secondUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_02).get().getUrn();
+        String thirdUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
 
         Collection<String> urns = new ArrayList<>();
         urns.add(firstUrn);
@@ -340,7 +340,7 @@ public class ThingPersistenceServiceTest {
         urns.add(thirdUrn);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByUrns(accountUrn, urns);
+        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
@@ -354,9 +354,9 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
+        String firstUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
         String secondUrn = UuidUtil.getUrnFromUuid(UuidUtil.getNewUuid());
-        String thirdUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+        String thirdUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
 
         Collection<String> urns = new ArrayList<>();
         urns.add(firstUrn);
@@ -364,7 +364,7 @@ public class ThingPersistenceServiceTest {
         urns.add(thirdUrn);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByUrns(accountUrn, urns);
+        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
@@ -378,9 +378,9 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
+        String firstUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
         String secondUrn = "cannot be parsed as URN";
-        String thirdUrn = persistenceService.findByObjectUrn(accountUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+        String thirdUrn = persistenceService.findByObjectUrn(tenantUrn, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
 
         Collection<String> urns = new ArrayList<>();
         urns.add(firstUrn);
@@ -388,7 +388,7 @@ public class ThingPersistenceServiceTest {
         urns.add(thirdUrn);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByUrns(accountUrn, urns);
+        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
@@ -401,40 +401,40 @@ public class ThingPersistenceServiceTest {
     // used by findByQueryParametersStringParameters()
     private void populateQueryData() throws Exception {
 
-        ThingEntity entityNameOneTypeOne = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameOneTypeOne = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_01).type(TYPE_ONE).build();
 
-        ThingEntity entityNameTwoTypeOne = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameTwoTypeOne = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_02).type(TYPE_ONE).build();
 
-        ThingEntity entityNameThreeTypeOne = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameThreeTypeOne = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_03).type(TYPE_ONE).build();
 
-        ThingEntity entityNameOneTypeTwo = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameOneTypeTwo = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_04).type(TYPE_TWO).build();
 
-        ThingEntity entityNameTwoTypeTwo = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameTwoTypeTwo = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_05).type(TYPE_TWO).build();
 
-        ThingEntity entityNameThreeTypeTwo = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameThreeTypeTwo = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_06).type(TYPE_TWO).build();
 
-        ThingEntity entityNameOneMonikerOne = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameOneMonikerOne = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_07).type(WHATEVER).build();
 
-        ThingEntity entityNameOneMonikerTwo = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameOneMonikerTwo = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_08).type(WHATEVER).build();
 
-        ThingEntity entityNameOneMonikerThree = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityNameOneMonikerThree = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_09).type(WHATEVER).build();
 
-        ThingEntity entityObjectUrn10 = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityObjectUrn10 = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_10).type(WHATEVER).build();
 
-        ThingEntity entityObjectUrn11 = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityObjectUrn11 = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_11).type(WHATEVER).build();
 
-        ThingEntity entityObjectUrn12 = ThingEntity.builder().tenantId(accountId)
+        ThingEntity entityObjectUrn12 = ThingEntity.builder().tenantId(tenantId)
             .urn(OBJECT_URN_QUERY_PARAMS_12).type(WHATEVER).build();
 
         repository.save(entityNameOneTypeOne);
