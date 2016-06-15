@@ -1,32 +1,20 @@
 package net.smartcosmos.dao.things.util;
 
 import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.dto.objects.ObjectUpdate;
+import net.smartcosmos.dto.things.ThingUpdate;
 
 public class ThingPersistenceUtil {
 
-    public static ThingEntity merge(ThingEntity objectEntity, ObjectUpdate updateObject) {
-
-        if (updateObject.getName() != null) {
-            objectEntity.setName(updateObject.getName());
-        }
+    public static ThingEntity merge(ThingEntity thingEntity, ThingUpdate updateObject) {
 
         if (updateObject.getType() != null) {
-            objectEntity.setType(updateObject.getType());
+            thingEntity.setType(updateObject.getType());
         }
 
-        if (updateObject.getDescription() != null) {
-            objectEntity.setDescription(updateObject.getDescription());
+        if (updateObject.getActive() != null) {
+            thingEntity.setActive(updateObject.getActive());
         }
 
-        if (updateObject.getMoniker() != null) {
-            objectEntity.setMoniker(updateObject.getMoniker());
-        }
-
-        if (updateObject.getActiveFlag() != null) {
-            objectEntity.setActive(updateObject.getActiveFlag());
-        }
-
-        return objectEntity;
+        return thingEntity;
     }
 }
