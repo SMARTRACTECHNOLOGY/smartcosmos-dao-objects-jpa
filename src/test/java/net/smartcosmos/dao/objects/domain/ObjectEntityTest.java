@@ -22,17 +22,11 @@ public class ObjectEntityTest {
 
     private static Validator validator;
 
-    private static final String OBJECT_URN = RandomStringUtils.randomAlphanumeric(767);
-    private static final String OBJECT_URN_INVALID = RandomStringUtils.randomAlphanumeric(768);
+    private static final String URN = RandomStringUtils.randomAlphanumeric(767);
+    private static final String URN_INVALID = RandomStringUtils.randomAlphanumeric(768);
     private static final UUID ID = UuidUtil.getNewUuid();
     private static final String TYPE = RandomStringUtils.randomAlphanumeric(255);
     private static final String TYPE_INVALID = RandomStringUtils.randomAlphanumeric(256);
-    private static final String NAME = RandomStringUtils.randomAlphanumeric(255);
-    private static final String NAME_INVALID = RandomStringUtils.randomAlphanumeric(256);
-    private static final String DESCRIPTION = RandomStringUtils.randomAlphanumeric(1024);
-    private static final String DESCRIPTION_INVALID = RandomStringUtils.randomAlphanumeric(1025);
-    private static final String MONIKER = RandomStringUtils.randomAlphanumeric(2048);
-    private static final String MONIKER_INVALID = RandomStringUtils.randomAlphanumeric(2049);
     private static final Boolean ACTIVE = false;
     private static final UUID ACCOUNT_ID = UuidUtil.getNewUuid();
 
@@ -46,14 +40,11 @@ public class ObjectEntityTest {
     public void thatEverythingIsOk() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -61,20 +52,17 @@ public class ObjectEntityTest {
         assertTrue(violationSet.isEmpty());
     }
 
-    // region Object URN
+    // region URN
 
     @Test
-    public void thatObjectUrnIsNotNull() {
+    public void thatUrnIsNotNull() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-//            .urn(OBJECT_URN)
+//            .urn(URN)
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -87,17 +75,14 @@ public class ObjectEntityTest {
     }
 
     @Test
-    public void thatObjectUrnIsNotEmpty() {
+    public void thatUrnIsNotEmpty() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn("")
+            .urn("")
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -110,17 +95,14 @@ public class ObjectEntityTest {
     }
 
     @Test
-    public void thatObjectUrnInvalidFails() {
+    public void thatUrnInvalidFails() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN_INVALID)
+            .urn(URN_INVALID)
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -130,79 +112,6 @@ public class ObjectEntityTest {
         assertEquals("{javax.validation.constraints.Size.message}",
             violationSet.iterator().next().getMessageTemplate());
         assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    // endregion
-
-    // region Name
-
-    @Test
-    public void thatNameIsNotNull() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-//            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    @Test
-    public void thatNameIsNotEmpty() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name("")
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    @Test
-    public void thatNameInvalidFails() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME_INVALID)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{javax.validation.constraints.Size.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("name", violationSet.iterator().next().getPropertyPath().toString());
     }
 
     // endregion
@@ -213,14 +122,11 @@ public class ObjectEntityTest {
     public void thatTypeIsNotNull() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
 //            .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -236,14 +142,11 @@ public class ObjectEntityTest {
     public void thatTypeIsNotEmpty() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
             .type("")
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -259,14 +162,11 @@ public class ObjectEntityTest {
     public void thatTypeInvalidFails() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
             .type(TYPE_INVALID)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .active(ACTIVE)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -280,149 +180,16 @@ public class ObjectEntityTest {
 
     // endregion
 
-    // region Description
-
-    @Test
-    public void thatDescriptionMayBeNull() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME)
-//            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertTrue(violationSet.isEmpty());
-    }
-
-    @Test
-    public void thatDescriptionMayBeEmpty() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME)
-            .description("")
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertTrue(violationSet.isEmpty());
-    }
-
-    @Test
-    public void thatDescriptionInvalidFails() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION_INVALID)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{javax.validation.constraints.Size.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("description", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    // endregion
-
-    // region Moniker
-
-    @Test
-    public void thatMonikerMayBeNull() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-//            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertTrue(violationSet.isEmpty());
-    }
-
-    @Test
-    public void thatMonikerMayBeEmpty() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker("")
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertTrue(violationSet.isEmpty());
-    }
-
-    @Test
-    public void thatMonikerInvalidFails() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
-            .id(ID)
-            .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER_INVALID)
-            .activeFlag(ACTIVE)
-            .accountId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{javax.validation.constraints.Size.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("moniker", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    // endregion
-
     // region Other
 
     @Test
     public void thatAccountIdIsNotNull() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(ACTIVE)
+            .active(ACTIVE)
 //            .tenantId(ACCOUNT_ID)
             .build();
 
@@ -436,17 +203,14 @@ public class ObjectEntityTest {
     }
 
     @Test
-    public void thatActiveFlagIsNotNullable() {
+    public void thatActiveIsNotNullable() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
-            .activeFlag(null)
-            .accountId(ACCOUNT_ID)
+            .active(null)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -456,17 +220,14 @@ public class ObjectEntityTest {
     }
 
     @Test
-    public void thatActiveFlagDefaultsToTrue() {
+    public void thatActiveDefaultsToTrue() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .objectUrn(OBJECT_URN)
+            .urn(URN)
             .id(ID)
             .type(TYPE)
-            .name(NAME)
-            .description(DESCRIPTION)
-            .moniker(MONIKER)
 //            .active(ACTIVE)
-            .accountId(ACCOUNT_ID)
+            .tenantId(ACCOUNT_ID)
             .build();
 
         assertTrue(objectEntity.getActive());
