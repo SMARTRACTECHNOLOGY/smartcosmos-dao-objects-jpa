@@ -70,13 +70,7 @@ public class ThingRepositoryTest {
     }
 
     @Test
-    public void findByAccountIdAndObjectUrn() throws Exception {
-        assertTrue(this.repository
-                .findByTenantIdAndUrn(tenantId, "urn").isPresent());
-    }
-
-    @Test
-    public void findByAccountIdAndId() throws Exception {
+    public void findByTenantIdAndId() throws Exception {
         assertTrue(this.repository.findByTenantIdAndId(tenantId, id).isPresent());
     }
 

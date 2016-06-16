@@ -1,14 +1,13 @@
 package net.smartcosmos.dao.things.impl;
 
-import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.ThingPersistenceConfig;
+import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
 import net.smartcosmos.security.user.SmartCosmosUser;
-import net.smartcosmos.util.UuidUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,7 +92,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantId, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(tenantUuid, "urn:fakeUrn");
+            .findByTenantIdAndTypeAndUrn(tenantUuid, "type", "urn:fakeUrn");
 
         assertTrue(entity.isPresent());
 
@@ -118,7 +117,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantId, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(tenantUuid, urn);
+            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         assertTrue(entity.isPresent());
 
@@ -157,7 +156,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantId, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(tenantUuid, urn);
+            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         assertTrue(entity.isPresent());
 
@@ -204,7 +203,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantId, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(tenantUuid, urn);
+            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         assertTrue(entity.isPresent());
 
@@ -238,7 +237,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantId, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(tenantUuid, urn);
+            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         assertTrue(entity.isPresent());
 
@@ -266,7 +265,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantId, create);
 
         Optional<ThingEntity> entity = repository
-            .findByTenantIdAndUrn(tenantUuid, urn);
+            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         assertTrue(entity.isPresent());
 
@@ -284,109 +283,92 @@ public class ThingPersistenceServiceTest {
     // region Find By Object URN
 
     @Test
-    public void testFindByObjectUrn() throws Exception {
-
-        final UUID accountUuid = UUID.randomUUID();
-        final String accountUrn = UuidUtil.getAccountUrnFromUuid(accountUuid);
-
-        ThingEntity entity = ThingEntity.builder().tenantId(accountUuid)
-            .urn("urn").type("some type").build();
-
-        this.repository.save(entity);
-
-        Optional<ThingResponse> response = persistenceService
-            .findByObjectUrn(accountUrn, "urn");
-
-        assertTrue(response.isPresent());
-    }
-
-    @Test
-    public void testFindByObjectUrnStartsWithNonexistent() throws Exception {
+    public void testFindByTypeAndUrnStartsWithNonexistent() throws Exception {
         populateQueryData();
 
-        List<ThingResponse> response = persistenceService.findByObjectUrnStartsWith(tenantId, "no-such-urn");
+        List<ThingResponse> response = persistenceService.findByTypeAndUrnStartsWith(tenantId, "no-such-type", "no-such-urn", 0L, 100L);
 
         assertTrue(response.isEmpty());
     }
 
     @Test
-    public void testFindByObjectUrnStartsWith() throws Exception {
+    public void testFindByTypeAndUrnStartsWith() throws Exception {
         populateQueryData();
 
-        List<ThingResponse> response = persistenceService.findByObjectUrnStartsWith(tenantId, OBJECT_URN_QUERY_PARAMS);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrnStartsWith(tenantId, WHATEVER, OBJECT_URN_QUERY_PARAMS, 0L, 100L);
 
-        assertEquals(12, response.size());
+        assertEquals(6, response.size());
     }
 
     // endregion
 
     @Test
-    public void testFindByUrns() throws Exception
+    public void testFindByIds() throws Exception
     {
         populateQueryData();
 
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
-        String secondUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_02).get().getUrn();
-        String thirdUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+        String firstId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_01).get().getId();
+        String secondId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_02).get().getId();
+        String thirdId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_03).get().getId();
 
-        Collection<String> urns = new ArrayList<>();
-        urns.add(firstUrn);
-        urns.add(secondUrn);
-        urns.add(thirdUrn);
+        Collection<String> ids = new ArrayList<>();
+        ids.add(firstId);
+        ids.add(secondId);
+        ids.add(thirdId);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantId, urns);
+        List<Optional<ThingResponse>> response = persistenceService.findByIds(tenantId, ids, 0L, 100L);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
     }
 
     @Test
-    public void thatFindByUrnsReturnsPartialResultsWithNonexistentUrn() throws Exception
+    public void thatFindByUrnsReturnsPartialResultsWithNonexistentId() throws Exception
     {
         populateQueryData();
 
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
-        String secondUrn = UuidUtil.getUrnFromUuid(UuidUtil.getNewUuid());
-        String thirdUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+        String firstId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_01).get().getId();
+        String secondId = UUID.randomUUID().toString();
+        String thirdId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_03).get().getId();
 
-        Collection<String> urns = new ArrayList<>();
-        urns.add(firstUrn);
-        urns.add(secondUrn);
-        urns.add(thirdUrn);
+        Collection<String> ids = new ArrayList<>();
+        ids.add(firstId);
+        ids.add(secondId);
+        ids.add(thirdId);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantId, urns);
+        List<Optional<ThingResponse>> response = persistenceService.findByIds(tenantId, ids, 0L, 100L);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
     }
 
     @Test
-    public void thatFindByUrnsReturnsPartialResultsWithUnparseableUrn() throws Exception
+    public void thatFindByUrnsReturnsPartialResultsWithUnparseableId() throws Exception
     {
         populateQueryData();
 
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_01).get().getUrn();
-        String secondUrn = "cannot be parsed as URN";
-        String thirdUrn = persistenceService.findByObjectUrn(tenantId, OBJECT_URN_QUERY_PARAMS_03).get().getUrn();
+        String firstId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_01).get().getId();
+        String secondId = "no UUID";
+        String thirdId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, OBJECT_URN_QUERY_PARAMS_03).get().getId();
 
-        Collection<String> urns = new ArrayList<>();
-        urns.add(firstUrn);
-        urns.add(secondUrn);
-        urns.add(thirdUrn);
+        Collection<String> ids = new ArrayList<>();
+        ids.add(firstId);
+        ids.add(secondId);
+        ids.add(thirdId);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantId, urns);
+        List<Optional<ThingResponse>> response = persistenceService.findByIds(tenantId, ids, 0L, 100L);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
 
