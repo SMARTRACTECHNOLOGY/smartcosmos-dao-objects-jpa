@@ -38,7 +38,6 @@ import static org.junit.Assert.*;
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
 public class ThingPersistenceServiceTest {
 
-    public static final int DELAY_BETWEEN_LAST_MODIFIED_DATES = 10;
     public static final String OBJECT_URN_QUERY_PARAMS_01 = "urnQueryParams01";
     public static final String OBJECT_URN_QUERY_PARAMS_02 = "urnQueryParams02";
     public static final String OBJECT_URN_QUERY_PARAMS_03 = "urnQueryParams03";
@@ -51,23 +50,13 @@ public class ThingPersistenceServiceTest {
     public static final String OBJECT_URN_QUERY_PARAMS_10 = "urnQueryParams10";
     public static final String OBJECT_URN_QUERY_PARAMS_11 = "urnQueryParams11";
     public static final String OBJECT_URN_QUERY_PARAMS_12 = "urnQueryParams12";
-    public static final String NAME_ONE = "name one";
     public static final String TYPE_ONE = "type one";
-    public static final String NAME_TWO = "name two";
-    public static final String NAME_THREE = "name three";
     public static final String TYPE_TWO = "type two";
     public static final String WHATEVER = "whatever";
-    public static final String MONIKER_ONE = "moniker one";
-    public static final String MONIKER_TWO = "moniker two";
-    public static final String MONIKER_THREE = "moniker three";
     public static final String OBJECT_URN_QUERY_PARAMS = "urnQueryParams";
-    public static final String OBJECT_URN_QUERY_PARAMS_0 = "urnQueryParams0";
-    public static final String OBJECT_URN_QUERY_PARAMS_1 = "urnQueryParams1";
-    public static final String OBJECT_URN_QUERY_PARAMS_99 = "urnQueryParams99";
-    public static final String BJECT_URN_QUERY_PARAMS = "bjectUrnQueryParams";
     private final UUID tenantId = UUID.randomUUID();
 
-    private final String tenantUrn = UuidUtil.getTenantUrnFromUuid(tenantId);
+    private final String tenantUrn = tenantId.toString();
 
     @Autowired
     ThingPersistenceService persistenceService;
