@@ -3,6 +3,7 @@ package net.smartcosmos.dao.things.repository;
 import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.ThingPersistenceConfig;
 import net.smartcosmos.dao.things.domain.ThingEntity;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,11 @@ public class ThingRepositoryTest {
         id = entity.getId();
     }
 
+    @After
+    public void tearDown() throws Exception {
+        repository.deleteAll();
+    }
+
     @Test
     public void deleteByTenantIdAndId() throws Exception {
         List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, id);
@@ -70,8 +76,30 @@ public class ThingRepositoryTest {
     }
 
     @Test
+    public void findByTenantIdAndTypeAndUrn() throws Exception {
+        assertTrue(this.repository.findByTenantIdAndTypeAndUrn(tenantId, "type", "urn").isPresent());
+    }
+
+    @Test
     public void findByTenantIdAndId() throws Exception {
         assertTrue(this.repository.findByTenantIdAndId(tenantId, id).isPresent());
     }
 
+    @Test
+    public void findByTenantId() throws Exception {
+        List<ThingEntity> entityList = repository.findByTenantId(tenantId);
+        assertFalse(entityList.isEmpty());
+
+        assertEquals(1, entityList.size());
+        assertEquals(id, entityList.get(0).getId());
+    }
+
+    @Test
+    public void findByTenantIdAndTypeAndUrnStartsWith() throws Exception {
+        List<ThingEntity> entityList = repository.findByTenantIdAndTypeAndUrnStartsWith(tenantId, "type", "u");
+        assertFalse(entityList.isEmpty());
+
+        assertEquals(1, entityList.size());
+        assertEquals(id, entityList.get(0).getId());
+    }
 }
