@@ -39,12 +39,12 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public ThingResponse create(String tenantUrn, ThingCreate createThing) {
+    public ThingResponse create(String tenantId, ThingCreate createThing) {
 
-        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+        UUID tenantUuid = UUID.fromString(tenantId);
 
         ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-        entity.setTenantId(tenantId);
+        entity.setTenantId(tenantUuid);
 
         entity = persist(entity);
 
@@ -52,14 +52,14 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public Optional<ThingResponse> update(String tenantUrn, ThingUpdate updateThing) throws ConstraintViolationException {
+    public Optional<ThingResponse> update(String tenantId, ThingUpdate updateThing) throws ConstraintViolationException {
 
-        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+        UUID tenantUuid = UUID.fromString(tenantId);
 
 //        checkIdentifiers(updateThing);
 
         Optional<ThingEntity> entity = findEntity(
-            tenantId,
+            tenantUuid,
             UUID.fromString(updateThing.getId()),
             updateThing.getType(),
             updateThing.getUrn());
@@ -78,11 +78,11 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> deleteById(String tenantUrn, String id) {
+    public List<ThingResponse> deleteById(String tenantId, String id) {
 
-        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+        UUID tenantUuid = UUID.fromString(tenantId);
 
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, UUID.fromString(id));
+        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantUuid, UUID.fromString(id));
 
         return deleteList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
@@ -90,11 +90,11 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> deleteByTypeAndUrn(String tenantUrn, String type, String urn) {
+    public List<ThingResponse> deleteByTypeAndUrn(String tenantId, String type, String urn) {
 
-        UUID tenantId = UuidUtil.getUuidFromTenantUrn(tenantUrn);
+        UUID tenantUuid = UUID.fromString(tenantId);
 
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantId, type, urn);
+        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         return deleteList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
