@@ -149,7 +149,7 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantId, String type, String urnStartsWith, Long page, Long size) {
+    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantId, String type, String urnStartsWith, Long page, Integer size) {
 
         UUID tenantUuid = UUID.fromString(tenantId);
         List<ThingEntity> entityList = repository.findByTenantIdAndTypeAndUrnStartsWith(tenantUuid, type, urnStartsWith);
@@ -175,7 +175,7 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<Optional<ThingResponse>> findByIds(String tenantId, Collection<String> ids, Long page, Long size) {
+    public List<Optional<ThingResponse>> findByIds(String tenantId, Collection<String> ids) {
 
         return ids.stream()
             .map(id -> findById(tenantId, id))
@@ -183,7 +183,7 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> findAll(String tenantId, Long page, Long size) {
+    public List<ThingResponse> findAll(String tenantId, Long page, Integer size) {
 
         try {
             UUID tenantUuid = UUID.fromString(tenantId);
