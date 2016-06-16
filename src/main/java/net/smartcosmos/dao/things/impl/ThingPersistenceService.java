@@ -8,8 +8,6 @@ import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
-import net.smartcosmos.util.UuidUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -17,11 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,7 +49,6 @@ public class ThingPersistenceService implements ThingDao {
     public Optional<ThingResponse> updateByTypeAndUrn(String tenantId, String type, String urn, ThingUpdate updateThing) throws ConstraintViolationException {
 
         UUID tenantUuid = UUID.fromString(tenantId);
-
         Optional<ThingEntity> thing = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         return update(thing, updateThing);
@@ -99,7 +92,6 @@ public class ThingPersistenceService implements ThingDao {
     public List<ThingResponse> deleteByTypeAndUrn(String tenantId, String type, String urn) {
 
         UUID tenantUuid = UUID.fromString(tenantId);
-
         List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
         return convert(deleteList);
@@ -115,8 +107,12 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Long page, Long size) {
-        return null;
+    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantId, String type, String urnStartsWith, Long page, Long size) {
+
+        UUID tenantUuid = UUID.fromString(tenantId);
+        List<ThingEntity> entityList = repository.findByTenantIdAndTypeAndUrnStartsWith(tenantUuid, type, urnStartsWith);
+
+        return convert(entityList);
     }
 
     @Override
@@ -133,7 +129,6 @@ public class ThingPersistenceService implements ThingDao {
     public List<Optional<ThingResponse>> findByIds(String tenantId, Collection<String> ids, Long page, Long size) {
 
         List<Optional<ThingResponse>> responseList = new ArrayList<>();
-
         for (String id: ids)
         {
             Optional<ThingResponse> response = findById(tenantId, id);
@@ -153,95 +148,17 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     /**
-     * Finds objects matching a specified object URN start.
-     *
-     * @param accountUrn the account URN
-     * @param objectUrnStartsWith the first characters of the object URN
-     * @return all objects whose {@code urn} starts with {@code objectUrnStartsWith}
-     */
-    @Deprecated
-    public List<ThingResponse> findByObjectUrnStartsWith(String accountUrn, String objectUrnStartsWith) {
-
-        List<ThingEntity> entityList = repository.findByTenantIdAndUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
-            objectUrnStartsWith);
-
-        return convert(entityList);
-    }
-
-    @Deprecated
-    public List<Optional<ThingResponse>> findByUrns(String accountUrn, Collection<String> urns)
-    {
-
-        List<Optional<ThingResponse>> entities = new ArrayList<>();
-
-        for (String urn: urns)
-        {
-            Optional<ThingEntity> entity = Optional.empty();
-            try
-            {
-                UUID uuid = UuidUtil.getUuidFromUrn(urn);
-                entity = repository.findByTenantIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
-
-                if (entity.isPresent())
-                {
-                    final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
-                    entities.add(Optional.ofNullable(response));
-                }
-                else {
-                    entities.add(Optional.empty());
-                }
-
-            } catch (IllegalArgumentException e)
-            {
-                // If there's a bad value, we return an empty list
-                log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
-                entities.add(Optional.empty());
-            }
-
-        }
-        return entities;
-    }
-
-    /**
      * This is a temporary function for development purposes -- eventually we don't want
      * to support a "get everything" call, since theoretically that'd be billions of
      * objects.
      *
      * @return All the objects.
      */
-    public List<ThingResponse> getObjects() {
+    public List<ThingResponse> getThings() {
         // You could theoretically create a conversion function to handle this, since
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
         return convert(repository.findAll());
-    }
-
-    private Optional<ThingEntity> findEntity(UUID tenantId, UUID id, String type, String urn) throws IllegalArgumentException {
-
-        Optional<ThingEntity> entity = Optional.empty();
-
-        if (id != null) {
-            entity = repository.findByTenantIdAndId(tenantId, id);
-
-            if (entity.isPresent() && StringUtils.isNotBlank(urn) && !urn.equals(entity.get().getUrn())) {
-                throw new IllegalArgumentException("ID and URN do not match");
-            }
-        }
-
-        if (StringUtils.isNotBlank(urn)) {
-            entity = repository.findByTenantIdAndTypeAndUrn(tenantId, type, urn);
-
-            if (entity.isPresent()) {
-                ThingEntity objectEntity = entity.get();
-                UUID entityId = objectEntity.getId();
-
-                if (id != null && id != entityId) {
-                    throw new IllegalArgumentException("ID and URN do not match");
-                }
-            }
-        }
-
-        return entity;
     }
 
     /**
