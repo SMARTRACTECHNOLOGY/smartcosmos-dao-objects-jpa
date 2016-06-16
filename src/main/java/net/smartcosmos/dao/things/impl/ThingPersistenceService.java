@@ -52,29 +52,37 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public Optional<ThingResponse> update(String tenantId, ThingUpdate updateThing) throws ConstraintViolationException {
+    public Optional<ThingResponse> updateByTypeAndUrn(String tenantId, String type, String urn, ThingUpdate updateThing) throws ConstraintViolationException {
 
         UUID tenantUuid = UUID.fromString(tenantId);
 
-//        checkIdentifiers(updateThing);
+        Optional<ThingEntity> thing = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
-        Optional<ThingEntity> entity = findEntity(
-            tenantUuid,
-            UUID.fromString(updateThing.getId()),
-            updateThing.getType(),
-            updateThing.getUrn());
+        return update(thing, updateThing);
+    }
+
+    @Override
+    public Optional<ThingResponse> updateById(String tenantId, String id, ThingUpdate updateThing) throws ConstraintViolationException {
+
+        UUID tenantUuid = UUID.fromString(tenantId);
+        UUID thingId = UUID.fromString(id);
+
+        Optional<ThingEntity> thing = repository.findByTenantIdAndId(tenantUuid, thingId);
+
+        return update(thing, updateThing);
+    }
+
+    private Optional<ThingResponse> update(Optional<ThingEntity> entity, ThingUpdate updateThing) {
 
         if (entity.isPresent()) {
             ThingEntity updateEntity = ThingPersistenceUtil.merge(entity.get(), updateThing);
-
             updateEntity = persist(updateEntity);
-
             final ThingResponse response = conversionService.convert(updateEntity, ThingResponse.class);
+
             return Optional.ofNullable(response);
         }
-        else {
-            return Optional.empty();
-        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -236,24 +244,23 @@ public class ThingPersistenceService implements ThingDao {
 
         Optional<ThingEntity> entity = Optional.empty();
 
-        if (StringUtils.isNotBlank(urn)) {
-//            UUID id = UuidUtil.getUuidFromUrn(urn);
+        if (id != null) {
             entity = repository.findByTenantIdAndId(tenantId, id);
 
             if (entity.isPresent() && StringUtils.isNotBlank(urn) && !urn.equals(entity.get().getUrn())) {
-                throw new IllegalArgumentException("urn and urn do not match");
+                throw new IllegalArgumentException("ID and URN do not match");
             }
         }
 
         if (StringUtils.isNotBlank(urn)) {
-            entity = repository.findByTenantIdAndUrn(tenantId, urn);
+            entity = repository.findByTenantIdAndTypeAndUrn(tenantId, type, urn);
 
             if (entity.isPresent()) {
                 ThingEntity objectEntity = entity.get();
-                String entityUrn = UuidUtil.getUrnFromUuid(objectEntity.getId());
+                UUID entityId = objectEntity.getId();
 
-                if (StringUtils.isNotBlank(urn) && !urn.equals(entityUrn)) {
-                    throw new IllegalArgumentException("urn and urn do not match");
+                if (id != null && id != entityId) {
+                    throw new IllegalArgumentException("ID and URN do not match");
                 }
             }
         }
@@ -282,16 +289,4 @@ public class ThingPersistenceService implements ThingDao {
             }
         }
     }
-
-    /*
-    private void checkIdentifiers(ThingUpdate updateObject) throws IllegalArgumentException {
-        if (StringUtils.isBlank(updateObject.getUrn()) && StringUtils.isBlank(updateObject.getObjectUrn())) {
-            throw new IllegalArgumentException(String.format("urn and urn may not be null: %s", updateObject.toString()));
-        }
-
-        if (StringUtils.isNotBlank(updateObject.getUrn()) && StringUtils.isNotBlank(updateObject.getObjectUrn())) {
-            throw new IllegalArgumentException(String.format("either urn or urn may be defined: %s", updateObject.toString()));
-        }
-    }
-    */
 }
