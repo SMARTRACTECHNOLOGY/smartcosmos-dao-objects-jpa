@@ -92,9 +92,7 @@ public class ThingPersistenceService implements ThingDao {
 
         List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantUuid, UUID.fromString(id));
 
-        return deleteList.stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
+        return convert(deleteList);
     }
 
     @Override
@@ -104,14 +102,16 @@ public class ThingPersistenceService implements ThingDao {
 
         List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
-        return deleteList.stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
+        return convert(deleteList);
     }
 
     @Override
-    public Optional<ThingResponse> findByTypeAndUrn(String tenantUrn, String type, String urn) {
-        return null;
+    public Optional<ThingResponse> findByTypeAndUrn(String tenantId, String type, String urn) {
+
+        UUID tenantUuid = UUID.fromString(tenantId);
+        Optional<ThingEntity> entity = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+
+        return convert(entity);
     }
 
     @Override
@@ -120,33 +120,36 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public Optional<ThingResponse> findById(String tenantUrn, String id) {
-        return null;
+    public Optional<ThingResponse> findById(String tenantId, String id) {
+
+        UUID tenantUuid = UUID.fromString(tenantId);
+        UUID thingId = UUID.fromString(id);
+        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, thingId);
+
+        return convert(entity);
     }
 
     @Override
-    public List<Optional<ThingResponse>> findByIds(String tenantUrn, Collection<String> ids, Long page, Long size) {
-        return null;
+    public List<Optional<ThingResponse>> findByIds(String tenantId, Collection<String> ids, Long page, Long size) {
+
+        List<Optional<ThingResponse>> responseList = new ArrayList<>();
+
+        for (String id: ids)
+        {
+            Optional<ThingResponse> response = findById(tenantId, id);
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 
     @Override
-    public List<ThingResponse> findAll(String tenantUrn, Long page, Long size) {
-        return null;
-    }
+    public List<ThingResponse> findAll(String tenantId, Long page, Long size) {
 
-    @Deprecated
-    public Optional<ThingResponse> findByObjectUrn(String accountUrn, String objectUrn) {
+        UUID tenantUuid = UUID.fromString(tenantId);
+        List<ThingEntity> entityList = repository.findByTenantId(tenantUuid);
 
-        Optional<ThingEntity> entity = repository.findByTenantIdAndUrn(UuidUtil.getUuidFromAccountUrn(accountUrn), objectUrn);
-
-        if (entity.isPresent()) {
-            final ThingResponse response = conversionService.convert(entity.get(),
-                ThingResponse.class);
-            return Optional.ofNullable(response);
-        }
-        else {
-            return Optional.empty();
-        }
+        return convert(entityList);
     }
 
     /**
@@ -162,32 +165,7 @@ public class ThingPersistenceService implements ThingDao {
         List<ThingEntity> entityList = repository.findByTenantIdAndUrnStartsWith(UuidUtil.getUuidFromAccountUrn(accountUrn),
             objectUrnStartsWith);
 
-        return entityList.stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
-    }
-
-    @Deprecated
-    public Optional<ThingResponse> findByUrn(String accountUrn, String urn)
-    {
-
-        Optional<ThingEntity> entity = Optional.empty();
-        try
-        {
-            UUID uuid = UuidUtil.getUuidFromUrn(urn);
-            entity = repository.findByTenantIdAndId(UuidUtil.getUuidFromAccountUrn(accountUrn), uuid);
-        } catch (IllegalArgumentException e)
-        {
-            // Optional.empty() will be returned anyway
-            log.warn("Illegal URN submitted: %s by account %s", urn, accountUrn);
-        }
-
-        if (entity.isPresent())
-        {
-            final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
-            return Optional.ofNullable(response);
-        }
-        return Optional.empty();
+        return convert(entityList);
     }
 
     @Deprecated
@@ -235,9 +213,7 @@ public class ThingPersistenceService implements ThingDao {
         // You could theoretically create a conversion function to handle this, since
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
-        return repository.findAll().stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
+        return convert(repository.findAll());
     }
 
     private Optional<ThingEntity> findEntity(UUID tenantId, UUID id, String type, String urn) throws IllegalArgumentException {
@@ -288,5 +264,22 @@ public class ThingPersistenceService implements ThingDao {
                 throw e;
             }
         }
+    }
+
+    private Optional<ThingResponse> convert(Optional<ThingEntity> entity) {
+
+        if (entity.isPresent()) {
+            final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
+            return Optional.ofNullable(response);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private List<ThingResponse> convert(List<ThingEntity> entityList) {
+        return entityList.stream()
+            .map(o -> conversionService.convert(o, ThingResponse.class))
+            .collect(Collectors.toList());
     }
 }
