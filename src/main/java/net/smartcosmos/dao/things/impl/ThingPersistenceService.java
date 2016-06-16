@@ -35,34 +35,54 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public ThingResponse create(String tenantId, ThingCreate createThing) {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
 
-        ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-        entity.setTenantId(tenantUuid);
+            ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
+            entity.setTenantId(tenantUuid);
 
-        entity = persist(entity);
+            entity = persist(entity);
 
-        return conversionService.convert(entity, ThingResponse.class);
+            return conversionService.convert(entity, ThingResponse.class);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing ID: Tenant ID '{}'", tenantId);
+            throw e;
+        }
     }
 
     @Override
     public Optional<ThingResponse> updateByTypeAndUrn(String tenantId, String type, String urn, ThingUpdate updateThing) throws ConstraintViolationException {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
-        Optional<ThingEntity> thing = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            Optional<ThingEntity> thing = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
-        return update(thing, updateThing);
+            return update(thing, updateThing);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing ID: Tenant ID '{}'", tenantId);
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public Optional<ThingResponse> updateById(String tenantId, String id, ThingUpdate updateThing) throws ConstraintViolationException {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
-        UUID thingId = UUID.fromString(id);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            UUID thingId = UUID.fromString(id);
 
-        Optional<ThingEntity> thing = repository.findByTenantIdAndId(tenantUuid, thingId);
+            Optional<ThingEntity> thing = repository.findByTenantIdAndId(tenantUuid, thingId);
 
-        return update(thing, updateThing);
+            return update(thing, updateThing);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing IDs: Tenant ID '{}' submitted Thing ID '{}'", tenantId, id);
+        }
+
+        return Optional.empty();
     }
 
     private Optional<ThingResponse> update(Optional<ThingEntity> entity, ThingUpdate updateThing) {
@@ -81,29 +101,51 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public List<ThingResponse> deleteById(String tenantId, String id) {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            UUID thingId = UUID.fromString(id);
 
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantUuid, UUID.fromString(id));
+            List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantUuid, thingId);
 
-        return convert(deleteList);
+            return convert(deleteList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing IDs: Tenant ID '{}' submitted Thing ID '{}'", tenantId, id);
+        }
+
+        return new ArrayList<>();
     }
 
     @Override
     public List<ThingResponse> deleteByTypeAndUrn(String tenantId, String type, String urn) {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
-        return convert(deleteList);
+            return convert(deleteList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing IDs: Tenant ID '{}'", tenantId);
+        }
+
+        return new ArrayList<>();
     }
 
     @Override
     public Optional<ThingResponse> findByTypeAndUrn(String tenantId, String type, String urn) {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
-        Optional<ThingEntity> entity = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            Optional<ThingEntity> entity = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
 
-        return convert(entity);
+            return convert(entity);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing IDs: Tenant ID '{}'", tenantId);
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -118,33 +160,42 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> findById(String tenantId, String id) {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
-        UUID thingId = UUID.fromString(id);
-        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, thingId);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            UUID thingId = UUID.fromString(id);
+            Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, thingId);
 
-        return convert(entity);
+            return convert(entity);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing IDs: Tenant ID '{}' submitted Thing ID '{}'", tenantId, id);
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public List<Optional<ThingResponse>> findByIds(String tenantId, Collection<String> ids, Long page, Long size) {
 
-        List<Optional<ThingResponse>> responseList = new ArrayList<>();
-        for (String id: ids)
-        {
-            Optional<ThingResponse> response = findById(tenantId, id);
-            responseList.add(response);
-        }
-
-        return responseList;
+        return ids.stream()
+            .map(id -> findById(tenantId, id))
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<ThingResponse> findAll(String tenantId, Long page, Long size) {
 
-        UUID tenantUuid = UUID.fromString(tenantId);
-        List<ThingEntity> entityList = repository.findByTenantId(tenantUuid);
+        try {
+            UUID tenantUuid = UUID.fromString(tenantId);
+            List<ThingEntity> entityList = repository.findByTenantId(tenantUuid);
 
-        return convert(entityList);
+            return convert(entityList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing IDs: Tenant ID '{}'", tenantId);
+        }
+
+        return new ArrayList<>();
     }
 
     /**
@@ -183,6 +234,12 @@ public class ThingPersistenceService implements ThingDao {
         }
     }
 
+    /**
+     * Converts a single thing entity optional to the corresponding response object.
+     *
+     * @param entity the thing entity
+     * @return an {@link Optional} that contains a {@link ThingResponse} instance or is empty
+     */
     private Optional<ThingResponse> convert(Optional<ThingEntity> entity) {
 
         if (entity.isPresent()) {
@@ -194,6 +251,12 @@ public class ThingPersistenceService implements ThingDao {
         }
     }
 
+    /**
+     * Converts a list of thing entities to a list of corresponding response objects.
+     *
+     * @param entityList the entities
+     * @return the list of {@link ThingResponse} instances
+     */
     private List<ThingResponse> convert(List<ThingEntity> entityList) {
         return entityList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
