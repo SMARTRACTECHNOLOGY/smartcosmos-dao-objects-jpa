@@ -20,12 +20,14 @@ public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, Query
 
     @Transactional
     List<ThingEntity> deleteByTenantIdAndTypeAndUrn(UUID tenantId, String type, String urn);
-    
+
     Optional<ThingEntity> findByTenantIdAndTypeAndUrn(UUID tenantId, String type, String urn);
 
     Optional<ThingEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     List<ThingEntity> findByTenantIdAndUrnStartsWith(UUID tenantId, String urn);
+
+    List<ThingEntity> findByTenantIdAndTypeAndUrnStartsWith(UUID tenantId, String type, String urn);
 
     List<ThingEntity> findByTenantId(UUID tenantId);
 
