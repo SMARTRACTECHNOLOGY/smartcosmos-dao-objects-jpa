@@ -9,6 +9,7 @@ import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
+import net.smartcosmos.dto.things.ThingUrnQueryResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,10 @@ import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -170,11 +173,19 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<Optional<ThingResponse>> findByUrns(String tenantUrn, Collection<String> urns) {
+    public ThingUrnQueryResponse findByUrns(String tenantUrn, Collection<String> urns) {
 
-        return urns.stream()
+        Map<String, ThingResponse> dataMap = urns.stream()
             .map(urn -> findByUrn(tenantUrn, urn))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toMap(ThingResponse::getUrn, Function.identity()));
+
+        List<String> notFound = urns.stream()
+            .filter(dataMap::containsKey)
             .collect(Collectors.toList());
+
+        return new ThingUrnQueryResponse(dataMap.values(), notFound);
     }
 
     @Override
