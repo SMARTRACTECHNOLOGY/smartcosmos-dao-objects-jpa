@@ -1,7 +1,5 @@
 package net.smartcosmos.dao.things.domain;
 
-import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.util.UuidUtil;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,13 +20,11 @@ public class ThingEntityTest {
 
     private static Validator validator;
 
-    private static final String URN = RandomStringUtils.randomAlphanumeric(767);
-    private static final String URN_INVALID = RandomStringUtils.randomAlphanumeric(768);
-    private static final UUID ID = UuidUtil.getNewUuid();
+    private static final UUID ID = UUID.randomUUID();
     private static final String TYPE = RandomStringUtils.randomAlphanumeric(255);
     private static final String TYPE_INVALID = RandomStringUtils.randomAlphanumeric(256);
     private static final Boolean ACTIVE = false;
-    private static final UUID ACCOUNT_ID = UuidUtil.getNewUuid();
+    private static final UUID ACCOUNT_ID = UUID.randomUUID();
 
     @BeforeClass
     public static void setUp() {
@@ -40,7 +36,6 @@ public class ThingEntityTest {
     public void thatEverythingIsOk() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
             .type(TYPE)
             .active(ACTIVE)
@@ -52,77 +47,12 @@ public class ThingEntityTest {
         assertTrue(violationSet.isEmpty());
     }
 
-    // region URN
-
-    @Test
-    public void thatUrnIsNotNull() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-//            .urn(URN)
-            .id(ID)
-            .type(TYPE)
-            .active(ACTIVE)
-            .tenantId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    @Test
-    public void thatUrnIsNotEmpty() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .urn("")
-            .id(ID)
-            .type(TYPE)
-            .active(ACTIVE)
-            .tenantId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    @Test
-    public void thatUrnInvalidFails() {
-
-        ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN_INVALID)
-            .id(ID)
-            .type(TYPE)
-            .active(ACTIVE)
-            .tenantId(ACCOUNT_ID)
-            .build();
-
-        Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
-
-        assertFalse(violationSet.isEmpty());
-        assertEquals(1, violationSet.size());
-        assertEquals("{javax.validation.constraints.Size.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("urn", violationSet.iterator().next().getPropertyPath().toString());
-    }
-
-    // endregion
-
     // region Type
 
     @Test
     public void thatTypeIsNotNull() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
 //            .type(TYPE)
             .active(ACTIVE)
@@ -142,7 +72,6 @@ public class ThingEntityTest {
     public void thatTypeIsNotEmpty() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
             .type("")
             .active(ACTIVE)
@@ -162,7 +91,6 @@ public class ThingEntityTest {
     public void thatTypeInvalidFails() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
             .type(TYPE_INVALID)
             .active(ACTIVE)
@@ -186,7 +114,6 @@ public class ThingEntityTest {
     public void thatAccountIdIsNotNull() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
             .type(TYPE)
             .active(ACTIVE)
@@ -206,7 +133,6 @@ public class ThingEntityTest {
     public void thatActiveIsNotNullable() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
             .type(TYPE)
             .active(null)
@@ -223,7 +149,6 @@ public class ThingEntityTest {
     public void thatActiveDefaultsToTrue() {
 
         ThingEntity objectEntity = ThingEntity.builder()
-            .urn(URN)
             .id(ID)
             .type(TYPE)
 //            .active(ACTIVE)
