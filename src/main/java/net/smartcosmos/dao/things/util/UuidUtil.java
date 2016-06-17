@@ -47,4 +47,7 @@ public class UuidUtil {
             .toLowerCase();
     }
 
+    public static UUID getNewUuid() {
+        return UUID.randomUUID();
+    }
 }

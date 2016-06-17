@@ -1,13 +1,15 @@
 package net.smartcosmos.dao.things.converter;
 
+import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.util.UuidUtil;
+import net.smartcosmos.dto.things.ThingCreate;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
 
-import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.dto.things.ThingCreate;
+import java.util.UUID;
 
 @Component
 public class ThingCreateToThingEntityConverter
@@ -16,8 +18,15 @@ public class ThingCreateToThingEntityConverter
     @Override
     public ThingEntity convert(ThingCreate thingCreate) {
 
+        UUID id;
+        if (StringUtils.isBlank(thingCreate.getUrn())) {
+            id = UuidUtil.getNewUuid();
+        } else {
+            id = UuidUtil.getUuidFromUrn(thingCreate.getUrn());
+        }
+
         return ThingEntity.builder()
-            .id(UuidUtil.getUuidFromUrn(thingCreate.getUrn()))
+            .id(id)
             .type(thingCreate.getType())
             .active(thingCreate.getActive())
             .build();

@@ -18,5 +18,4 @@ public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, Query
     Optional<ThingEntity> findByTenantIdAndId(UUID tenantId, UUID id);
 
     List<ThingEntity> findByTenantId(UUID tenantId);
-
 }
