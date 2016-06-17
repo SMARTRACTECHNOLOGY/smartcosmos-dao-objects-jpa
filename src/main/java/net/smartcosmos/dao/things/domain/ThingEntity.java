@@ -16,11 +16,14 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.beans.ConstructorProperties;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity(name = "thing")
@@ -57,14 +60,14 @@ public class ThingEntity implements Serializable {
     private UUID tenantId;
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "createdTimestamp", insertable = true, updatable = false)
-    private Long created;
+    private Date created;
 
     @LastModifiedDate
-//    @Column(name = "lastModifiedTimestamp", insertable = false, updatable = true) // lastModified only set on update, might be used later
-    // lastModified already set on create (v2 compatibility)
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "lastModifiedTimestamp", nullable = false, insertable = true, updatable = true)
-    private Long lastModified;
+    private Date lastModified;
 
     @Basic
     @NotNull
@@ -82,8 +85,8 @@ public class ThingEntity implements Serializable {
     protected ThingEntity(UUID id,
                           String type,
                           UUID tenantId,
-                          Long created,
-                          Long lastModified,
+                          Date created,
+                          Date lastModified,
                           Boolean active)
     {
         this.id = id;
