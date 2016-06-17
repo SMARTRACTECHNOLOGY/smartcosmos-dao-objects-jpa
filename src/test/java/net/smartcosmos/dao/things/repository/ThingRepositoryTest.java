@@ -43,13 +43,13 @@ public class ThingRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
+        id = UUID.randomUUID();
+
         ThingEntity entity = repository
                 .save(ThingEntity.builder()
-                    .urn("urn")
+                    .id(id)
                     .tenantId(tenantId)
                     .type("type").build());
-
-        id = entity.getId();
     }
 
     @After
@@ -67,20 +67,6 @@ public class ThingRepositoryTest {
     }
 
     @Test
-    public void deleteByTenantIdAndTypeAndUrn() throws Exception {
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantId, "type", "urn");
-
-        assertFalse(deleteList.isEmpty());
-        assertEquals(1, deleteList.size());
-        assertEquals(id, deleteList.get(0).getId());
-    }
-
-    @Test
-    public void findByTenantIdAndTypeAndUrn() throws Exception {
-        assertTrue(this.repository.findByTenantIdAndTypeAndUrn(tenantId, "type", "urn").isPresent());
-    }
-
-    @Test
     public void findByTenantIdAndId() throws Exception {
         assertTrue(this.repository.findByTenantIdAndId(tenantId, id).isPresent());
     }
@@ -88,15 +74,6 @@ public class ThingRepositoryTest {
     @Test
     public void findByTenantId() throws Exception {
         List<ThingEntity> entityList = repository.findByTenantId(tenantId);
-        assertFalse(entityList.isEmpty());
-
-        assertEquals(1, entityList.size());
-        assertEquals(id, entityList.get(0).getId());
-    }
-
-    @Test
-    public void findByTenantIdAndTypeAndUrnStartsWith() throws Exception {
-        List<ThingEntity> entityList = repository.findByTenantIdAndTypeAndUrnStartsWith(tenantId, "type", "u");
         assertFalse(entityList.isEmpty());
 
         assertEquals(1, entityList.size());
