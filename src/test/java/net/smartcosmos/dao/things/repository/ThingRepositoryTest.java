@@ -81,4 +81,14 @@ public class ThingRepositoryTest {
         assertEquals(1, entityList.size());
         assertEquals(id, entityList.get(0).getId());
     }
+
+    @Test
+    public void findByTenantIdAndType() throws Exception {
+
+        List<ThingEntity> entityList = repository.findByTenantIdAndType(tenantId, type);
+        assertFalse(entityList.isEmpty());
+
+        assertEquals(1, entityList.size());
+        assertEquals(id, entityList.get(0).getId());
+    }
 }
