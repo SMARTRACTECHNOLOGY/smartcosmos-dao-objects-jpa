@@ -269,7 +269,25 @@ public class ThingPersistenceServiceTest {
 
     // endregion
 
-    // region Find by URNS
+    // region Find by Type
+
+    @Test
+    public void testFindByType() throws Exception {
+
+        populateData();
+
+        int expectedSize = 3;
+        int actualSize = 0;
+
+        List<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE, 0L, 100);
+
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    // endregion
+
+    // region Find by URNs
 
     @Test
     public void testFindByUrns() throws Exception

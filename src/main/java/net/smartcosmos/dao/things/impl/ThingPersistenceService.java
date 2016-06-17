@@ -96,6 +96,22 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
+    public List<ThingResponse> findByType(String tenantUrn, String type, Long page, Integer size) {
+
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            List<ThingEntity> deleteList = repository.findByTenantIdAndType(tenantId, type);
+
+            return convert(deleteList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<ThingResponse> delete(String tenantUrn, String type, String urn) {
 
         try {
