@@ -156,7 +156,7 @@ public class ThingPersistenceServiceTest {
             .active(false)
             .build();
 
-        Optional<ThingResponse> responseUpdate = persistenceService.updateByTypeAndUrn(tenantId, type, urn, update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantId, type, urn, update);
 
         assertTrue(responseUpdate.isPresent());
 
@@ -208,7 +208,7 @@ public class ThingPersistenceServiceTest {
             .active(false)
             .build();
 
-        Optional<ThingResponse> responseUpdate = persistenceService.updateByTypeAndUrn(tenantId, "NO SUCH TYPE", "URN:DOES-NOT-EXIST", update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantId, "NO SUCH TYPE", "URN:DOES-NOT-EXIST", update);
 
         assertFalse(responseUpdate.isPresent());
     }
@@ -296,7 +296,7 @@ public class ThingPersistenceServiceTest {
 
         String id = entity.get().getId().toString();
 
-        List<ThingResponse> responseDelete = persistenceService.deleteByTypeAndUrn(tenantId, type, urn);
+        List<ThingResponse> responseDelete = persistenceService.delete(tenantId, type, urn);
 
         assertFalse(responseDelete.isEmpty());
         assertEquals(1, responseDelete.size());
@@ -369,7 +369,7 @@ public class ThingPersistenceServiceTest {
         assertEquals(type, response.get().getType());
         assertEquals(urn, response.get().getUrn());
         assertEquals(id, response.get().getId());
-        assertEquals(tenantId, response.get().getTenantId());
+        assertEquals(tenantId, response.get().getTenantUrn());
     }
 
     @Test

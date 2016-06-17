@@ -29,11 +29,10 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "urn", "tenantId" }) )
+@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "id", "tenantId" }) )
 public class ThingEntity implements Serializable {
 
     private static final int UUID_LENGTH = 16;
-    private static final int URN_LENGTH = 767;
     private static final int TYPE_LENGTH = 255;
 
     /*
@@ -50,11 +49,6 @@ public class ThingEntity implements Serializable {
     @Type(type = "uuid-binary")
     @Column(name = "id", length = UUID_LENGTH)
     private UUID id;
-
-    @NotEmpty
-    @Size(max = URN_LENGTH)
-    @Column(name="urn", length = URN_LENGTH, nullable = false, updatable = false)
-    private String urn;
 
     @NotEmpty
     @Size(max = TYPE_LENGTH)
@@ -88,9 +82,8 @@ public class ThingEntity implements Serializable {
         We therefore provide our own AllArgsConstructor that is used by the generated builder and takes care of field initialization.
      */
     @Builder
-    @ConstructorProperties({"id", "urn", "type", "tenantId", "created", "lastModified", "active"})
+    @ConstructorProperties({"id", "type", "tenantId", "created", "lastModified", "active"})
     protected ThingEntity(UUID id,
-                          String urn,
                           String type,
                           UUID tenantId,
                           Long created,
@@ -98,7 +91,6 @@ public class ThingEntity implements Serializable {
                           Boolean active)
     {
         this.id = id;
-        this.urn = urn;
         this.type = type;
         this.tenantId = tenantId;
         this.created = created;
