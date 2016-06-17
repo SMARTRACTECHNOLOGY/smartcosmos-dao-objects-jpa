@@ -1,5 +1,7 @@
 package net.smartcosmos.dao.things.util;
 
+import com.fasterxml.uuid.Generators;
+
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +50,17 @@ public class UuidUtil {
     }
 
     public static UUID getNewUuid() {
-        return UUID.randomUUID();
+
+        String baseUuidString = Generators.timeBasedGenerator().generate().toString();
+        String[] parts = baseUuidString.split("-");
+
+        String sortedUuidString = new StringBuilder(36)
+            .append(parts[2]).append(parts[1]).append("-")
+            .append(parts[0].substring(0, 4)).append("-")
+            .append(parts[0].substring(4, 8)).append("-")
+            .append(parts[3]).append("-")
+            .append(parts[4]).toString();
+
+        return UUID.fromString(sortedUuidString);
     }
 }
