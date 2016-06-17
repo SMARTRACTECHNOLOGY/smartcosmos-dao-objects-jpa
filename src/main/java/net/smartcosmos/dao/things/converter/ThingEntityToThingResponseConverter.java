@@ -1,6 +1,7 @@
 package net.smartcosmos.dao.things.converter;
 
 import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.ThingResponse;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistrar;
@@ -23,11 +24,10 @@ public class ThingEntityToThingResponseConverter
 
         return ThingResponse.builder()
                 // Required
-                .id(entity.getId().toString())
-                .urn(entity.getUrn())
+                .urn(UuidUtil.getThingUrnFromUuid(entity.getId()))
                 .type(entity.getType())
                 .active(entity.getActive())
-                .tenantId(entity.getTenantId().toString())
+                .tenantUrn(UuidUtil.getTenantUrnFromUuid(entity.getTenantId()))
                 // Don't forget to build it!
                 .build();
     }

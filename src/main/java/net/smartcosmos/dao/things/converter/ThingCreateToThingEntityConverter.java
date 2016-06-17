@@ -1,5 +1,6 @@
 package net.smartcosmos.dao.things.converter;
 
+import net.smartcosmos.dao.things.util.UuidUtil;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
@@ -16,7 +17,7 @@ public class ThingCreateToThingEntityConverter
     public ThingEntity convert(ThingCreate thingCreate) {
 
         return ThingEntity.builder()
-            .urn(thingCreate.getUrn())
+            .id(UuidUtil.getUuidFromUrn(thingCreate.getUrn()))
             .type(thingCreate.getType())
             .active(thingCreate.getActive())
             .build();
