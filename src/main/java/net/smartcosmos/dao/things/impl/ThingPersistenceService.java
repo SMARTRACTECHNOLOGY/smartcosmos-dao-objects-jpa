@@ -5,9 +5,11 @@ import net.smartcosmos.dao.things.ThingDao;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
+import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
@@ -15,7 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 
 import javax.validation.ConstraintViolationException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,30 +39,46 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public ThingResponse create(String tenantUrn, ThingCreate createThing) {
+    public Optional<ThingResponse> create(String tenantUrn, ThingCreate createThing) {
 
-        try {
-            UUID tenantUuid = UUID.fromString(tenantUrn);
+        if (!alreadyExists(tenantUrn, createThing)) {
+            try {
+                UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
 
-            ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-            entity.setTenantId(tenantUuid);
+                ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
+                entity.setTenantId(tenantId);
 
-            entity = persist(entity);
+                entity = persist(entity);
+                ThingResponse response = conversionService.convert(entity, ThingResponse.class);
 
-            return conversionService.convert(entity, ThingResponse.class);
+                return Optional.ofNullable(response);
+            }
+            catch (IllegalArgumentException e) {
+                if (StringUtils.isNotBlank(createThing.getUrn())) {
+                    log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, createThing.getUrn());
+                }
+                else {
+                    log.warn("Error processing ID: Tenant ID '{}'", tenantUrn);
+                }
+                throw e;
+            }
         }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing ID: Tenant ID '{}'", tenantUrn);
-            throw e;
-        }
+
+        return Optional.empty();
+    }
+
+    private boolean alreadyExists(String tenantUrn, ThingCreate createThing) {
+
+        return StringUtils.isNotBlank(createThing.getUrn()) && findByUrn(tenantUrn, createThing.getUrn()).isPresent();
     }
 
     @Override
     public Optional<ThingResponse> update(String tenantUrn, String type, String urn, ThingUpdate updateThing) throws ConstraintViolationException {
 
         try {
-            UUID tenantUuid = UUID.fromString(tenantUrn);
-            Optional<ThingEntity> thing = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            UUID id = UuidUtil.getUuidFromUrn(urn);
+            Optional<ThingEntity> thing = repository.findByTenantIdAndId(tenantId, id);
 
             if (thing.isPresent()) {
                 ThingEntity updateEntity = ThingPersistenceUtil.merge(thing.get(), updateThing);
@@ -67,7 +89,7 @@ public class ThingPersistenceService implements ThingDao {
             }
         }
         catch (IllegalArgumentException e) {
-            log.warn("Error processing ID: Tenant ID '{}'", tenantUrn);
+            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
 
         return Optional.empty();
@@ -77,13 +99,14 @@ public class ThingPersistenceService implements ThingDao {
     public List<ThingResponse> delete(String tenantUrn, String type, String urn) {
 
         try {
-            UUID tenantUuid = UUID.fromString(tenantUrn);
-            List<ThingEntity> deleteList = repository.deleteByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            UUID id = UuidUtil.getUuidFromUrn(urn);
+            List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, id);
 
             return convert(deleteList);
         }
         catch (IllegalArgumentException e) {
-            log.warn("Error processing IDs: Tenant ID '{}'", tenantUrn);
+            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
 
         return new ArrayList<>();
@@ -92,33 +115,37 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> findByTypeAndUrn(String tenantUrn, String type, String urn) {
 
+        return findByUrn(tenantUrn, urn);
+    }
+
+    @Override
+    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Long page, Integer size) {
+
+        throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
+    }
+
+    private Optional<ThingResponse> findByUrn(String tenantUrn, String urn) {
+
         try {
-            UUID tenantUuid = UUID.fromString(tenantUrn);
-            Optional<ThingEntity> entity = repository.findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            UUID id = UuidUtil.getUuidFromUrn(urn);
+
+            Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantId, id);
 
             return convert(entity);
         }
         catch (IllegalArgumentException e) {
-            log.warn("Error processing IDs: Tenant ID '{}'", tenantUrn);
+            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
 
         return Optional.empty();
     }
 
     @Override
-    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Long page, Integer size) {
-
-        UUID tenantUuid = UUID.fromString(tenantUrn);
-        List<ThingEntity> entityList = repository.findByTenantIdAndTypeAndUrnStartsWith(tenantUuid, type, urnStartsWith);
-
-        return convert(entityList);
-    }
-
-    @Override
     public List<Optional<ThingResponse>> findByUrns(String tenantUrn, Collection<String> urns) {
 
         return urns.stream()
-            .map(urn -> findById(tenantUrn, urn))
+            .map(urn -> findByUrn(tenantUrn, urn))
             .collect(Collectors.toList());
     }
 
@@ -126,13 +153,13 @@ public class ThingPersistenceService implements ThingDao {
     public List<ThingResponse> findAll(String tenantUrn, Long page, Integer size) {
 
         try {
-            UUID tenantUuid = UUID.fromString(tenantUrn);
-            List<ThingEntity> entityList = repository.findByTenantId(tenantUuid);
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            List<ThingEntity> entityList = repository.findByTenantId(tenantId);
 
             return convert(entityList);
         }
         catch (IllegalArgumentException e) {
-            log.warn("Error processing IDs: Tenant ID '{}'", tenantUrn);
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
         }
 
         return new ArrayList<>();

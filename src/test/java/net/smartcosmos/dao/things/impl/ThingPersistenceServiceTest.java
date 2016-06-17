@@ -4,13 +4,14 @@ import net.smartcosmos.dao.things.ThingPersistenceConfig;
 import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
+import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -25,9 +26,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("Duplicates")
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -38,25 +46,24 @@ import static org.junit.Assert.*;
 @IntegrationTest({ "spring.cloud.config.enabled=false", "eureka.client.enabled:false" })
 public class ThingPersistenceServiceTest {
 
-    public static final String URN_01 = "urn:thing:dummy01";
-    public static final String URN_02 = "urn:thing:dummy02";
-    public static final String URN_03 = "urn:thing:dummy03";
-    public static final String URN_04 = "urn:thing:dummy04";
-    public static final String URN_05 = "urn:thing:dummy05";
-    public static final String URN_06 = "urn:thing:dummy06";
-    public static final String URN_07 = "urn:thing:dummy07";
-    public static final String URN_08 = "urn:thing:dummy08";
-    public static final String URN_09 = "urn:thing:dummy09";
-    public static final String URN_10 = "urn:thing:dummy10";
-    public static final String URN_11 = "urn:thing:dummy11";
-    public static final String URN_12 = "urn:thing:dummy12";
+    public static final String URN_01 = "urn:thing:uuid:8614fac9-693d-4bee-886f-f9eefd60180a";
+    public static final String URN_02 = "urn:thing:uuid:73f81ca4-0800-4769-bb6f-db4a61b0fea1";
+    public static final String URN_03 = "urn:thing:uuid:2650c7d5-9dc5-4455-9eda-e34066050f76";
+    public static final String URN_04 = "urn:thing:uuid:10857865-4230-4d27-9dcc-9ef17ace3921";
+    public static final String URN_05 = "urn:thing:uuid:28124b54-edc4-4eed-b307-2af056119db2";
+    public static final String URN_06 = "urn:thing:uuid:fe55664a-0896-42bb-86c6-ba0c668eb348";
+    public static final String URN_07 = "urn:thing:uuid:9f1e8d9e-8d8e-4d04-b776-bbfcdf760405";
+    public static final String URN_08 = "urn:thing:uuid:71a03bc2-d41a-4c08-a355-6d0d5dc6f8a4";
+    public static final String URN_09 = "urn:thing:uuid:17f890b8-caa6-4ad2-98d6-641f3999128e";
+    public static final String URN_10 = "urn:thing:uuid:5926a69f-ff56-4a9c-ab79-e90b829f2ec4";
+    public static final String URN_11 = "urn:thing:uuid:97005fff-da53-4ad2-8a40-128da31e9cd4";
+    public static final String URN_12 = "urn:thing:uuid:4d872a55-ea69-4b9f-935a-9d21303085a5";
     public static final String TYPE_ONE = "type one";
     public static final String TYPE_TWO = "type two";
     public static final String WHATEVER = "whatever";
-    public static final String OBJECT_URN_QUERY_PARAMS = "urn:thing:dummy";
     private final UUID tenantUuid = UUID.randomUUID();
 
-    private final String tenantId = tenantUuid.toString();
+    private final String tenantUrn = UuidUtil.getTenantUrnFromUuid(tenantUuid);
 
     @Autowired
     ThingPersistenceService persistenceService;
@@ -71,7 +78,7 @@ public class ThingPersistenceServiceTest {
         // Might be a good candidate for a test package util.
         Authentication authentication = Mockito.mock(Authentication.class);
         Mockito.when(authentication.getPrincipal())
-            .thenReturn(new SmartCosmosUser(tenantId, "urn:userUrn", "username",
+            .thenReturn(new SmartCosmosUser(tenantUrn, "urn:userUrn", "username",
                                             "password", Arrays.asList(new SimpleGrantedAuthority("USER"))));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -86,41 +93,69 @@ public class ThingPersistenceServiceTest {
     // region Create
 
     @Test
-    public void createByTypeAndUrn() throws Exception {
+    public void thatCreateByTypeAndUrnUsesGivenId() throws Exception {
+
+        final String uuid = "238978cb-c279-47e6-a553-92f2c372ae1d";
+        final String urn = "urn:thing:uuid:" + uuid;
+
         ThingCreate create = ThingCreate.builder()
-            .urn("urn:fakeUrn")
+            .urn(urn)
             .type("type")
             .build();
-        ThingResponse response = persistenceService
-            .create(tenantId, create);
+        Optional<ThingResponse> response = persistenceService
+            .create(tenantUrn, create);
+        assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndTypeAndUrn(tenantUuid, "type", "urn:fakeUrn");
+        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(urn));
 
         assertTrue(entity.isPresent());
+        assertEquals(UUID.fromString(uuid), entity.get().getId());
 
-        assertEquals("urn:fakeUrn", entity.get().getUrn());
-        assertEquals("urn:fakeUrn", response.getUrn());
+        assertEquals(urn, response.get().getUrn());
     }
 
-    // TODO: Generate URN from UUID if no URN is provided
-    @Ignore
     @Test
-    public void createByType() throws Exception {
+    public void thatCreateByTypeGeneratesId() throws Exception {
         ThingCreate create = ThingCreate.builder()
             .type("type")
             .build();
-        ThingResponse response = persistenceService
-            .create(tenantId, create);
+        Optional<ThingResponse> response = persistenceService
+            .create(tenantUrn, create);
+        assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndId(tenantUuid, UUID.fromString(response.getId()));
+        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(response.get().getUrn()));
 
         assertTrue(entity.isPresent());
 
         assertEquals("type", entity.get().getType());
-        assertEquals("type", response.getType());
-        assertTrue(entity.get().getUrn().startsWith("urn:"));
+        assertEquals("type", response.get().getType());
+        assertTrue(response.get().getUrn().startsWith("urn:thing:uuid:"));
+
+        try {
+            UuidUtil.getUuidFromUrn(response.get().getUrn());
+        } catch (IllegalArgumentException e)
+        {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void thatDuplicateIdFails() {
+
+        final String uuid = "238978cb-c279-47e6-a553-92f2c372ae1d";
+        final String urn = "urn:thing:uuid:" + uuid;
+
+        ThingCreate create = ThingCreate.builder()
+            .urn(urn)
+            .type("type")
+            .build();
+        Optional<ThingResponse> response1 = persistenceService
+            .create(tenantUrn, create);
+        assertTrue(response1.isPresent());
+
+        Optional<ThingResponse> response2 = persistenceService
+            .create(tenantUrn, create);
+        assertFalse(response2.isPresent());
     }
 
     // endregion
@@ -130,7 +165,7 @@ public class ThingPersistenceServiceTest {
     @Test
     public void thatUpdateByTypeAndUrnSucceeds() {
 
-        String urn = "urn:fakeUrn-update";
+        String urn = "urn:thing:uuid:a71bd56a-841a-4a34-bd9d-1fd3bfcd8f15";
         String type = "type";
 
         ThingCreate create = ThingCreate.builder()
@@ -138,15 +173,15 @@ public class ThingPersistenceServiceTest {
             .type(type)
             .build();
 
-        ThingResponse responseCreate = persistenceService
-            .create(tenantId, create);
+        Optional<ThingResponse> response = persistenceService
+            .create(tenantUrn, create);
+        assertTrue(response.isPresent());
+        ThingResponse responseCreate = response.get();
 
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(urn));
 
         assertTrue(entity.isPresent());
 
-        assertEquals(urn, entity.get().getUrn());
         assertTrue(entity.get().getActive());
 
         assertEquals(urn, responseCreate.getUrn());
@@ -156,43 +191,7 @@ public class ThingPersistenceServiceTest {
             .active(false)
             .build();
 
-        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantId, type, urn, update);
-
-        assertTrue(responseUpdate.isPresent());
-
-        assertEquals(urn, responseUpdate.get().getUrn());
-        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
-        assertEquals(type, responseUpdate.get().getType());
-        assertEquals(false, responseUpdate.get().getActive());
-    }
-
-    @Test
-    public void thatUpdateByIdSucceeds() {
-
-        String urn = "urn:fakeUrn-update2";
-        String type = "type";
-
-        ThingCreate create = ThingCreate.builder()
-            .urn(urn)
-            .type(type)
-            .build();
-
-        ThingResponse responseCreate = persistenceService
-            .create(tenantId, create);
-
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
-
-        assertTrue(entity.isPresent());
-
-        assertEquals(urn, entity.get().getUrn());
-        assertEquals(urn, responseCreate.getUrn());
-
-        ThingUpdate update = ThingUpdate.builder()
-            .active(false)
-            .build();
-
-        Optional<ThingResponse> responseUpdate = persistenceService.updateById(tenantId, responseCreate.getId(), update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, type, urn, update);
 
         assertTrue(responseUpdate.isPresent());
 
@@ -208,37 +207,7 @@ public class ThingPersistenceServiceTest {
             .active(false)
             .build();
 
-        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantId, "NO SUCH TYPE", "URN:DOES-NOT-EXIST", update);
-
-        assertFalse(responseUpdate.isPresent());
-    }
-
-    @Test
-    public void thatUpdateNonexistentByIdFails() {
-
-        String urn = "urn:fakeUrn-update3";
-        String type = "type";
-
-        ThingCreate create = ThingCreate.builder()
-            .urn(urn)
-            .type(type)
-            .build();
-
-        ThingResponse responseCreate = persistenceService
-            .create(tenantId, create);
-
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
-
-        assertTrue(entity.isPresent());
-
-        assertEquals(urn, entity.get().getUrn());
-        assertEquals(urn, responseCreate.getUrn());
-
-        ThingUpdate update = ThingUpdate.builder()
-            .active(false)
-            .build();
-        Optional<ThingResponse> responseUpdate = persistenceService.updateById(tenantId, UUID.randomUUID().toString(), update);
+        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, "NO SUCH TYPE", "URN:DOES-NOT-EXIST", update);
 
         assertFalse(responseUpdate.isPresent());
     }
@@ -248,37 +217,9 @@ public class ThingPersistenceServiceTest {
     // region Delete
 
     @Test
-    public void testDeleteById() throws Exception {
-
-        String urn = "urn:fakeUrn-delete";
-        String type = "type";
-
-        ThingCreate create = ThingCreate.builder()
-            .urn(urn)
-            .type(type)
-            .build();
-
-        ThingResponse responseCreate = persistenceService
-            .create(tenantId, create);
-
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
-
-        assertTrue(entity.isPresent());
-
-        String id = entity.get().getId().toString();
-
-        List<ThingResponse> responseDelete = persistenceService.deleteById(tenantId, id);
-
-        assertFalse(responseDelete.isEmpty());
-        assertEquals(1, responseDelete.size());
-        assertEquals(id, responseDelete.get(0).getId());
-    }
-
-    @Test
     public void testDeleteByTypeAndUrn() throws Exception {
 
-        String urn = "urn:fakeUrn-delete2";
+        String urn = "urn:thing:uuid:a8996049-18cb-40b0-9ffd-592c6b610d58";
         String type = "type";
 
         ThingCreate create = ThingCreate.builder()
@@ -286,21 +227,21 @@ public class ThingPersistenceServiceTest {
             .type(type)
             .build();
 
-        ThingResponse responseCreate = persistenceService
-            .create(tenantId, create);
+        Optional<ThingResponse> response = persistenceService
+            .create(tenantUrn, create);
+        assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository
-            .findByTenantIdAndTypeAndUrn(tenantUuid, type, urn);
+        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(urn));
 
         assertTrue(entity.isPresent());
 
-        String id = entity.get().getId().toString();
+        UUID id = entity.get().getId();
 
-        List<ThingResponse> responseDelete = persistenceService.delete(tenantId, type, urn);
+        List<ThingResponse> responseDelete = persistenceService.delete(tenantUrn, type, urn);
 
         assertFalse(responseDelete.isEmpty());
         assertEquals(1, responseDelete.size());
-        assertEquals(id, responseDelete.get(0).getId());
+        assertEquals(id, UuidUtil.getUuidFromUrn(responseDelete.get(0).getUrn()));
     }
 
     // endregion
@@ -311,7 +252,7 @@ public class ThingPersistenceServiceTest {
     public void testFindByTypeAndUrn() throws Exception {
         populateData();
 
-        Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_01);
+        Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01);
 
         assertTrue(response.isPresent());
         assertEquals(URN_01, response.get().getUrn());
@@ -322,66 +263,13 @@ public class ThingPersistenceServiceTest {
     public void testFindByTypeAndUrnNonExistent() throws Exception {
         populateData();
 
-        Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantId, WHATEVER, URN_01);
-        assertFalse(response.isPresent());
-    }
-
-    @Test
-    public void testFindByTypeAndUrnStartsWithNonexistent() throws Exception {
-        populateData();
-
-        List<ThingResponse> response = persistenceService.findByTypeAndUrnStartsWith(tenantId, "no-such-type", "no-such-urn", 0L, 100L);
-
-        assertTrue(response.isEmpty());
-    }
-
-    @Test
-    public void testFindByTypeAndUrnStartsWith() throws Exception {
-        populateData();
-
-        List<ThingResponse> response = persistenceService.findByTypeAndUrnStartsWith(tenantId, WHATEVER, OBJECT_URN_QUERY_PARAMS, 0L, 100L);
-
-        assertEquals(6, response.size());
-    }
-
-    // endregion
-
-    // region Find by ID
-
-    @Test
-    public void testFindById() {
-        String urn = "urn:fakeUrn-find1";
-        String type = "type";
-
-        ThingCreate create = ThingCreate.builder()
-            .urn(urn)
-            .type(type)
-            .build();
-
-        ThingResponse responseCreate = persistenceService
-            .create(tenantId, create);
-
-        String id = responseCreate.getId().toString();
-
-        Optional<ThingResponse> response = persistenceService.findById(tenantId, id);
-
-        assertTrue(response.isPresent());
-        assertEquals(type, response.get().getType());
-        assertEquals(urn, response.get().getUrn());
-        assertEquals(id, response.get().getId());
-        assertEquals(tenantId, response.get().getTenantUrn());
-    }
-
-    @Test
-    public void testFindByIdNonexistent() {
-
-        Optional<ThingResponse> response = persistenceService.findById(tenantId, UUID.randomUUID().toString());
+        Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_01);
         assertFalse(response.isPresent());
     }
 
     // endregion
 
-    // region Find by IDs
+    // region Find by URNS
 
     @Test
     public void testFindByIds() throws Exception
@@ -391,17 +279,17 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_01).get().getId();
-        String secondId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_02).get().getId();
-        String thirdId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_03).get().getId();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_02).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
 
-        Collection<String> ids = new ArrayList<>();
-        ids.add(firstId);
-        ids.add(secondId);
-        ids.add(thirdId);
+        Collection<String> urn = new ArrayList<>();
+        urn.add(firstUrn);
+        urn.add(secondUrn);
+        urn.add(thirdUrn);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByIds(tenantId, ids, 0L, 100L);
+        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantUrn, urn);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
@@ -414,17 +302,17 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_01).get().getId();
-        String secondId = UUID.randomUUID().toString();
-        String thirdId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_03).get().getId();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String secondUrn = UUID.randomUUID().toString();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
 
-        Collection<String> ids = new ArrayList<>();
-        ids.add(firstId);
-        ids.add(secondId);
-        ids.add(thirdId);
+        Collection<String> urns = new ArrayList<>();
+        urns.add(firstUrn);
+        urns.add(secondUrn);
+        urns.add(thirdUrn);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByIds(tenantId, ids, 0L, 100L);
+        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
@@ -437,17 +325,17 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        String firstId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_01).get().getId();
-        String secondId = "no UUID";
-        String thirdId = persistenceService.findByTypeAndUrn(tenantId, TYPE_ONE, URN_03).get().getId();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String seconUrn = "no UUID";
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
 
-        Collection<String> ids = new ArrayList<>();
-        ids.add(firstId);
-        ids.add(secondId);
-        ids.add(thirdId);
+        Collection<String> urns = new ArrayList<>();
+        urns.add(firstUrn);
+        urns.add(seconUrn);
+        urns.add(thirdUrn);
 
         expectedSize = 3;
-        List<Optional<ThingResponse>> response = persistenceService.findByIds(tenantId, ids, 0L, 100L);
+        List<Optional<ThingResponse>> response = persistenceService.findByUrns(tenantUrn, urns);
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
@@ -459,40 +347,40 @@ public class ThingPersistenceServiceTest {
     private void populateData() throws Exception {
 
         ThingEntity entityNameOneTypeOne = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_01).type(TYPE_ONE).build();
+            .id(UuidUtil.getUuidFromUrn(URN_01)).type(TYPE_ONE).build();
 
         ThingEntity entityNameTwoTypeOne = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_02).type(TYPE_ONE).build();
+            .id(UuidUtil.getUuidFromUrn(URN_02)).type(TYPE_ONE).build();
 
         ThingEntity entityNameThreeTypeOne = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_03).type(TYPE_ONE).build();
+            .id(UuidUtil.getUuidFromUrn(URN_03)).type(TYPE_ONE).build();
 
         ThingEntity entityNameOneTypeTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_04).type(TYPE_TWO).build();
+            .id(UuidUtil.getUuidFromUrn(URN_04)).type(TYPE_TWO).build();
 
         ThingEntity entityNameTwoTypeTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_05).type(TYPE_TWO).build();
+            .id(UuidUtil.getUuidFromUrn(URN_05)).type(TYPE_TWO).build();
 
         ThingEntity entityNameThreeTypeTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_06).type(TYPE_TWO).build();
+            .id(UuidUtil.getUuidFromUrn(URN_06)).type(TYPE_TWO).build();
 
         ThingEntity entityNameOneMonikerOne = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_07).type(WHATEVER).build();
+            .id(UuidUtil.getUuidFromUrn(URN_07)).type(WHATEVER).build();
 
         ThingEntity entityNameOneMonikerTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_08).type(WHATEVER).build();
+            .id(UuidUtil.getUuidFromUrn(URN_08)).type(WHATEVER).build();
 
         ThingEntity entityNameOneMonikerThree = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_09).type(WHATEVER).build();
+            .id(UuidUtil.getUuidFromUrn(URN_09)).type(WHATEVER).build();
 
         ThingEntity entityObjectUrn10 = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_10).type(WHATEVER).build();
+            .id(UuidUtil.getUuidFromUrn(URN_10)).type(WHATEVER).build();
 
         ThingEntity entityObjectUrn11 = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_11).type(WHATEVER).build();
+            .id(UuidUtil.getUuidFromUrn(URN_11)).type(WHATEVER).build();
 
         ThingEntity entityObjectUrn12 = ThingEntity.builder().tenantId(tenantUuid)
-            .urn(URN_12).type(WHATEVER).build();
+            .id(UuidUtil.getUuidFromUrn(URN_12)).type(WHATEVER).build();
 
         repository.save(entityNameOneTypeOne);
         repository.save(entityNameTwoTypeOne);
