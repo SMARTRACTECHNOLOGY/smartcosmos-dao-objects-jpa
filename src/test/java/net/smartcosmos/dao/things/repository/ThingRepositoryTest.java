@@ -37,6 +37,8 @@ import static org.junit.Assert.assertTrue;
 public class ThingRepositoryTest {
 
     final UUID tenantId = UUID.randomUUID();
+    final String type = "type";
+
     @Autowired
     ThingRepository repository;
     private UUID id;
@@ -49,7 +51,7 @@ public class ThingRepositoryTest {
                 .save(ThingEntity.builder()
                     .id(id)
                     .tenantId(tenantId)
-                    .type("type").build());
+                    .type(type).build());
     }
 
     @After
@@ -58,8 +60,8 @@ public class ThingRepositoryTest {
     }
 
     @Test
-    public void deleteByTenantIdAndId() throws Exception {
-        List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, id);
+    public void deleteByIdAndTenantIdAndType() throws Exception {
+        List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndType(id, tenantId, type);
 
         assertFalse(deleteList.isEmpty());
         assertEquals(1, deleteList.size());
@@ -67,8 +69,8 @@ public class ThingRepositoryTest {
     }
 
     @Test
-    public void findByTenantIdAndId() throws Exception {
-        assertTrue(this.repository.findByTenantIdAndId(tenantId, id).isPresent());
+    public void findByIdAndTenantId() throws Exception {
+        assertTrue(this.repository.findByIdAndTenantIdAndType(id, tenantId, type).isPresent());
     }
 
     @Test

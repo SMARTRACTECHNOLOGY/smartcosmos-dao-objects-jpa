@@ -78,7 +78,7 @@ public class ThingPersistenceService implements ThingDao {
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
-            Optional<ThingEntity> thing = repository.findByTenantIdAndId(tenantId, id);
+            Optional<ThingEntity> thing = repository.findByIdAndTenantIdAndType(id, tenantId, type);
 
             if (thing.isPresent()) {
                 ThingEntity updateEntity = ThingPersistenceUtil.merge(thing.get(), updateThing);
@@ -101,7 +101,7 @@ public class ThingPersistenceService implements ThingDao {
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
-            List<ThingEntity> deleteList = repository.deleteByTenantIdAndId(tenantId, id);
+            List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndType(id, tenantId, type);
 
             return convert(deleteList);
         }
@@ -115,7 +115,19 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> findByTypeAndUrn(String tenantUrn, String type, String urn) {
 
-        return findByUrn(tenantUrn, urn);
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            UUID id = UuidUtil.getUuidFromUrn(urn);
+
+            Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(id, tenantId, type);
+
+            return convert(entity);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+        }
+
+        return Optional.empty();
     }
 
     @Override
@@ -130,7 +142,7 @@ public class ThingPersistenceService implements ThingDao {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
 
-            Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantId, id);
+            Optional<ThingEntity> entity = repository.findByIdAndTenantId(id, tenantId);
 
             return convert(entity);
         }

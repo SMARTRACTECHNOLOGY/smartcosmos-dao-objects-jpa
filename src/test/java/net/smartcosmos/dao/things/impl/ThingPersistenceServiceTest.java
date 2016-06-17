@@ -106,7 +106,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(urn));
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(urn), tenantUuid, "type");
 
         assertTrue(entity.isPresent());
         assertEquals(UUID.fromString(uuid), entity.get().getId());
@@ -123,7 +123,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(response.get().getUrn()));
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(response.get().getUrn()), tenantUuid, "type");
 
         assertTrue(entity.isPresent());
 
@@ -178,7 +178,7 @@ public class ThingPersistenceServiceTest {
         assertTrue(response.isPresent());
         ThingResponse responseCreate = response.get();
 
-        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(urn));
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(urn), tenantUuid, type);
 
         assertTrue(entity.isPresent());
 
@@ -231,7 +231,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByTenantIdAndId(tenantUuid, UuidUtil.getUuidFromUrn(urn));
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(urn), tenantUuid, type);
 
         assertTrue(entity.isPresent());
 
@@ -272,7 +272,7 @@ public class ThingPersistenceServiceTest {
     // region Find by URNS
 
     @Test
-    public void testFindByIds() throws Exception
+    public void testFindByUrns() throws Exception
     {
         populateData();
 
