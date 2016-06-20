@@ -182,7 +182,7 @@ public class ThingPersistenceService implements ThingDao {
             .collect(Collectors.toMap(ThingResponse::getUrn, Function.identity()));
 
         List<String> notFound = urns.stream()
-            .filter(dataMap::containsKey)
+            .filter(urn -> !dataMap.containsKey(urn))
             .collect(Collectors.toList());
 
         return new ThingUrnQueryResponse(dataMap.values(), notFound);

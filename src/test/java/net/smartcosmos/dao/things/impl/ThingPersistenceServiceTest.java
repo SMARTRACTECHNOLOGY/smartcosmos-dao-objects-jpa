@@ -320,7 +320,7 @@ public class ThingPersistenceServiceTest {
     }
 
     @Test
-    public void thatFindByIdsReturnsPartialResultsWithNonexistentId() throws Exception
+    public void thatFindByUrnsReturnsPartialResultsWithNonexistentId() throws Exception
     {
         populateData();
 
@@ -349,7 +349,7 @@ public class ThingPersistenceServiceTest {
     }
 
     @Test
-    public void thatFindByIdsReturnsPartialResultsWithUnparseableId() throws Exception
+    public void thatFindByUrnsReturnsPartialResultsWithUnparseableId() throws Exception
     {
         populateData();
 
