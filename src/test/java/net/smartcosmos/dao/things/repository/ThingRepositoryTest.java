@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -86,6 +87,19 @@ public class ThingRepositoryTest {
     public void findByTenantIdAndType() throws Exception {
 
         List<ThingEntity> entityList = repository.findByTenantIdAndType(tenantId, type);
+        assertFalse(entityList.isEmpty());
+
+        assertEquals(1, entityList.size());
+        assertEquals(id, entityList.get(0).getId());
+    }
+
+    @Test
+    public void findByIdInAndTenantId() throws Exception {
+
+        List<UUID> uuids = new ArrayList<>();
+        uuids.add(id);
+
+        List<ThingEntity> entityList = repository.findByIdInAndTenantId(uuids, tenantId);
         assertFalse(entityList.isEmpty());
 
         assertEquals(1, entityList.size());
