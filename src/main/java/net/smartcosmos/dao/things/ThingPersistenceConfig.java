@@ -1,4 +1,4 @@
-package net.smartcosmos.dao.objects;
+package net.smartcosmos.dao.things;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.orm.jpa.EntityScan;
@@ -20,7 +20,7 @@ import java.util.Map;
 @EntityScan
 @ComponentScan
 @Configuration
-public class ObjectPersistenceConfig extends WebMvcConfigurerAdapter {
+public class ThingPersistenceConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
     Map<String, FormatterRegistrar> formatterRegistrarMap;
