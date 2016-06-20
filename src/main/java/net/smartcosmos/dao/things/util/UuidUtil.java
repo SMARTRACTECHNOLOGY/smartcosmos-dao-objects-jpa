@@ -14,11 +14,12 @@ public class UuidUtil {
     private static final String UUID_TYPE = "uuid";
 
     private static final String TENANT_PREFIX = "tenant";
+    private static final String USER_PREFIX = "user";
     private static final String THING_PREFIX = "thing";
 
     public static UUID getUuidFromUrn(String urn) throws IllegalArgumentException {
 
-        String urnScheme="urn:.*:uuid:([A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12})";
+        String urnScheme="urn:.*:uuid:([A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12})";
 
         Pattern p = Pattern.compile(urnScheme, Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(urn);
@@ -35,6 +36,10 @@ public class UuidUtil {
 
     public static String getTenantUrnFromUuid(UUID uuid) {
         return getPrefixUrnFromUuid(TENANT_PREFIX, uuid);
+    }
+
+    public static String getUserUrnFromUuid(UUID uuid) {
+        return getPrefixUrnFromUuid(USER_PREFIX, uuid);
     }
 
     static String getPrefixUrnFromUuid(String prefix, UUID uuid) {
