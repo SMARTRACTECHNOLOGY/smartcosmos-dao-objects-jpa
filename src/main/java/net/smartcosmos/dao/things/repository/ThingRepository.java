@@ -22,4 +22,6 @@ public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, Query
     List<ThingEntity> findByTenantIdAndType(UUID tenantId, String type);
 
     List<ThingEntity> findByTenantId(UUID tenantId);
+
+    List<ThingEntity> findByIdInAndTenantId(List<UUID> ids, UUID tenantId);
 }

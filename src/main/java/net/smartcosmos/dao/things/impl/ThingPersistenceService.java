@@ -9,7 +9,6 @@ import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
-import net.smartcosmos.dto.things.ThingUrnQueryResponse;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +20,8 @@ import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -173,19 +170,32 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public ThingUrnQueryResponse findByUrns(String tenantUrn, Collection<String> urns) {
+    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns) {
 
-        Map<String, ThingResponse> dataMap = urns.stream()
-            .map(urn -> findByUrn(tenantUrn, urn))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toMap(ThingResponse::getUrn, Function.identity()));
+        UUID tenantId;
+        try {
+            tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+            return new ArrayList<>();
+        }
 
-        List<String> notFound = urns.stream()
-            .filter(urn -> !dataMap.containsKey(urn))
+        List<UUID> ids = urns.stream()
+            .map(urn -> {
+                try {
+                    return UuidUtil.getUuidFromUrn(urn);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+                }
+                return null;
+            })
+            .filter(uuid -> uuid != null)
             .collect(Collectors.toList());
 
-        return new ThingUrnQueryResponse(dataMap.values(), notFound);
+        List<ThingEntity> entityList = repository.findByIdInAndTenantId(ids, tenantId);
+
+        return convert(entityList);
     }
 
     @Override

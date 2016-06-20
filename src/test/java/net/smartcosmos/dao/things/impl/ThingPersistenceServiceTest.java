@@ -8,7 +8,6 @@ import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
-import net.smartcosmos.dto.things.ThingUrnQueryResponse;
 import net.smartcosmos.security.user.SmartCosmosUser;
 import org.junit.After;
 import org.junit.Assert;
@@ -298,9 +297,6 @@ public class ThingPersistenceServiceTest {
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        int expectedNotFoundSize = 0;
-        int actualNotFoundSize = 0;
-
         String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
         String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_02).get().getUrn();
         String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
@@ -310,13 +306,10 @@ public class ThingPersistenceServiceTest {
         urn.add(secondUrn);
         urn.add(thirdUrn);
 
-        ThingUrnQueryResponse response = persistenceService.findByUrns(tenantUrn, urn);
+        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
-
-        actualNotFoundSize = response.getNotFound().size();
-        assertTrue("Expected " + expectedNotFoundSize + " misses, but received " + actualNotFoundSize, actualNotFoundSize == expectedNotFoundSize);
     }
 
     @Test
@@ -327,9 +320,6 @@ public class ThingPersistenceServiceTest {
         int expectedDataSize = 2;
         int actualDataSize = 0;
 
-        int expectedNotFoundSize = 1;
-        int actualNotFoundSize = 0;
-
         String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
         String secondUrn = UuidUtil.getThingUrnFromUuid(UUID.randomUUID());
         String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
@@ -339,13 +329,10 @@ public class ThingPersistenceServiceTest {
         urns.add(secondUrn);
         urns.add(thirdUrn);
 
-        ThingUrnQueryResponse response = persistenceService.findByUrns(tenantUrn, urns);
+        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urns);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
-
-        actualNotFoundSize = response.getNotFound().size();
-        assertTrue("Expected " + expectedNotFoundSize + " misses, but received " + actualNotFoundSize, actualNotFoundSize == expectedNotFoundSize);
     }
 
     @Test
@@ -356,9 +343,6 @@ public class ThingPersistenceServiceTest {
         int expectedDataSize = 2;
         int actualDataSize = 0;
 
-        int expectedNotFoundSize = 1;
-        int actualNotFoundSize = 0;
-
         String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
         String seconUrn = "no URN";
         String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
@@ -368,13 +352,10 @@ public class ThingPersistenceServiceTest {
         urns.add(seconUrn);
         urns.add(thirdUrn);
 
-        ThingUrnQueryResponse response = persistenceService.findByUrns(tenantUrn, urns);
+        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urns);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
-
-        actualNotFoundSize = response.getNotFound().size();
-        assertTrue("Expected " + expectedNotFoundSize + " misses, but received " + actualNotFoundSize, actualNotFoundSize == expectedNotFoundSize);
     }
 
     // endregion
