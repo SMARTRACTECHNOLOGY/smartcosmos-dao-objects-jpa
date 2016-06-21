@@ -24,7 +24,7 @@ public class ThingPersistenceUtil {
 
     public static String normalizeFieldName(String fieldName) {
 
-        if (StringUtils.equalsIgnoreCase("urn", fieldName)) {
+        if (StringUtils.equalsIgnoreCase("urn", fieldName) || StringUtils.equalsIgnoreCase("id", fieldName)) {
             return "id";
         }
 
@@ -32,7 +32,7 @@ public class ThingPersistenceUtil {
             return "type";
         }
 
-        if (StringUtils.equalsIgnoreCase("tenantUrn", fieldName)) {
+        if (StringUtils.equalsIgnoreCase("tenantUrn", fieldName) || StringUtils.equalsIgnoreCase("tenantId", fieldName)) {
             return "tenantId";
         }
 
