@@ -300,7 +300,7 @@ public class ThingPersistenceServiceTest {
         long expectedTotalSize = 6;
         long actualTotalSize = 0;
 
-        Page<ThingResponse> response = persistenceService.findByType(tenantUrn, WHATEVER, 0, 3);
+        Page<ThingResponse> response = persistenceService.findByType(tenantUrn, WHATEVER, 1, 3);
 
         assertNotNull(response);
         assertNotNull(response.getData());
@@ -543,12 +543,50 @@ public class ThingPersistenceServiceTest {
     public void testFindAllPaging() throws Exception {
 
         populateData();
+
+        Page<ThingResponse> response = persistenceService.findAll(tenantUrn, 1, 3);
+
+        assertFalse(response.getData().isEmpty());
+        assertEquals(3, response.getData().size());
+
+        assertEquals(3, response.getPage().getSize());
+        assertEquals(4, response.getPage().getTotalPages());
+        assertEquals(12, response.getPage().getTotalElements());
+        assertEquals(1, response.getPage().getNumber());
     }
 
     @Test
     public void testFinallPagingAndSorting() throws Exception {
 
         populateData();
+
+        Page<ThingResponse> page1 = persistenceService.findAll(tenantUrn, 1, 3, SortOrder.ASC, "type");
+
+        assertFalse(page1.getData().isEmpty());
+        assertEquals(3, page1.getData().size());
+
+        assertEquals(3, page1.getPage().getSize());
+        assertEquals(4, page1.getPage().getTotalPages());
+        assertEquals(12, page1.getPage().getTotalElements());
+        assertEquals(1, page1.getPage().getNumber());
+
+        assertEquals(TYPE_ONE, page1.getData().get(0));
+        assertEquals(TYPE_ONE, page1.getData().get(1));
+        assertEquals(TYPE_ONE, page1.getData().get(2));
+
+        Page<ThingResponse> page2 = persistenceService.findAll(tenantUrn, 2, 3, SortOrder.ASC, "type");
+
+        assertFalse(page2.getData().isEmpty());
+        assertEquals(3, page2.getData().size());
+
+        assertEquals(3, page2.getPage().getSize());
+        assertEquals(4, page2.getPage().getTotalPages());
+        assertEquals(12, page2.getPage().getTotalElements());
+        assertEquals(1, page2.getPage().getNumber());
+
+        assertEquals(TYPE_TWO, page2.getData().get(0));
+        assertEquals(TYPE_TWO, page2.getData().get(1));
+        assertEquals(TYPE_TWO, page2.getData().get(2));
     }
 
     // endregion
