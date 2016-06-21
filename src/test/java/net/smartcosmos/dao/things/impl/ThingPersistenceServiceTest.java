@@ -279,7 +279,7 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 3;
         int actualSize = 0;
 
-        List<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE, 0L, 100);
+        List<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE);
 
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);

@@ -127,7 +127,7 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public Page<ThingResponse> findByType(String tenantUrn, String type, Long page, Integer size) {
+    public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size) {
         // TODO: Implement Paging
         return null;
     }
