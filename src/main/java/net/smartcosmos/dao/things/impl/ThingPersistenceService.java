@@ -117,6 +117,7 @@ public class ThingPersistenceService implements ThingDao {
         sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
         Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
         Sort sort = new Sort(direction, sortBy);
+
         return findByTypeList(tenantUrn, type, sort);
     }
 
@@ -249,6 +250,21 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns) {
 
+        return findByUrns(tenantUrn, urns, null);
+    }
+
+    @Override
+    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, SortOrder sortOrder, String sortBy) {
+
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        Sort sort = new Sort(direction, sortBy);
+
+        return findByUrns(tenantUrn, urns, sort);
+    }
+
+    private List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, Sort sort) {
+
         UUID tenantId;
         try {
             tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
@@ -258,27 +274,30 @@ public class ThingPersistenceService implements ThingDao {
             return new ArrayList<>();
         }
 
-        List<UUID> ids = urns.stream()
-            .map(urn -> {
-                try {
-                    return UuidUtil.getUuidFromUrn(urn);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
-                }
-                return null;
-            })
-            .filter(uuid -> uuid != null)
-            .collect(Collectors.toList());
+        List<UUID> ids = getUuidListFromUrnCollection(tenantUrn, urns);
 
-        List<ThingEntity> entityList = repository.findByIdInAndTenantId(ids, tenantId);
+        List<ThingEntity> entityList;
+        if (sort != null) {
+            entityList = repository.findByIdInAndTenantId(ids, tenantId, sort);
+        } else {
+            entityList = repository.findByIdInAndTenantId(ids, tenantId);
+        }
 
         return convert(entityList);
     }
 
-    @Override
-    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, SortOrder sortOrder, String sortBy) {
-        // TODO: Implement Sorting
-        return findByUrns(tenantUrn, urns);
+    private List<UUID> getUuidListFromUrnCollection(String tenantUrn, Collection<String> urns) {
+        return urns.stream()
+                .map(urn -> {
+                    try {
+                        return UuidUtil.getUuidFromUrn(urn);
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+                    }
+                    return null;
+                })
+                .filter(uuid -> uuid != null)
+                .collect(Collectors.toList());
     }
 
     // endregion
