@@ -477,6 +477,82 @@ public class ThingPersistenceServiceTest {
 
     // endregion
 
+    // region Find All
+
+    @Test
+    public void testFindAll() throws Exception {
+
+        populateData();
+
+        int expectedSize = 12;
+        int actualSize = 0;
+
+        List<ThingResponse> response = persistenceService.findAll(tenantUrn);
+
+        assertFalse(response.isEmpty());
+
+        actualSize = response.size();
+        assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    @Test
+    public void testFindAllSortingAsc() throws Exception {
+
+        populateData();
+
+        List<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.ASC, "type");
+
+        assertFalse(response.isEmpty());
+        assertEquals(TYPE_ONE, response.get(0).getType());
+        assertEquals(TYPE_ONE, response.get(1).getType());
+        assertEquals(TYPE_ONE, response.get(2).getType());
+        assertEquals(TYPE_TWO, response.get(3).getType());
+        assertEquals(TYPE_TWO, response.get(4).getType());
+        assertEquals(TYPE_TWO, response.get(5).getType());
+        assertEquals(WHATEVER, response.get(6).getType());
+        assertEquals(WHATEVER, response.get(7).getType());
+        assertEquals(WHATEVER, response.get(8).getType());
+        assertEquals(WHATEVER, response.get(9).getType());
+        assertEquals(WHATEVER, response.get(10).getType());
+        assertEquals(WHATEVER, response.get(11).getType());
+    }
+
+    @Test
+    public void testFindAllSortingDesc() throws Exception {
+
+        populateData();
+
+        List<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.DESC, "type");
+
+        assertFalse(response.isEmpty());
+        assertEquals(WHATEVER, response.get(0).getType());
+        assertEquals(WHATEVER, response.get(1).getType());
+        assertEquals(WHATEVER, response.get(2).getType());
+        assertEquals(WHATEVER, response.get(3).getType());
+        assertEquals(WHATEVER, response.get(4).getType());
+        assertEquals(WHATEVER, response.get(5).getType());
+        assertEquals(TYPE_TWO, response.get(6).getType());
+        assertEquals(TYPE_TWO, response.get(7).getType());
+        assertEquals(TYPE_TWO, response.get(8).getType());
+        assertEquals(TYPE_ONE, response.get(9).getType());
+        assertEquals(TYPE_ONE, response.get(10).getType());
+        assertEquals(TYPE_ONE, response.get(11).getType());
+    }
+
+    @Test
+    public void testFindAllPaging() throws Exception {
+
+        populateData();
+    }
+
+    @Test
+    public void testFinallPagingAndSorting() throws Exception {
+
+        populateData();
+    }
+
+    // endregion
+
     // region Helper Methods
 
     private void populateData() throws Exception {
