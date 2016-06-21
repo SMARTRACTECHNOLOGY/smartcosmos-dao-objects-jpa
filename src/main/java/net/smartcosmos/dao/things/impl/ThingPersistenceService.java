@@ -108,11 +108,30 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public List<ThingResponse> findByType(String tenantUrn, String type) {
 
+        return findByTypeList(tenantUrn, type, null);
+    }
+
+    @Override
+    public List<ThingResponse> findByType(String tenantUrn, String type, SortOrder sortOrder, String sortBy) {
+
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        Sort sort = new Sort(direction, sortBy);
+        return findByTypeList(tenantUrn, type, sort);
+    }
+
+    private List<ThingResponse> findByTypeList(String tenantUrn, String type, Sort sort) {
+
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            List<ThingEntity> deleteList = repository.findByTenantIdAndType(tenantId, type);
+            List<ThingEntity> entityList;
+            if (sort != null) {
+                entityList = repository.findByTenantIdAndType(tenantId, type, sort);
+            } else {
+                entityList = repository.findByTenantIdAndType(tenantId, type);
+            }
 
-            return convert(deleteList);
+            return convert(entityList);
         }
         catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
@@ -122,17 +141,11 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     @Override
-    public List<ThingResponse> findByType(String tenantUrn, String type, SortOrder sortOrder, String sortBy) {
-        // TODO: Implement Sorting
-        return findByType(tenantUrn, type);
-    }
-
-    @Override
     public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size) {
 
         Pageable pageable = new PageRequest(page, size);
 
-        return findByType(tenantUrn, type, pageable);
+        return findByTypePage(tenantUrn, type, pageable);
     }
 
     @Override
@@ -143,10 +156,10 @@ public class ThingPersistenceService implements ThingDao {
 
         Pageable pageable = new PageRequest(page, size, direction, sortBy);
 
-        return findByType(tenantUrn, type, pageable);
+        return findByTypePage(tenantUrn, type, pageable);
     }
 
-    private Page<ThingResponse> findByType(String tenantUrn, String type, Pageable pageable) {
+    private Page<ThingResponse> findByTypePage(String tenantUrn, String type, Pageable pageable) {
 
         Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
         try {
@@ -290,8 +303,19 @@ public class ThingPersistenceService implements ThingDao {
 
     @Override
     public List<ThingResponse> findAll(String tenantUrn, SortOrder sortOrder, String sortBy) {
-        // TODO: Implement Sorting
-        return null;
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+            Sort sort = new Sort(ThingPersistenceUtil.getSortDirection(sortOrder), sortBy);
+            List<ThingEntity> entityList = repository.findByTenantId(tenantId, sort);
+
+            return convert(entityList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return new ArrayList<>();
     }
 
     @Override
