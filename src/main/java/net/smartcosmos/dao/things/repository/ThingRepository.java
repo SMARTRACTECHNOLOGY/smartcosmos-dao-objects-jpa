@@ -33,9 +33,10 @@ public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, Pagin
 
     List<ThingEntity> findByTenantId(UUID tenantId, Sort sort);
 
+    Page<ThingEntity> findByTenantId(UUID tenantId, Pageable pageable);
+
     List<ThingEntity> findByIdInAndTenantId(List<UUID> ids, UUID tenantId);
 
     List<ThingEntity> findByIdInAndTenantId(List<UUID> ids, UUID tenantId, Sort sort);
 
-    Page<ThingEntity> findByTenantId(UUID tenantId, Pageable pageable);
 }
