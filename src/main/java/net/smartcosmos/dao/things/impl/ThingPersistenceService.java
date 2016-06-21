@@ -340,7 +340,7 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size) {
 
-        Pageable pageable = new PageRequest(page, size);
+        Pageable pageable = new PageRequest(page - 1, size);
         return findAll(tenantUrn, pageable);
     }
 
@@ -350,7 +350,7 @@ public class ThingPersistenceService implements ThingDao {
         Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
         sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
 
-        Pageable pageable = new PageRequest(page, size, direction, sortBy);
+        Pageable pageable = new PageRequest(page - 1, size, direction, sortBy);
 
         return findAll(tenantUrn, pageable);
     }

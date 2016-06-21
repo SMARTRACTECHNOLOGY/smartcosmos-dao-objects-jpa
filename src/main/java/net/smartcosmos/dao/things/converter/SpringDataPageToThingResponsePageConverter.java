@@ -30,7 +30,7 @@ public class SpringDataPageToThingResponsePageConverter
     public Page<ThingResponse> convert(org.springframework.data.domain.Page<ThingEntity> page) {
 
         PageInformation pageInformation = PageInformation.builder()
-            .number(page.getNumber())
+            .number(page.getNumber() + 1)
             .totalElements(page.getTotalElements())
             .size(page.getNumberOfElements())
             .totalPages(page.getTotalPages())
