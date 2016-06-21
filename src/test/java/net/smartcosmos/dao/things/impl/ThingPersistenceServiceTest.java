@@ -570,9 +570,9 @@ public class ThingPersistenceServiceTest {
         assertEquals(12, page1.getPage().getTotalElements());
         assertEquals(1, page1.getPage().getNumber());
 
-        assertEquals(TYPE_ONE, page1.getData().get(0));
-        assertEquals(TYPE_ONE, page1.getData().get(1));
-        assertEquals(TYPE_ONE, page1.getData().get(2));
+        assertEquals(TYPE_ONE, page1.getData().get(0).getType());
+        assertEquals(TYPE_ONE, page1.getData().get(1).getType());
+        assertEquals(TYPE_ONE, page1.getData().get(2).getType());
 
         Page<ThingResponse> page2 = persistenceService.findAll(tenantUrn, 2, 3, SortOrder.ASC, "type");
 
@@ -582,11 +582,11 @@ public class ThingPersistenceServiceTest {
         assertEquals(3, page2.getPage().getSize());
         assertEquals(4, page2.getPage().getTotalPages());
         assertEquals(12, page2.getPage().getTotalElements());
-        assertEquals(1, page2.getPage().getNumber());
+        assertEquals(2, page2.getPage().getNumber());
 
-        assertEquals(TYPE_TWO, page2.getData().get(0));
-        assertEquals(TYPE_TWO, page2.getData().get(1));
-        assertEquals(TYPE_TWO, page2.getData().get(2));
+        assertEquals(TYPE_TWO, page2.getData().get(0).getType());
+        assertEquals(TYPE_TWO, page2.getData().get(1).getType());
+        assertEquals(TYPE_TWO, page2.getData().get(2).getType());
     }
 
     // endregion
