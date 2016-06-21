@@ -17,8 +17,7 @@ import net.smartcosmos.dto.things.ThingResponse;
 
 @Component
 public class SpringDataPageToThingResponsePageConverter
-    extends ConversionServiceAwareConverter<org.springframework.data.domain.Page<ThingEntity>, Page<ThingResponse>>
-    implements FormatterRegistrar {
+    extends ConversionServiceAwareConverter<org.springframework.data.domain.Page<ThingEntity>, Page<ThingResponse>> {
 
     @Inject
     private ConversionService conversionService;
@@ -45,10 +44,5 @@ public class SpringDataPageToThingResponsePageConverter
             .data(data)
             .page(pageInformation)
             .build();
-    }
-
-    @Override
-    public void registerFormatters(FormatterRegistry registry) {
-        registry.addConverter(this);
     }
 }
