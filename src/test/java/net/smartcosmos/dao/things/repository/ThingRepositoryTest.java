@@ -1,7 +1,7 @@
 package net.smartcosmos.dao.things.repository;
 
-import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.ThingPersistenceConfig;
+import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import org.junit.After;
 import org.junit.Before;
@@ -10,6 +10,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -104,5 +106,31 @@ public class ThingRepositoryTest {
 
         assertEquals(1, entityList.size());
         assertEquals(id, entityList.get(0).getId());
+    }
+
+    @Test
+    public void findByTenantIdPageable() throws Exception {
+
+        final UUID tenantId = UUID.randomUUID();
+        final int entityCount = 30;
+        List<UUID> ids = new ArrayList<>();
+
+        for (int i = 0; i < entityCount; i++) {
+            UUID id = UUID.randomUUID();
+            ids.add(id);
+
+            ThingEntity entity = repository
+                .save(ThingEntity.builder()
+                    .id(id)
+                    .tenantId(tenantId)
+                    .type(type).build());
+        }
+
+        Page<ThingEntity> entityList = repository.findByTenantId(tenantId, new PageRequest(0, 1));
+        assertFalse(entityList.getContent().isEmpty());
+
+        assertEquals(1, entityList.getContent().size());
+        assertTrue(ids.contains(entityList.getContent().get(0).getId()));
+        assertEquals(entityCount, entityList.getTotalElements());
     }
 }
