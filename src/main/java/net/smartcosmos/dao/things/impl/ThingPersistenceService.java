@@ -8,7 +8,6 @@ import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
 import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.Page;
-import net.smartcosmos.dto.things.PageInformation;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
@@ -17,6 +16,8 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 
@@ -128,14 +129,37 @@ public class ThingPersistenceService implements ThingDao {
 
     @Override
     public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size) {
-        // TODO: Implement Paging
-        return null;
+
+        Pageable pageable = new PageRequest(page, size);
+
+        return findByType(tenantUrn, type, pageable);
     }
 
     @Override
     public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
-        // TODO: Implement Paging and Sorting
-        return null;
+
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+
+        Pageable pageable = new PageRequest(page, size, direction, sortBy);
+
+        return findByType(tenantUrn, type, pageable);
+    }
+
+    private Page<ThingResponse> findByType(String tenantUrn, String type, Pageable pageable) {
+
+        Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndType(tenantId, type, pageable);
+
+            return conversionService.convert(pageResponse, result.getClass());
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return result;
     }
 
     // endregion
@@ -273,23 +297,35 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size) {
 
+        Pageable pageable = new PageRequest(page, size);
+        return findAll(tenantUrn, pageable);
+    }
+
+    @Override
+    public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
+
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+
+        Pageable pageable = new PageRequest(page, size, direction, sortBy);
+
+        return findAll(tenantUrn, pageable);
+    }
+
+    private Page<ThingResponse> findAll(String tenantUrn, Pageable pageable) {
+
+        Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            org.springframework.data.domain.Page<ThingEntity> entityList = repository.findByTenantId(tenantId, new PageRequest(page, size));
+            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantId(tenantId, pageable);
 
-            return convert(entityList);
+            return conversionService.convert(pageResponse, result.getClass());
         }
         catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
         }
 
-        return ThingPersistenceUtil.emptyPage();
-    }
-
-    @Override
-    public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
-        // TODO: Implement Sorting
-        return findAll(tenantUrn, page, size);
+        return result;
     }
 
     /**
@@ -319,6 +355,7 @@ public class ThingPersistenceService implements ThingDao {
      * @throws TransactionException if the transaction fails because of something else
      */
     private ThingEntity persist(ThingEntity objectEntity) throws ConstraintViolationException, TransactionException {
+
         try {
             return repository.save(objectEntity);
         } catch (TransactionException e) {
@@ -381,19 +418,6 @@ public class ThingPersistenceService implements ThingDao {
         return entityList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
-    }
-
-    private Page<ThingResponse> convert(org.springframework.data.domain.Page<ThingEntity> page) {
-        List<ThingResponse> data = convert(page.getContent());
-
-        PageInformation pageInformation = PageInformation.builder()
-            .number(page.getNumber())
-            .totalElements(page.getTotalElements())
-            .size(page.getNumberOfElements())
-            .totalPages(page.getTotalPages())
-            .build();
-
-        return new Page<>(data, pageInformation);
     }
 
     // endregion
