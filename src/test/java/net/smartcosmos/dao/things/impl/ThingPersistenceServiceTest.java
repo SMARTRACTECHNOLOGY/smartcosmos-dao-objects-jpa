@@ -1,10 +1,12 @@
 package net.smartcosmos.dao.things.impl;
 
+import net.smartcosmos.dao.things.SortOrder;
 import net.smartcosmos.dao.things.ThingPersistenceConfig;
 import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dao.things.util.UuidUtil;
+import net.smartcosmos.dto.things.Page;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
@@ -32,9 +34,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("Duplicates")
@@ -285,6 +289,30 @@ public class ThingPersistenceServiceTest {
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
+    @Test
+    public void testFindByTypePaging() throws Exception {
+
+        populateData();
+
+        int expectedPageSize = 3;
+        int actualPageSize = 0;
+
+        long expectedTotalSize = 6;
+        long actualTotalSize = 0;
+
+        Page<ThingResponse> response = persistenceService.findByType(tenantUrn, WHATEVER, 0, 3);
+
+        assertNotNull(response);
+        assertNotNull(response.getData());
+        assertNotNull(response.getPage());
+
+        actualPageSize = response.getData().size();
+        assertTrue("Expected " + expectedPageSize + " elements on page, but received " + actualPageSize, actualPageSize == expectedPageSize);
+
+        actualTotalSize = response.getPage().getTotalElements();
+        assertTrue("Expected " + expectedTotalSize + " total elements, but received " + actualTotalSize, actualTotalSize == expectedTotalSize);
+    }
+
     // endregion
 
     // region Find by URNs
@@ -310,6 +338,95 @@ public class ThingPersistenceServiceTest {
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
+    }
+
+    @Test
+    public void testFindByUrnsSortingByType() throws Exception
+    {
+        populateData();
+
+        int expectedDataSize = 3;
+        int actualDataSize = 0;
+
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_TWO, URN_04).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_12).get().getUrn();
+
+        Collection<String> urn = new ArrayList<>();
+        urn.add(secondUrn);
+        urn.add(firstUrn);
+        urn.add(thirdUrn);
+
+        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn, SortOrder.ASC, "type");
+
+        actualDataSize = response.size();
+        assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
+
+        assertEquals(firstUrn, response.get(0).getUrn());
+        assertEquals(secondUrn, response.get(1).getUrn());
+        assertEquals(thirdUrn, response.get(2).getUrn());
+    }
+
+    @Test
+    public void testFindByUrnsSortingEmptySortByDefaultsToId() throws Exception
+    {
+        populateData();
+
+        int expectedDataSize = 3;
+        int actualDataSize = 0;
+
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_TWO, URN_04).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_12).get().getUrn();
+
+        List<String> urn = new ArrayList<>();
+        urn.add(secondUrn);
+        urn.add(firstUrn);
+        urn.add(thirdUrn);
+
+        List<String> sortedUrns = urn.stream()
+            .sorted()
+            .collect(Collectors.toList());
+
+        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn, SortOrder.ASC, "");
+
+        actualDataSize = response.size();
+        assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
+
+        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
+        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
+        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
+    }
+
+    @Test
+    public void testFindByUrnsSortingNullSortByDefaultsToId() throws Exception
+    {
+        populateData();
+
+        int expectedDataSize = 3;
+        int actualDataSize = 0;
+
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_TWO, URN_04).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_12).get().getUrn();
+
+        List<String> urn = new ArrayList<>();
+        urn.add(secondUrn);
+        urn.add(firstUrn);
+        urn.add(thirdUrn);
+
+        List<String> sortedUrns = urn.stream()
+            .sorted()
+            .collect(Collectors.toList());
+
+        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn, SortOrder.ASC, null);
+
+        actualDataSize = response.size();
+        assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
+
+        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
+        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
+        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
     }
 
     @Test
