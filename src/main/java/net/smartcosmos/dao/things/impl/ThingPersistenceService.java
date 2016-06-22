@@ -1,11 +1,13 @@
 package net.smartcosmos.dao.things.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import net.smartcosmos.dao.things.SortOrder;
 import net.smartcosmos.dao.things.ThingDao;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
 import net.smartcosmos.dao.things.util.UuidUtil;
+import net.smartcosmos.dto.things.Page;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
@@ -13,6 +15,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 
@@ -37,6 +42,8 @@ public class ThingPersistenceService implements ThingDao {
         this.repository = repository;
         this.conversionService = conversionService;
     }
+
+    // region Create
 
     @Override
     public Optional<ThingResponse> create(String tenantUrn, ThingCreate createThing) {
@@ -67,10 +74,9 @@ public class ThingPersistenceService implements ThingDao {
         return Optional.empty();
     }
 
-    private boolean alreadyExists(String tenantUrn, ThingCreate createThing) {
+    // endregion
 
-        return StringUtils.isNotBlank(createThing.getUrn()) && findByUrn(tenantUrn, createThing.getUrn()).isPresent();
-    }
+    // region Update
 
     @Override
     public Optional<ThingResponse> update(String tenantUrn, String type, String urn, ThingUpdate updateThing) throws ConstraintViolationException {
@@ -95,14 +101,38 @@ public class ThingPersistenceService implements ThingDao {
         return Optional.empty();
     }
 
+    // endregion
+
+    // region Find By Type
+
     @Override
-    public List<ThingResponse> findByType(String tenantUrn, String type, Long page, Integer size) {
+    public List<ThingResponse> findByType(String tenantUrn, String type) {
+
+        return findByTypeList(tenantUrn, type, null);
+    }
+
+    @Override
+    public List<ThingResponse> findByType(String tenantUrn, String type, SortOrder sortOrder, String sortBy) {
+
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        Sort sort = new Sort(direction, sortBy);
+
+        return findByTypeList(tenantUrn, type, sort);
+    }
+
+    private List<ThingResponse> findByTypeList(String tenantUrn, String type, Sort sort) {
 
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            List<ThingEntity> deleteList = repository.findByTenantIdAndType(tenantId, type);
+            List<ThingEntity> entityList;
+            if (sort != null) {
+                entityList = repository.findByTenantIdAndType(tenantId, type, sort);
+            } else {
+                entityList = repository.findByTenantIdAndType(tenantId, type);
+            }
 
-            return convert(deleteList);
+            return convert(entityList);
         }
         catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
@@ -110,6 +140,45 @@ public class ThingPersistenceService implements ThingDao {
 
         return new ArrayList<>();
     }
+
+    @Override
+    public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size) {
+
+        Pageable pageable = new PageRequest(page, size);
+
+        return findByTypePage(tenantUrn, type, pageable);
+    }
+
+    @Override
+    public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
+
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+
+        Pageable pageable = new PageRequest(page, size, direction, sortBy);
+
+        return findByTypePage(tenantUrn, type, pageable);
+    }
+
+    private Page<ThingResponse> findByTypePage(String tenantUrn, String type, Pageable pageable) {
+
+        Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndType(tenantId, type, pageable);
+
+            return conversionService.convert(pageResponse, result.getClass());
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return result;
+    }
+
+    // endregion
+
+    // region Delete
 
     @Override
     public List<ThingResponse> delete(String tenantUrn, String type, String urn) {
@@ -127,6 +196,10 @@ public class ThingPersistenceService implements ThingDao {
 
         return new ArrayList<>();
     }
+
+    // endregion
+
+    // region Find By Type and URN
 
     @Override
     public Optional<ThingResponse> findByTypeAndUrn(String tenantUrn, String type, String urn) {
@@ -146,10 +219,202 @@ public class ThingPersistenceService implements ThingDao {
         return Optional.empty();
     }
 
-    @Override
-    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Long page, Integer size) {
+    // endregion
 
+    // region Find by Type and URN startsWith
+
+    @Override
+    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith) {
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
+    }
+
+    @Override
+    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, SortOrder sortOrder, String sortBy) {
+        throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
+    }
+
+    @Override
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer size) {
+        throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
+    }
+
+    @Override
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
+        throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
+    }
+
+    // endregion
+
+    // region Find by URNs
+
+    @Override
+    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns) {
+
+        return findByUrns(tenantUrn, urns, null);
+    }
+
+    @Override
+    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, SortOrder sortOrder, String sortBy) {
+
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        Sort sort = new Sort(direction, sortBy);
+
+        return findByUrns(tenantUrn, urns, sort);
+    }
+
+    private List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, Sort sort) {
+
+        UUID tenantId;
+        try {
+            tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+            return new ArrayList<>();
+        }
+
+        List<UUID> ids = getUuidListFromUrnCollection(tenantUrn, urns);
+
+        List<ThingEntity> entityList;
+        if (sort != null) {
+            entityList = repository.findByIdInAndTenantId(ids, tenantId, sort);
+        } else {
+            entityList = repository.findByIdInAndTenantId(ids, tenantId);
+        }
+
+        return convert(entityList);
+    }
+
+    private List<UUID> getUuidListFromUrnCollection(String tenantUrn, Collection<String> urns) {
+        return urns.stream()
+                .map(urn -> {
+                    try {
+                        return UuidUtil.getUuidFromUrn(urn);
+                    } catch (IllegalArgumentException e) {
+                        log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+                    }
+                    return null;
+                })
+                .filter(uuid -> uuid != null)
+                .collect(Collectors.toList());
+    }
+
+    // endregion
+
+    // region Find All
+
+    @Override
+    public List<ThingResponse> findAll(String tenantUrn) {
+
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            List<ThingEntity> entityList = repository.findByTenantId(tenantId);
+
+            return convert(entityList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<ThingResponse> findAll(String tenantUrn, SortOrder sortOrder, String sortBy) {
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+            Sort sort = new Sort(ThingPersistenceUtil.getSortDirection(sortOrder), sortBy);
+            List<ThingEntity> entityList = repository.findByTenantId(tenantId, sort);
+
+            return convert(entityList);
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size) {
+
+        Pageable pageable = new PageRequest(page - 1, size);
+        return findAll(tenantUrn, pageable);
+    }
+
+    @Override
+    public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
+
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+
+        Pageable pageable = new PageRequest(page - 1, size, direction, sortBy);
+
+        return findAll(tenantUrn, pageable);
+    }
+
+    private Page<ThingResponse> findAll(String tenantUrn, Pageable pageable) {
+
+        Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantId(tenantId, pageable);
+
+            return conversionService.convert(pageResponse, result.getClass());
+        }
+        catch (IllegalArgumentException e) {
+            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
+        }
+
+        return result;
+    }
+
+    /**
+     * This is a temporary function for development purposes -- eventually we don't want
+     * to support a "get everything" call, since theoretically that'd be billions of
+     * objects.
+     *
+     * @return All the objects.
+     */
+    public List<ThingResponse> getThings() {
+        // You could theoretically create a conversion function to handle this, since
+        // it'll happen fairly often and in numerous places, but for example sake it's
+        // done inline here.
+        return convert(repository.findAll());
+    }
+
+    // endregion
+
+    // region Helper Methods
+
+    /**
+     * Saves an object entity in an {@link ThingRepository}.
+     *
+     * @param objectEntity the object entity to persist
+     * @return the persisted object entity
+     * @throws ConstraintViolationException if the transaction fails due to violated constraints
+     * @throws TransactionException if the transaction fails because of something else
+     */
+    private ThingEntity persist(ThingEntity objectEntity) throws ConstraintViolationException, TransactionException {
+
+        try {
+            return repository.save(objectEntity);
+        } catch (TransactionException e) {
+            // we expect constraint violations to be the root cause for exceptions here,
+            // so we throw this particular exception back to the caller
+            if (ExceptionUtils.getRootCause(e) instanceof ConstraintViolationException) {
+                throw (ConstraintViolationException) ExceptionUtils.getRootCause(e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private boolean alreadyExists(String tenantUrn, ThingCreate createThing) {
+
+        return StringUtils.isNotBlank(createThing.getUrn()) && findByUrn(tenantUrn, createThing.getUrn()).isPresent();
     }
 
     private Optional<ThingResponse> findByUrn(String tenantUrn, String urn) {
@@ -167,87 +432,6 @@ public class ThingPersistenceService implements ThingDao {
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns) {
-
-        UUID tenantId;
-        try {
-            tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-            return new ArrayList<>();
-        }
-
-        List<UUID> ids = urns.stream()
-            .map(urn -> {
-                try {
-                    return UuidUtil.getUuidFromUrn(urn);
-                } catch (IllegalArgumentException e) {
-                    log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
-                }
-                return null;
-            })
-            .filter(uuid -> uuid != null)
-            .collect(Collectors.toList());
-
-        List<ThingEntity> entityList = repository.findByIdInAndTenantId(ids, tenantId);
-
-        return convert(entityList);
-    }
-
-    @Override
-    public List<ThingResponse> findAll(String tenantUrn, Long page, Integer size) {
-
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            List<ThingEntity> entityList = repository.findByTenantId(tenantId);
-
-            return convert(entityList);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-        }
-
-        return new ArrayList<>();
-    }
-
-    /**
-     * This is a temporary function for development purposes -- eventually we don't want
-     * to support a "get everything" call, since theoretically that'd be billions of
-     * objects.
-     *
-     * @return All the objects.
-     */
-    public List<ThingResponse> getThings() {
-        // You could theoretically create a conversion function to handle this, since
-        // it'll happen fairly often and in numerous places, but for example sake it's
-        // done inline here.
-        return convert(repository.findAll());
-    }
-
-    /**
-     * Saves an object entity in an {@link ThingRepository}.
-     *
-     * @param objectEntity the object entity to persist
-     * @return the persisted object entity
-     * @throws ConstraintViolationException if the transaction fails due to violated constraints
-     * @throws TransactionException if the transaction fails because of something else
-     */
-    private ThingEntity persist(ThingEntity objectEntity) throws ConstraintViolationException, TransactionException {
-        try {
-            return repository.save(objectEntity);
-        } catch (TransactionException e) {
-            // we expect constraint violations to be the root cause for exceptions here,
-            // so we throw this particular exception back to the caller
-            if (ExceptionUtils.getRootCause(e) instanceof ConstraintViolationException) {
-                throw (ConstraintViolationException) ExceptionUtils.getRootCause(e);
-            } else {
-                throw e;
-            }
-        }
     }
 
     /**
@@ -278,4 +462,6 @@ public class ThingPersistenceService implements ThingDao {
             .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
     }
+
+    // endregion
 }
