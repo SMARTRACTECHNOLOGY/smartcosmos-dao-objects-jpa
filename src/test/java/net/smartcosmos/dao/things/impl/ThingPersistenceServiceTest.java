@@ -110,7 +110,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(urn), tenantUuid, "type");
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(urn), tenantUuid, "type");
 
         assertTrue(entity.isPresent());
         assertEquals(UUID.fromString(uuid), entity.get().getId());
@@ -127,7 +127,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(response.get().getUrn()), tenantUuid, "type");
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(response.get().getUrn()), tenantUuid, "type");
 
         assertTrue(entity.isPresent());
 
@@ -182,7 +182,7 @@ public class ThingPersistenceServiceTest {
         assertTrue(response.isPresent());
         ThingResponse responseCreate = response.get();
 
-        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(urn), tenantUuid, type);
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(urn), tenantUuid, type);
 
         assertTrue(entity.isPresent());
 
@@ -235,7 +235,7 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(UuidUtil.getUuidFromUrn(urn), tenantUuid, type);
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(urn), tenantUuid, type);
 
         assertTrue(entity.isPresent());
 
@@ -264,6 +264,15 @@ public class ThingPersistenceServiceTest {
     }
 
     @Test
+    public void testFindByTypeAndUrnIsCaseSensitiveUrn() throws Exception {
+        populateData();
+
+        Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01.toUpperCase());
+
+        assertTrue(response.isPresent());
+    }
+
+    @Test
     public void testFindByTypeAndUrnNonExistent() throws Exception {
         populateData();
 
@@ -287,6 +296,19 @@ public class ThingPersistenceServiceTest {
 
         actualSize = response.size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
+    }
+
+    @Test
+    public void testFindByTypeIsCaseInSensitive() throws Exception {
+
+        populateData();
+
+        int expectedSize = 0;
+        int actualSize = 0;
+
+        List<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE.toUpperCase());
+
+        assertFalse(response.isEmpty());
     }
 
     @Test

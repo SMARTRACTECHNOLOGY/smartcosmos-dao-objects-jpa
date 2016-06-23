@@ -84,7 +84,7 @@ public class ThingPersistenceService implements ThingDao {
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
-            Optional<ThingEntity> thing = repository.findByIdAndTenantIdAndType(id, tenantId, type);
+            Optional<ThingEntity> thing = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
             if (thing.isPresent()) {
                 ThingEntity updateEntity = ThingPersistenceUtil.merge(thing.get(), updateThing);
@@ -127,9 +127,9 @@ public class ThingPersistenceService implements ThingDao {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             List<ThingEntity> entityList;
             if (sort != null) {
-                entityList = repository.findByTenantIdAndType(tenantId, type, sort);
+                entityList = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, sort);
             } else {
-                entityList = repository.findByTenantIdAndType(tenantId, type);
+                entityList = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type);
             }
 
             return convert(entityList);
@@ -165,7 +165,7 @@ public class ThingPersistenceService implements ThingDao {
         Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndType(tenantId, type, pageable);
+            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, pageable);
 
             return conversionService.convert(pageResponse, result.getClass());
         }
@@ -186,7 +186,7 @@ public class ThingPersistenceService implements ThingDao {
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
-            List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndType(id, tenantId, type);
+            List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
             return convert(deleteList);
         }
@@ -208,7 +208,7 @@ public class ThingPersistenceService implements ThingDao {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
 
-            Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndType(id, tenantId, type);
+            Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
             return convert(entity);
         }
