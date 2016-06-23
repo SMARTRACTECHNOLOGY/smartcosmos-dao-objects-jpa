@@ -17,17 +17,17 @@ import java.util.UUID;
 public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, PagingAndSortingRepository<ThingEntity, UUID>, QueryByExampleExecutor<ThingEntity>, JpaSpecificationExecutor<ThingEntity>
 {
     @Transactional
-    List<ThingEntity> deleteByIdAndTenantIdAndType(UUID id, UUID tenantId, String type);
+    List<ThingEntity> deleteByIdAndTenantIdAndTypeIgnoreCase(UUID id, UUID tenantId, String type);
 
-    Optional<ThingEntity> findByIdAndTenantIdAndType(UUID id, UUID tenantId, String type);
+    Optional<ThingEntity> findByIdAndTenantIdAndTypeIgnoreCase(UUID id, UUID tenantId, String type);
 
     Optional<ThingEntity> findByIdAndTenantId(UUID id, UUID tenantId);
 
-    List<ThingEntity> findByTenantIdAndType(UUID tenantId, String type);
+    List<ThingEntity> findByTenantIdAndTypeIgnoreCase(UUID tenantId, String type);
 
-    List<ThingEntity> findByTenantIdAndType(UUID tenantId, String type, Sort sort);
+    List<ThingEntity> findByTenantIdAndTypeIgnoreCase(UUID tenantId, String type, Sort sort);
 
-    Page<ThingEntity> findByTenantIdAndType(UUID tenantId, String type, Pageable pageable);
+    Page<ThingEntity> findByTenantIdAndTypeIgnoreCase(UUID tenantId, String type, Pageable pageable);
 
     List<ThingEntity> findByTenantId(UUID tenantId);
 

@@ -66,7 +66,7 @@ public class ThingRepositoryTest {
 
     @Test
     public void deleteByIdAndTenantIdAndType() throws Exception {
-        List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndType(id, tenantId, type);
+        List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
         assertFalse(deleteList.isEmpty());
         assertEquals(1, deleteList.size());
@@ -75,7 +75,7 @@ public class ThingRepositoryTest {
 
     @Test
     public void findByIdAndTenantId() throws Exception {
-        assertTrue(this.repository.findByIdAndTenantIdAndType(id, tenantId, type).isPresent());
+        assertTrue(this.repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type).isPresent());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class ThingRepositoryTest {
     @Test
     public void findByTenantIdAndType() throws Exception {
 
-        List<ThingEntity> entityList = repository.findByTenantIdAndType(tenantId, type);
+        List<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type);
         assertFalse(entityList.isEmpty());
 
         assertEquals(1, entityList.size());
