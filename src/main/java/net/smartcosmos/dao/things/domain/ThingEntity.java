@@ -61,12 +61,12 @@ public class ThingEntity implements Serializable {
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "createdTimestamp", insertable = true, updatable = false)
+    @Column(name = "created", insertable = true, updatable = false)
     private Date created;
 
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "lastModifiedTimestamp", nullable = false, insertable = true, updatable = true)
+    @Column(name = "lastModified", nullable = false, insertable = true, updatable = true)
     private Date lastModified;
 
     @Basic
