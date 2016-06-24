@@ -333,6 +333,8 @@ public class ThingPersistenceServiceTest {
 
         actualTotalSize = response.getPage().getTotalElements();
         assertTrue("Expected " + expectedTotalSize + " total elements, but received " + actualTotalSize, actualTotalSize == expectedTotalSize);
+
+        assertEquals(1, response.getPage().getNumber());
     }
 
     // endregion
