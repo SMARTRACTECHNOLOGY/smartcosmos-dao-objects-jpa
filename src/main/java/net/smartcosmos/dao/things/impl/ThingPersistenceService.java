@@ -456,6 +456,16 @@ public class ThingPersistenceService implements ThingDao {
             .collect(Collectors.toList());
     }
 
+    /**
+     * Builds the pageable for repository calls, including translation of 1-based page numbering on the API level to
+     * 0-based page numbering on the repository level.
+     *
+     * @param page the page number
+     * @param size the page size
+     * @param sortBy the name of the field to sort by
+     * @param direction the sort order direction
+     * @return the pageable object
+     */
     protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort.Direction direction) {
 
         if (page < 1) {
