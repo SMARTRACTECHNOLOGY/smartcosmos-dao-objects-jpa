@@ -144,9 +144,7 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size) {
 
-        Pageable pageable = new PageRequest(page, size);
-
-        return findByTypePage(tenantUrn, type, pageable);
+        return findByTypePage(tenantUrn, type, getPageable(page, size, null, null));
     }
 
     @Override
@@ -155,9 +153,7 @@ public class ThingPersistenceService implements ThingDao {
         Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
         sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
 
-        Pageable pageable = new PageRequest(page, size, direction, sortBy);
-
-        return findByTypePage(tenantUrn, type, pageable);
+        return findByTypePage(tenantUrn, type, getPageable(page, size, sortBy, direction));
     }
 
     private Page<ThingResponse> findByTypePage(String tenantUrn, String type, Pageable pageable) {
@@ -340,8 +336,7 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size) {
 
-        Pageable pageable = new PageRequest(page - 1, size);
-        return findAll(tenantUrn, pageable);
+        return findAll(tenantUrn, getPageable(page, size, null, null));
     }
 
     @Override
@@ -350,9 +345,7 @@ public class ThingPersistenceService implements ThingDao {
         Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
         sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
 
-        Pageable pageable = new PageRequest(page - 1, size, direction, sortBy);
-
-        return findAll(tenantUrn, pageable);
+        return findAll(tenantUrn, getPageable(page, size, sortBy, direction));
     }
 
     private Page<ThingResponse> findAll(String tenantUrn, Pageable pageable) {
@@ -461,6 +454,30 @@ public class ThingPersistenceService implements ThingDao {
         return entityList.stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Builds the pageable for repository calls, including translation of 1-based page numbering on the API level to
+     * 0-based page numbering on the repository level.
+     *
+     * @param page the page number
+     * @param size the page size
+     * @param sortBy the name of the field to sort by
+     * @param direction the sort order direction
+     * @return the pageable object
+     */
+    protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort.Direction direction) {
+
+        if (page < 1) {
+            throw new IllegalArgumentException("Page index must not be less than one!");
+        }
+        page = page - 1;
+
+        if (StringUtils.isBlank(sortBy) || direction == null) {
+            return new PageRequest(page, size);
+        }
+
+        return new PageRequest(page, size, direction, sortBy);
     }
 
     // endregion
