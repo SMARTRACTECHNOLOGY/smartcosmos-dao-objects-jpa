@@ -1,15 +1,9 @@
 package net.smartcosmos.dao.things.domain;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import java.beans.ConstructorProperties;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,10 +15,17 @@ import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.beans.ConstructorProperties;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.UUID;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity(name = "thing")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,7 +41,7 @@ public class ThingEntity implements Serializable {
         Without setting an appropriate Hibernate naming strategy, the column names specified in the @Column annotations below will be converted
         from camel case to underscore, e.g.: systemUuid -> system_uuid
 
-        To avoid that, select the "old" naming strategy org.hibernate.cfg.EJB3NamingStrategy in your configuration (smartcosmos-ext-objects-rdao.yml):
+        To avoid that, select the "old" naming strategy org.hibernate.cfg.EJB3NamingStrategy in your configuration (smartcosmos-ext-things-rdao.yml):
         jpa.hibernate.naming_strategy: org.hibernate.cfg.EJB3NamingStrategy
      */
 
