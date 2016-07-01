@@ -10,9 +10,9 @@
         <version>3.0.0-SNAPSHOT</version>
         <relativePath></relativePath>
     </parent>
-    <artifactId>smartcosmos-dao-objects-jpa</artifactId>
+    <artifactId>smartcosmos-dao-things-default</artifactId>
     <name>SMART COSMOS DAO Impl for JPA Entities</name>
-    <description>Access simple Object entities</description>
+    <description>Access simple Thing entities</description>
     <properties>
         <start-class>net.smartcosmos.extension.objects.ObjectRdao</start-class>
     </properties>
@@ -96,7 +96,7 @@
             <dependencies>
                 <dependency>
                     <groupId>net.smartcosmos</groupId>
-                    <artifactId>smartcosmos-ext-objects-rdao</artifactId>
+                    <artifactId>smartcosmos-ext-things-rdao</artifactId>
                     <version>3.0.0-SNAPSHOT</version>
                     <scope>runtime</scope>
                 </dependency>
