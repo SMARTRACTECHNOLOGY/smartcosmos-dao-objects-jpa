@@ -162,6 +162,29 @@ public class ThingPersistenceServiceTest {
         assertFalse(response2.isPresent());
     }
 
+    @Test
+    public void thatDuplicateIdDifferentTypeSucceeds() {
+
+        final String uuid = "238978cb-c279-47e6-a553-92f2c372ae1d";
+        final String urn = "urn:thing:uuid:" + uuid;
+
+        ThingCreate create1 = ThingCreate.builder()
+            .urn(urn)
+            .type("type")
+            .build();
+        Optional<ThingResponse> response1 = persistenceService
+            .create(tenantUrn, create1);
+        assertTrue(response1.isPresent());
+
+        ThingCreate create2 = ThingCreate.builder()
+            .urn(urn)
+            .type("type2")
+            .build();
+        Optional<ThingResponse> response2 = persistenceService
+            .create(tenantUrn, create2);
+        assertTrue(response2.isPresent());
+    }
+
     // endregion
 
     // region Update
