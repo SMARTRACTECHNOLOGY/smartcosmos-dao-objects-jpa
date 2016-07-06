@@ -165,7 +165,7 @@ public class ThingPersistenceServiceTest {
     @Test
     public void thatDuplicateIdDifferentTypeSucceeds() {
 
-        final String uuid = "238978cb-c279-47e6-a553-92f2c372ae1d";
+        final String uuid = "06ee2f2f-eb93-4089-98c0-cc732b1837ba";
         final String urn = "urn:thing:uuid:" + uuid;
 
         ThingCreate create1 = ThingCreate.builder()
