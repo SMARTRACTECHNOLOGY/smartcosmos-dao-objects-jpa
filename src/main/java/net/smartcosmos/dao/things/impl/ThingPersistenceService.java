@@ -407,16 +407,16 @@ public class ThingPersistenceService implements ThingDao {
 
     private boolean alreadyExists(String tenantUrn, ThingCreate createThing) {
 
-        return StringUtils.isNotBlank(createThing.getUrn()) && findByUrn(tenantUrn, createThing.getUrn()).isPresent();
+        return StringUtils.isNotBlank(createThing.getUrn()) && findByUrnAndType(tenantUrn, createThing.getUrn(), createThing.getType()).isPresent();
     }
 
-    private Optional<ThingResponse> findByUrn(String tenantUrn, String urn) {
+    private Optional<ThingResponse> findByUrnAndType(String tenantUrn, String urn, String type) {
 
         try {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
 
-            Optional<ThingEntity> entity = repository.findByIdAndTenantId(id, tenantId);
+            Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
             return convert(entity);
         }
