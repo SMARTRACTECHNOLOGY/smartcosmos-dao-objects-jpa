@@ -2,12 +2,9 @@ package net.smartcosmos.dao.things.converter;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.inject.Inject;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.format.FormatterRegistrar;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
 
 import net.smartcosmos.dao.things.domain.ThingEntity;
@@ -30,7 +27,7 @@ public class SpringDataPageToThingResponsePageConverter
     public Page<ThingResponse> convert(org.springframework.data.domain.Page<ThingEntity> page) {
 
         PageInformation pageInformation = PageInformation.builder()
-            .number(page.getNumber() + 1)
+            .number((page.getTotalElements() > 0 ? page.getNumber() + 1 : 0))
             .totalElements(page.getTotalElements())
             .size(page.getNumberOfElements())
             .totalPages(page.getTotalPages())
