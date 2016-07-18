@@ -1,6 +1,9 @@
 package net.smartcosmos.dao.things.repository;
 
-import net.smartcosmos.dao.things.domain.ThingEntity;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,9 +13,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.QueryByExampleExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import net.smartcosmos.dao.things.domain.ThingEntity;
 
 public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, PagingAndSortingRepository<ThingEntity, UUID>, QueryByExampleExecutor<ThingEntity>, JpaSpecificationExecutor<ThingEntity>
 {
@@ -35,8 +36,8 @@ public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, Pagin
 
     Page<ThingEntity> findByTenantId(UUID tenantId, Pageable pageable);
 
-    List<ThingEntity> findByIdInAndTenantId(List<UUID> ids, UUID tenantId);
+    List<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, List<UUID> ids);
 
-    List<ThingEntity> findByIdInAndTenantId(List<UUID> ids, UUID tenantId, Sort sort);
+    List<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, List<UUID> ids, Sort sort);
 
 }
