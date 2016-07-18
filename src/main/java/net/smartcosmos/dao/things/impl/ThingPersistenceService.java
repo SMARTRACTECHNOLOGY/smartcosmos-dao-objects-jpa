@@ -1,16 +1,15 @@
 package net.smartcosmos.dao.things.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolationException;
+
 import lombok.extern.slf4j.Slf4j;
-import net.smartcosmos.dao.things.SortOrder;
-import net.smartcosmos.dao.things.ThingDao;
-import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.dao.things.repository.ThingRepository;
-import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
-import net.smartcosmos.dao.things.util.UuidUtil;
-import net.smartcosmos.dto.things.Page;
-import net.smartcosmos.dto.things.ThingCreate;
-import net.smartcosmos.dto.things.ThingResponse;
-import net.smartcosmos.dto.things.ThingUpdate;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +20,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
 
-import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import net.smartcosmos.dao.things.SortOrder;
+import net.smartcosmos.dao.things.ThingDao;
+import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.repository.ThingRepository;
+import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
+import net.smartcosmos.dao.things.util.UuidUtil;
+import net.smartcosmos.dto.things.Page;
+import net.smartcosmos.dto.things.ThingCreate;
+import net.smartcosmos.dto.things.ThingResponse;
+import net.smartcosmos.dto.things.ThingUpdate;
 
 @Slf4j
 @Service
@@ -244,22 +246,22 @@ public class ThingPersistenceService implements ThingDao {
     // region Find by URNs
 
     @Override
-    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns) {
+    public List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns) {
 
-        return findByUrns(tenantUrn, urns, null);
+        return findByTypeAndUrns(tenantUrn, type, urns, null);
     }
 
     @Override
-    public List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, SortOrder sortOrder, String sortBy) {
+    public List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, SortOrder sortOrder, String sortBy) {
 
         sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
         Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
         Sort sort = new Sort(direction, sortBy);
 
-        return findByUrns(tenantUrn, urns, sort);
+        return findByTypeAndUrns(tenantUrn, type, urns, sort);
     }
 
-    private List<ThingResponse> findByUrns(String tenantUrn, Collection<String> urns, Sort sort) {
+    private List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Sort sort) {
 
         UUID tenantId;
         try {
@@ -274,9 +276,9 @@ public class ThingPersistenceService implements ThingDao {
 
         List<ThingEntity> entityList;
         if (sort != null) {
-            entityList = repository.findByIdInAndTenantId(ids, tenantId, sort);
+            entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids, sort);
         } else {
-            entityList = repository.findByIdInAndTenantId(ids, tenantId);
+            entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids);
         }
 
         return convert(entityList);

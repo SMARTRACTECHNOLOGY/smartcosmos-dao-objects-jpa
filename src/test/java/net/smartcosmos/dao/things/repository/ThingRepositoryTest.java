@@ -1,12 +1,11 @@
 package net.smartcosmos.dao.things.repository;
 
-import net.smartcosmos.dao.things.ThingPersistenceConfig;
-import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
-import net.smartcosmos.dao.things.domain.ThingEntity;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.*;
+import org.junit.runner.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -17,13 +16,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import net.smartcosmos.dao.things.ThingPersistenceConfig;
+import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
+import net.smartcosmos.dao.things.domain.ThingEntity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -103,7 +100,7 @@ public class ThingRepositoryTest {
         List<UUID> uuids = new ArrayList<>();
         uuids.add(id);
 
-        List<ThingEntity> entityList = repository.findByIdInAndTenantId(uuids, tenantId);
+        List<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, uuids);
         assertFalse(entityList.isEmpty());
 
         assertEquals(1, entityList.size());

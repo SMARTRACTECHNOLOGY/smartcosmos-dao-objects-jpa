@@ -1,22 +1,16 @@
 package net.smartcosmos.dao.things.impl;
 
-import net.smartcosmos.dao.things.SortOrder;
-import net.smartcosmos.dao.things.ThingPersistenceConfig;
-import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
-import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.dao.things.repository.ThingRepository;
-import net.smartcosmos.dao.things.util.UuidUtil;
-import net.smartcosmos.dto.things.Page;
-import net.smartcosmos.dto.things.ThingCreate;
-import net.smartcosmos.dto.things.ThingResponse;
-import net.smartcosmos.dto.things.ThingUpdate;
-import net.smartcosmos.security.user.SmartCosmosUser;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.junit.*;
+import org.junit.runner.*;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -28,18 +22,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import net.smartcosmos.dao.things.SortOrder;
+import net.smartcosmos.dao.things.ThingPersistenceConfig;
+import net.smartcosmos.dao.things.ThingsPersistenceTestApplication;
+import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.repository.ThingRepository;
+import net.smartcosmos.dao.things.util.UuidUtil;
+import net.smartcosmos.dto.things.Page;
+import net.smartcosmos.dto.things.ThingCreate;
+import net.smartcosmos.dto.things.ThingResponse;
+import net.smartcosmos.dto.things.ThingUpdate;
+import net.smartcosmos.security.user.SmartCosmosUser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -381,30 +376,30 @@ public class ThingPersistenceServiceTest {
         urn.add(secondUrn);
         urn.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urn);
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 
     @Test
-    public void testFindByUrnsSortingByType() throws Exception
+    public void testFindByUrnsSortingByUrn() throws Exception
     {
         populateData();
 
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_TWO, URN_04).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_12).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07).get().getUrn();
 
         Collection<String> urn = new ArrayList<>();
         urn.add(secondUrn);
         urn.add(firstUrn);
         urn.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn, SortOrder.ASC, "type");
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "urn");
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
@@ -422,9 +417,9 @@ public class ThingPersistenceServiceTest {
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_TWO, URN_04).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_12).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07).get().getUrn();
 
         List<String> urn = new ArrayList<>();
         urn.add(secondUrn);
@@ -435,7 +430,7 @@ public class ThingPersistenceServiceTest {
             .sorted()
             .collect(Collectors.toList());
 
-        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn, SortOrder.ASC, "");
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "");
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
@@ -453,9 +448,9 @@ public class ThingPersistenceServiceTest {
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_TWO, URN_04).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_12).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09).get().getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07).get().getUrn();
 
         List<String> urn = new ArrayList<>();
         urn.add(secondUrn);
@@ -466,7 +461,7 @@ public class ThingPersistenceServiceTest {
             .sorted()
             .collect(Collectors.toList());
 
-        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urn, SortOrder.ASC, null);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, null);
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
@@ -493,7 +488,7 @@ public class ThingPersistenceServiceTest {
         urns.add(secondUrn);
         urns.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urns);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
@@ -516,7 +511,7 @@ public class ThingPersistenceServiceTest {
         urns.add(seconUrn);
         urns.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByUrns(tenantUrn, urns);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
 
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
