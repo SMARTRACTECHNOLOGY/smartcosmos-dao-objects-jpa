@@ -31,7 +31,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "id", "tenantId" }) )
+@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "id", "tenantId", "type" }) )
 public class ThingEntity implements Serializable {
 
     private static final int UUID_LENGTH = 16;
