@@ -598,7 +598,7 @@ public class ThingPersistenceServiceTest {
     }
 
     @Test
-    public void testFinallPagingAndSorting() throws Exception {
+    public void testFindAllPagingAndSorting() throws Exception {
 
         populateData();
 
