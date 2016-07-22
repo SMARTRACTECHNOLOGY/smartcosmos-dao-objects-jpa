@@ -167,17 +167,27 @@ public class ThingPersistenceServiceTest {
             .urn(urn)
             .type("type")
             .build();
-        Optional<ThingResponse> response1 = persistenceService
+        Optional<ThingResponse> createResponse1 = persistenceService
             .create(tenantUrn, create1);
-        assertTrue(response1.isPresent());
+        assertTrue(createResponse1.isPresent());
+        assertEquals("type1", createResponse1.get().getType());
+        assertEquals(urn, createResponse1.get().getUrn());
+
+        Optional<ThingResponse> persistResponse1 = persistenceService.findByTypeAndUrn(tenantUrn, "type1", urn);
+        assertTrue(persistResponse1.isPresent());
 
         ThingCreate create2 = ThingCreate.builder()
             .urn(urn)
             .type("type2")
             .build();
-        Optional<ThingResponse> response2 = persistenceService
+        Optional<ThingResponse> createResponse2 = persistenceService
             .create(tenantUrn, create2);
-        assertTrue(response2.isPresent());
+        assertTrue(createResponse2.isPresent());
+        assertEquals("type2", createResponse2.get().getType());
+        assertEquals(urn, createResponse2.get().getUrn());
+
+        Optional<ThingResponse> persistResponse2 = persistenceService.findByTypeAndUrn(tenantUrn, "type2", urn);
+        assertTrue(persistResponse2.isPresent());
     }
 
     // endregion
