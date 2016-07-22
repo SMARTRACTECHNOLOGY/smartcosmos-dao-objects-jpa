@@ -162,31 +162,33 @@ public class ThingPersistenceServiceTest {
 
         final String uuid = "06ee2f2f-eb93-4089-98c0-cc732b1837ba";
         final String urn = "urn:thing:uuid:" + uuid;
+        final String type1 = "type1";
+        final String type2 = "type2";
 
         ThingCreate create1 = ThingCreate.builder()
             .urn(urn)
-            .type("type")
+            .type(type1)
             .build();
         Optional<ThingResponse> createResponse1 = persistenceService
             .create(tenantUrn, create1);
         assertTrue(createResponse1.isPresent());
-        assertEquals("type1", createResponse1.get().getType());
+        assertEquals(type1, createResponse1.get().getType());
         assertEquals(urn, createResponse1.get().getUrn());
 
-        Optional<ThingResponse> persistResponse1 = persistenceService.findByTypeAndUrn(tenantUrn, "type1", urn);
+        Optional<ThingResponse> persistResponse1 = persistenceService.findByTypeAndUrn(tenantUrn, type1, urn);
         assertTrue(persistResponse1.isPresent());
 
         ThingCreate create2 = ThingCreate.builder()
             .urn(urn)
-            .type("type2")
+            .type(type2)
             .build();
         Optional<ThingResponse> createResponse2 = persistenceService
             .create(tenantUrn, create2);
         assertTrue(createResponse2.isPresent());
-        assertEquals("type2", createResponse2.get().getType());
+        assertEquals(type2, createResponse2.get().getType());
         assertEquals(urn, createResponse2.get().getUrn());
 
-        Optional<ThingResponse> persistResponse2 = persistenceService.findByTypeAndUrn(tenantUrn, "type2", urn);
+        Optional<ThingResponse> persistResponse2 = persistenceService.findByTypeAndUrn(tenantUrn, type2, urn);
         assertTrue(persistResponse2.isPresent());
     }
 
