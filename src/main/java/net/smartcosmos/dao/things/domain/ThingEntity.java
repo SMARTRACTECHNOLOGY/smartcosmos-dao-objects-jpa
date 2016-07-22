@@ -9,10 +9,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -28,10 +28,11 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity(name = "thing")
+@IdClass(ThingId.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "id", "tenantId", "type" }) )
+@Table(name = "thing")
 public class ThingEntity implements Serializable {
 
     private static final int UUID_LENGTH = 16;
@@ -50,11 +51,13 @@ public class ThingEntity implements Serializable {
     @Column(name = "id", length = UUID_LENGTH)
     private UUID id;
 
+    @Id
     @NotEmpty
     @Size(max = TYPE_LENGTH)
     @Column(name = "type", length = TYPE_LENGTH, nullable = false, updatable = false)
     private String type;
 
+    @Id
     @NotNull
     @Type(type = "uuid-binary")
     @Column(name = "tenantId", length = UUID_LENGTH, nullable = false, updatable = false)
