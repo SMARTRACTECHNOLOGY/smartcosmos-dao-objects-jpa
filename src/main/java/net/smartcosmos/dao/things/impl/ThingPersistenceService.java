@@ -1,5 +1,6 @@
 package net.smartcosmos.dao.things.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -184,8 +185,9 @@ public class ThingPersistenceService implements ThingDao {
             UUID id = UuidUtil.getUuidFromUrn(urn);
 
             Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
-
-            return convert(entity);
+            if (entity.isPresent()) {
+                return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
+            }
         } catch (IllegalArgumentException e) {
             log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
@@ -227,48 +229,42 @@ public class ThingPersistenceService implements ThingDao {
     // region Find by URNs
 
     @Override
-    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns) {
+    public List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns) {
 
-        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(null, null, null, null));
+        return findByTypeAndUrns(tenantUrn, type, urns, null);
     }
 
     @Override
-    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Integer page, Integer size) {
+    public List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, SortOrder sortOrder, String sortBy) {
 
-        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(page, size, null, null));
+        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
+        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
+        Sort sort = new Sort(direction, sortBy);
+
+        return findByTypeAndUrns(tenantUrn, type, urns, sort);
     }
 
-    @Override
-    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, SortOrder sortOrder, String sortBy) {
-
-        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(null, null, ThingPersistenceUtil.getSortByFieldName(sortBy),
-                                                                    ThingPersistenceUtil.getSortDirection(sortOrder)));
-    }
-
-    @Override
-    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Integer page, Integer size, SortOrder
-                                                 sortOrder, String sortBy) {
-
-        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(null, null, ThingPersistenceUtil.getSortByFieldName(sortBy),
-                                                                    ThingPersistenceUtil.getSortDirection(sortOrder)));
-    }
-
-    private Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Pageable pageable) {
+    private List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Sort sort) {
 
         UUID tenantId;
         try {
             tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-            return ThingPersistenceUtil.emptyPage();
+            return new ArrayList<>();
         }
 
         List<UUID> ids = getUuidListFromUrnCollection(tenantUrn, urns);
 
-        org.springframework.data.domain.Page<ThingEntity> entityPage;
-            entityPage = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids, pageable);
+        List<ThingEntity> entityList;
+        if (sort != null) {
+            entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids, sort);
+        } else {
+            entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids);
+        }
 
-        return convert(entityPage);
+        return convertList(entityList);
     }
 
     // endregion
@@ -322,10 +318,8 @@ public class ThingPersistenceService implements ThingDao {
      * @return All the objects.
      */
     public Page<ThingResponse> getThings() {
-        // You could theoretically create a conversion function to handle this, since
-        // it'll happen fairly often and in numerous places, but for example sake it's
-        // done inline here.
-        return convert(repository.findAll(getPageable(null, null, null, null)));
+
+        return convertPage(repository.findAll(getPageable(null, null, null, null)));
     }
 
     // endregion
@@ -381,8 +375,9 @@ public class ThingPersistenceService implements ThingDao {
             UUID id = UuidUtil.getUuidFromUrn(urn);
 
             Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
-
-            return convert(entity);
+            if (entity.isPresent()) {
+                return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
+            }
         } catch (IllegalArgumentException e) {
             log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
@@ -396,7 +391,7 @@ public class ThingPersistenceService implements ThingDao {
      * @param entity the thing entity
      * @return an {@link Optional} that contains a {@link ThingResponse} instance or is empty
      */
-    private Optional<ThingResponse> convert(Optional<ThingEntity> entity) {
+    private Optional<ThingResponse> convertList(Optional<ThingEntity> entity) {
 
         if (entity.isPresent()) {
             final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
@@ -412,7 +407,7 @@ public class ThingPersistenceService implements ThingDao {
      * @param entityPage the entities
      * @return the list of {@link ThingResponse} instances
      */
-    private Page<ThingResponse> convert(org.springframework.data.domain.Page<ThingEntity> entityPage) {
+    private Page<ThingResponse> convertPage(org.springframework.data.domain.Page<ThingEntity> entityPage) {
         List<ThingResponse> responseData = entityPage.getContent().stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
@@ -427,6 +422,19 @@ public class ThingPersistenceService implements ThingDao {
                       .build())
             .build();
     }
+
+    /**
+     * Converts a list of thing entities to a list of corresponding response objects.
+     *
+     * @param entityList the entities
+     * @return the list of {@link ThingResponse} instances
+     */
+    private List<ThingResponse> convertList(List<ThingEntity> entityList) {
+        return entityList.stream()
+            .map(o -> conversionService.convert(o, ThingResponse.class))
+            .collect(Collectors.toList());
+    }
+
 
     /**
      * Builds the pageable for repository calls, including translation of 1-based page numbering on the API level to

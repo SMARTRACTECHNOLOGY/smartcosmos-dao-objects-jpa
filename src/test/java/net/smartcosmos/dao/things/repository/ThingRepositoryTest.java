@@ -101,11 +101,11 @@ public class ThingRepositoryTest {
         List<UUID> uuids = new ArrayList<>();
         uuids.add(id);
 
-        Page<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, uuids, null);
-        assertFalse(entityList.getContent().isEmpty());
+        List<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, uuids);
+        assertFalse(entityList.isEmpty());
 
-        assertEquals(1, entityList.getContent().size());
-        assertEquals(id, entityList.getContent().get(0).getId());
+        assertEquals(1, entityList.size());
+        assertEquals(id, entityList.get(0).getId());
     }
 
     @Test

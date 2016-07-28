@@ -387,9 +387,9 @@ public class ThingPersistenceServiceTest {
         urn.add(secondUrn);
         urn.add(thirdUrn);
 
-        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urn);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urn);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 
@@ -410,14 +410,14 @@ public class ThingPersistenceServiceTest {
         urn.add(firstUrn);
         urn.add(thirdUrn);
 
-        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "urn");
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(firstUrn, response.getData().get(0).getUrn());
-        assertEquals(secondUrn, response.getData().get(1).getUrn());
-        assertEquals(thirdUrn, response.getData().get(2).getUrn());
+        assertEquals(firstUrn, response.get(0).getUrn());
+        assertEquals(secondUrn, response.get(1).getUrn());
+        assertEquals(thirdUrn, response.get(2).getUrn());
     }
 
     @Test
@@ -441,14 +441,14 @@ public class ThingPersistenceServiceTest {
             .sorted()
             .collect(Collectors.toList());
 
-        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "");
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(sortedUrns.get(0), response.getData().get(0).getUrn());
-        assertEquals(sortedUrns.get(1), response.getData().get(1).getUrn());
-        assertEquals(sortedUrns.get(2), response.getData().get(2).getUrn());
+        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
+        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
+        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
     }
 
     @Test
@@ -472,14 +472,14 @@ public class ThingPersistenceServiceTest {
             .sorted()
             .collect(Collectors.toList());
 
-        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, null);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(sortedUrns.get(0), response.getData().get(0).getUrn());
-        assertEquals(sortedUrns.get(1), response.getData().get(1).getUrn());
-        assertEquals(sortedUrns.get(2), response.getData().get(2).getUrn());
+        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
+        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
+        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
     }
 
     @Test
@@ -499,9 +499,9 @@ public class ThingPersistenceServiceTest {
         urns.add(secondUrn);
         urns.add(thirdUrn);
 
-        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 
@@ -522,9 +522,9 @@ public class ThingPersistenceServiceTest {
         urns.add(seconUrn);
         urns.add(thirdUrn);
 
-        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
+        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
 
-        actualDataSize = response.getData().size();
+        actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 

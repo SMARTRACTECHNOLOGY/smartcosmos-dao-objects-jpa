@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -28,7 +29,9 @@ public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, Pagin
 
     Page<ThingEntity> findByTenantId(UUID tenantId, Pageable pageable);
 
-    Page<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, Collection<UUID> ids, Pageable pageable);
+    List<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, Collection<UUID> ids);
+
+    List<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, Collection<UUID> ids, Sort sort);
 
     Page<ThingEntity> findAll(Pageable pageable);
 
