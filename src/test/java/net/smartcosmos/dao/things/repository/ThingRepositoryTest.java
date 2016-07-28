@@ -11,6 +11,7 @@ import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -77,21 +78,21 @@ public class ThingRepositoryTest {
 
     @Test
     public void findByTenantId() throws Exception {
-        List<ThingEntity> entityList = repository.findByTenantId(tenantId);
-        assertFalse(entityList.isEmpty());
+        Page<ThingEntity> entityPage = repository.findByTenantId(tenantId, null);
+        assertFalse(entityPage.getContent().isEmpty());
 
-        assertEquals(1, entityList.size());
-        assertEquals(id, entityList.get(0).getId());
+        assertEquals(1, entityPage.getContent().size());
+        assertEquals(id, entityPage.getContent().get(0).getId());
     }
 
     @Test
     public void findByTenantIdAndType() throws Exception {
 
-        List<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type);
-        assertFalse(entityList.isEmpty());
+        Page<ThingEntity> entityPage = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, null);
+        assertFalse(entityPage.getContent().isEmpty());
 
-        assertEquals(1, entityList.size());
-        assertEquals(id, entityList.get(0).getId());
+        assertEquals(1, entityPage.getContent().size());
+        assertEquals(id, entityPage.getContent().get(0).getId());
     }
 
     @Test
@@ -100,11 +101,11 @@ public class ThingRepositoryTest {
         List<UUID> uuids = new ArrayList<>();
         uuids.add(id);
 
-        List<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, uuids);
-        assertFalse(entityList.isEmpty());
+        Page<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, uuids, null);
+        assertFalse(entityList.getContent().isEmpty());
 
-        assertEquals(1, entityList.size());
-        assertEquals(id, entityList.get(0).getId());
+        assertEquals(1, entityList.getContent().size());
+        assertEquals(id, entityList.getContent().get(0).getId());
     }
 
     @Test
@@ -259,14 +260,15 @@ public class ThingRepositoryTest {
                     .build());
         }
 
-        List<ThingEntity> entityList = repository.findByTenantId(tenantId, new Sort(Sort.Direction.DESC, "type"));
-        assertFalse(entityList.isEmpty());
+        Pageable pageable = new PageRequest(0, 100, Sort.Direction.DESC, "type");
+        Page<ThingEntity> entityList = repository.findByTenantId(tenantId, pageable);
+        assertFalse(entityList.getContent().isEmpty());
 
-        assertEquals(entityCount, entityList.size());
-        assertEquals(typeB, entityList.get(0).getType());
-        assertEquals(typeB, entityList.get(14).getType());
+        assertEquals(entityCount, entityList.getTotalElements());
+        assertEquals(typeB, entityList.getContent().get(0).getType());
+        assertEquals(typeB, entityList.getContent().get(14).getType());
 
-        assertEquals(typeA, entityList.get(15).getType());
-        assertEquals(typeA, entityList.get(29).getType());
+        assertEquals(typeA, entityList.getContent().get(15).getType());
+        assertEquals(typeA, entityList.getContent().get(29).getType());
     }
 }

@@ -1,6 +1,5 @@
 package net.smartcosmos.dao.things.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +26,7 @@ import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
 import net.smartcosmos.dao.things.util.UuidUtil;
 import net.smartcosmos.dto.things.Page;
+import net.smartcosmos.dto.things.PageInformation;
 import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
@@ -35,12 +35,18 @@ import net.smartcosmos.dto.things.ThingUpdate;
 @Service
 public class ThingPersistenceService implements ThingDao {
 
+    public static final Integer DEFAULT_PAGE = 1;
+    public static final Integer DEFAULT_SIZE = 20;
+    public static final Sort.Direction DEFAULT_SORT_ORDER = Sort.Direction.ASC;
+    public static final String DEFAULT_SORT_BY = "created";
+
     private final ThingRepository repository;
     private final ConversionService conversionService;
 
     @Autowired
-    public ThingPersistenceService(ThingRepository repository,
-                                   ConversionService conversionService) {
+    public ThingPersistenceService(
+        ThingRepository repository,
+        ConversionService conversionService) {
         this.repository = repository;
         this.conversionService = conversionService;
     }
@@ -61,12 +67,10 @@ public class ThingPersistenceService implements ThingDao {
                 ThingResponse response = conversionService.convert(entity, ThingResponse.class);
 
                 return Optional.ofNullable(response);
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 if (StringUtils.isNotBlank(createThing.getUrn())) {
                     log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, createThing.getUrn());
-                }
-                else {
+                } else {
                     log.warn("Error processing ID: Tenant ID '{}'", tenantUrn);
                 }
                 throw e;
@@ -95,8 +99,29 @@ public class ThingPersistenceService implements ThingDao {
 
                 return Optional.ofNullable(response);
             }
+        } catch (IllegalArgumentException e) {
+            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
-        catch (IllegalArgumentException e) {
+
+        return Optional.empty();
+    }
+
+    // endregion
+
+    // region Delete
+
+    @Override
+    public Optional<ThingResponse> delete(String tenantUrn, String type, String urn) {
+
+        try {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            UUID id = UuidUtil.getUuidFromUrn(urn);
+            List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+
+            if (!deleteList.isEmpty()) {
+                return Optional.ofNullable(conversionService.convert(deleteList.get(0), ThingResponse.class));
+            }
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
 
@@ -108,57 +133,32 @@ public class ThingPersistenceService implements ThingDao {
     // region Find By Type
 
     @Override
-    public List<ThingResponse> findByType(String tenantUrn, String type) {
+    public Page<ThingResponse> findByType(String tenantUrn, String type) {
 
-        return findByTypeList(tenantUrn, type, null);
+        return findByType(tenantUrn, type, getPageable(null, null, null, null));
     }
 
     @Override
-    public List<ThingResponse> findByType(String tenantUrn, String type, SortOrder sortOrder, String sortBy) {
+    public Page<ThingResponse> findByType(String tenantUrn, String type, SortOrder sortOrder, String sortBy) {
 
-        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
-        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
-        Sort sort = new Sort(direction, sortBy);
-
-        return findByTypeList(tenantUrn, type, sort);
-    }
-
-    private List<ThingResponse> findByTypeList(String tenantUrn, String type, Sort sort) {
-
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            List<ThingEntity> entityList;
-            if (sort != null) {
-                entityList = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, sort);
-            } else {
-                entityList = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type);
-            }
-
-            return convert(entityList);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-        }
-
-        return new ArrayList<>();
+        return findByType(tenantUrn, type, getPageable(null, null, ThingPersistenceUtil.getSortByFieldName(sortBy),
+                                                       ThingPersistenceUtil.getSortDirection(sortOrder)));
     }
 
     @Override
     public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size) {
 
-        return findByTypePage(tenantUrn, type, getPageable(page, size, null, null));
+        return findByType(tenantUrn, type, getPageable(page, size, null, null));
     }
 
     @Override
     public Page<ThingResponse> findByType(String tenantUrn, String type, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
 
-        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
-        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
-
-        return findByTypePage(tenantUrn, type, getPageable(page, size, sortBy, direction));
+        return findByType(tenantUrn, type, getPageable(page, size, ThingPersistenceUtil.getSortByFieldName(sortBy),
+                                                       ThingPersistenceUtil.getSortDirection(sortOrder)));
     }
 
-    private Page<ThingResponse> findByTypePage(String tenantUrn, String type, Pageable pageable) {
+    private Page<ThingResponse> findByType(String tenantUrn, String type, Pageable pageable) {
 
         Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
         try {
@@ -166,33 +166,10 @@ public class ThingPersistenceService implements ThingDao {
             org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, pageable);
 
             return conversionService.convert(pageResponse, result.getClass());
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
         }
-
         return result;
-    }
-
-    // endregion
-
-    // region Delete
-
-    @Override
-    public List<ThingResponse> delete(String tenantUrn, String type, String urn) {
-
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            UUID id = UuidUtil.getUuidFromUrn(urn);
-            List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
-
-            return convert(deleteList);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
-        }
-
-        return new ArrayList<>();
     }
 
     // endregion
@@ -209,8 +186,7 @@ public class ThingPersistenceService implements ThingDao {
             Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
             return convert(entity);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
 
@@ -222,22 +198,27 @@ public class ThingPersistenceService implements ThingDao {
     // region Find by Type and URN startsWith
 
     @Override
-    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith) {
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith) {
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     @Override
-    public List<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, SortOrder sortOrder, String sortBy) {
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer number) {
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     @Override
-    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer size) {
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, SortOrder sortOrder, String sortBy) {
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     @Override
-    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer size,
+                                                          SortOrder sortOrder, String sortBy) {
+        throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
+    }
+
+    private Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Pageable pageable) {
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
@@ -246,56 +227,48 @@ public class ThingPersistenceService implements ThingDao {
     // region Find by URNs
 
     @Override
-    public List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns) {
+    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns) {
 
-        return findByTypeAndUrns(tenantUrn, type, urns, null);
+        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(null, null, null, null));
     }
 
     @Override
-    public List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, SortOrder sortOrder, String sortBy) {
+    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Integer page, Integer size) {
 
-        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
-        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
-        Sort sort = new Sort(direction, sortBy);
-
-        return findByTypeAndUrns(tenantUrn, type, urns, sort);
+        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(page, size, null, null));
     }
 
-    private List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Sort sort) {
+    @Override
+    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, SortOrder sortOrder, String sortBy) {
+
+        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(null, null, ThingPersistenceUtil.getSortByFieldName(sortBy),
+                                                                    ThingPersistenceUtil.getSortDirection(sortOrder)));
+    }
+
+    @Override
+    public Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Integer page, Integer size, SortOrder
+                                                 sortOrder, String sortBy) {
+
+        return findByTypeAndUrns(tenantUrn, type, urns, getPageable(null, null, ThingPersistenceUtil.getSortByFieldName(sortBy),
+                                                                    ThingPersistenceUtil.getSortDirection(sortOrder)));
+    }
+
+    private Page<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Pageable pageable) {
 
         UUID tenantId;
         try {
             tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-            return new ArrayList<>();
+            return ThingPersistenceUtil.emptyPage();
         }
 
         List<UUID> ids = getUuidListFromUrnCollection(tenantUrn, urns);
 
-        List<ThingEntity> entityList;
-        if (sort != null) {
-            entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids, sort);
-        } else {
-            entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids);
-        }
+        org.springframework.data.domain.Page<ThingEntity> entityPage;
+            entityPage = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids, pageable);
 
-        return convert(entityList);
-    }
-
-    private List<UUID> getUuidListFromUrnCollection(String tenantUrn, Collection<String> urns) {
-        return urns.stream()
-                .map(urn -> {
-                    try {
-                        return UuidUtil.getUuidFromUrn(urn);
-                    } catch (IllegalArgumentException e) {
-                        log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
-                    }
-                    return null;
-                })
-                .filter(uuid -> uuid != null)
-                .collect(Collectors.toList());
+        return convert(entityPage);
     }
 
     // endregion
@@ -303,36 +276,15 @@ public class ThingPersistenceService implements ThingDao {
     // region Find All
 
     @Override
-    public List<ThingResponse> findAll(String tenantUrn) {
+    public Page<ThingResponse> findAll(String tenantUrn) {
 
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            List<ThingEntity> entityList = repository.findByTenantId(tenantId);
-
-            return convert(entityList);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-        }
-
-        return new ArrayList<>();
+        return findAll(tenantUrn, getPageable(null, null, null, null));
     }
 
     @Override
-    public List<ThingResponse> findAll(String tenantUrn, SortOrder sortOrder, String sortBy) {
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
-            Sort sort = new Sort(ThingPersistenceUtil.getSortDirection(sortOrder), sortBy);
-            List<ThingEntity> entityList = repository.findByTenantId(tenantId, sort);
+    public Page<ThingResponse> findAll(String tenantUrn, SortOrder sortOrder, String sortBy) {
 
-            return convert(entityList);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-        }
-
-        return new ArrayList<>();
+        return findAll(tenantUrn, getPageable(null, null, sortBy, ThingPersistenceUtil.getSortDirection(sortOrder)));
     }
 
     @Override
@@ -344,10 +296,7 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
 
-        Sort.Direction direction = ThingPersistenceUtil.getSortDirection(sortOrder);
-        sortBy = ThingPersistenceUtil.getSortByFieldName(sortBy);
-
-        return findAll(tenantUrn, getPageable(page, size, sortBy, direction));
+       return findAll(tenantUrn, getPageable(page, size, sortBy, ThingPersistenceUtil.getSortDirection(sortOrder)));
     }
 
     private Page<ThingResponse> findAll(String tenantUrn, Pageable pageable) {
@@ -358,8 +307,7 @@ public class ThingPersistenceService implements ThingDao {
             org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantId(tenantId, pageable);
 
             return conversionService.convert(pageResponse, result.getClass());
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
         }
 
@@ -373,11 +321,11 @@ public class ThingPersistenceService implements ThingDao {
      *
      * @return All the objects.
      */
-    public List<ThingResponse> getThings() {
+    public Page<ThingResponse> getThings() {
         // You could theoretically create a conversion function to handle this, since
         // it'll happen fairly often and in numerous places, but for example sake it's
         // done inline here.
-        return convert(repository.findAll());
+        return convert(repository.findAll(getPageable(null, null, null, null)));
     }
 
     // endregion
@@ -390,7 +338,7 @@ public class ThingPersistenceService implements ThingDao {
      * @param objectEntity the object entity to persist
      * @return the persisted object entity
      * @throws ConstraintViolationException if the transaction fails due to violated constraints
-     * @throws TransactionException if the transaction fails because of something else
+     * @throws TransactionException         if the transaction fails because of something else
      */
     private ThingEntity persist(ThingEntity objectEntity) throws ConstraintViolationException, TransactionException {
 
@@ -407,6 +355,20 @@ public class ThingPersistenceService implements ThingDao {
         }
     }
 
+    private List<UUID> getUuidListFromUrnCollection(String tenantUrn, Collection<String> urns) {
+        return urns.stream()
+            .map(urn -> {
+                try {
+                    return UuidUtil.getUuidFromUrn(urn);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+                }
+                return null;
+            })
+            .filter(uuid -> uuid != null)
+            .collect(Collectors.toList());
+    }
+
     private boolean alreadyExists(String tenantUrn, ThingCreate createThing) {
 
         return StringUtils.isNotBlank(createThing.getUrn()) && findByUrnAndType(tenantUrn, createThing.getUrn(), createThing.getType()).isPresent();
@@ -421,8 +383,7 @@ public class ThingPersistenceService implements ThingDao {
             Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
             return convert(entity);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
         }
 
@@ -440,8 +401,7 @@ public class ThingPersistenceService implements ThingDao {
         if (entity.isPresent()) {
             final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
             return Optional.ofNullable(response);
-        }
-        else {
+        } else {
             return Optional.empty();
         }
     }
@@ -449,13 +409,23 @@ public class ThingPersistenceService implements ThingDao {
     /**
      * Converts a list of thing entities to a list of corresponding response objects.
      *
-     * @param entityList the entities
+     * @param entityPage the entities
      * @return the list of {@link ThingResponse} instances
      */
-    private List<ThingResponse> convert(List<ThingEntity> entityList) {
-        return entityList.stream()
+    private Page<ThingResponse> convert(org.springframework.data.domain.Page<ThingEntity> entityPage) {
+        List<ThingResponse> responseData = entityPage.getContent().stream()
             .map(o -> conversionService.convert(o, ThingResponse.class))
             .collect(Collectors.toList());
+
+        return Page.builder()
+            .data((List) responseData)
+            .page(PageInformation.builder()
+                      .number(entityPage.getNumber())
+                      .size(entityPage.getSize())
+                      .totalElements(entityPage.getTotalElements())
+                      .totalPages(entityPage.getTotalPages())
+                      .build())
+            .build();
     }
 
     /**
@@ -470,7 +440,12 @@ public class ThingPersistenceService implements ThingDao {
      */
     protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort.Direction direction) {
 
-        if (page < 1) {
+        if (page == null) { page = DEFAULT_PAGE; }
+        if (size == null) { size = DEFAULT_SIZE; }
+        if (sortBy == null) { sortBy = DEFAULT_SORT_BY; }
+        if (direction == null) { direction = DEFAULT_SORT_ORDER; }
+
+        if ( page < 1) {
             throw new IllegalArgumentException("Page index must not be less than one!");
         }
         page = page - 1;

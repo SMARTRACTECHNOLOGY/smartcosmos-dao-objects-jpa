@@ -271,11 +271,10 @@ public class ThingPersistenceServiceTest {
 
         UUID id = entity.get().getId();
 
-        List<ThingResponse> responseDelete = persistenceService.delete(tenantUrn, type, urn);
+        Optional<ThingResponse> responseDelete = persistenceService.delete(tenantUrn, type, urn);
 
-        assertFalse(responseDelete.isEmpty());
-        assertEquals(1, responseDelete.size());
-        assertEquals(id, UuidUtil.getUuidFromUrn(responseDelete.get(0).getUrn()));
+        assertTrue(responseDelete.isPresent());
+        assertEquals(id, UuidUtil.getUuidFromUrn(responseDelete.get().getUrn()));
     }
 
     // endregion
@@ -322,9 +321,9 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 3;
         int actualSize = 0;
 
-        List<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE);
+        Page<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE);
 
-        actualSize = response.size();
+        actualSize = response.getData().size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
@@ -336,9 +335,9 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 0;
         int actualSize = 0;
 
-        List<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE.toUpperCase());
+        Page<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE.toUpperCase());
 
-        assertFalse(response.isEmpty());
+        assertFalse(response.getData().isEmpty());
     }
 
     @Test
@@ -388,9 +387,9 @@ public class ThingPersistenceServiceTest {
         urn.add(secondUrn);
         urn.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urn);
+        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urn);
 
-        actualDataSize = response.size();
+        actualDataSize = response.getData().size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 
@@ -411,14 +410,14 @@ public class ThingPersistenceServiceTest {
         urn.add(firstUrn);
         urn.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "urn");
+        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "urn");
 
-        actualDataSize = response.size();
+        actualDataSize = response.getData().size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(firstUrn, response.get(0).getUrn());
-        assertEquals(secondUrn, response.get(1).getUrn());
-        assertEquals(thirdUrn, response.get(2).getUrn());
+        assertEquals(firstUrn, response.getData().get(0).getUrn());
+        assertEquals(secondUrn, response.getData().get(1).getUrn());
+        assertEquals(thirdUrn, response.getData().get(2).getUrn());
     }
 
     @Test
@@ -442,14 +441,14 @@ public class ThingPersistenceServiceTest {
             .sorted()
             .collect(Collectors.toList());
 
-        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "");
+        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, "");
 
-        actualDataSize = response.size();
+        actualDataSize = response.getData().size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
-        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
-        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
+        assertEquals(sortedUrns.get(0), response.getData().get(0).getUrn());
+        assertEquals(sortedUrns.get(1), response.getData().get(1).getUrn());
+        assertEquals(sortedUrns.get(2), response.getData().get(2).getUrn());
     }
 
     @Test
@@ -473,14 +472,14 @@ public class ThingPersistenceServiceTest {
             .sorted()
             .collect(Collectors.toList());
 
-        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, null);
+        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, WHATEVER, urn, SortOrder.ASC, null);
 
-        actualDataSize = response.size();
+        actualDataSize = response.getData().size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
-        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
-        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
+        assertEquals(sortedUrns.get(0), response.getData().get(0).getUrn());
+        assertEquals(sortedUrns.get(1), response.getData().get(1).getUrn());
+        assertEquals(sortedUrns.get(2), response.getData().get(2).getUrn());
     }
 
     @Test
@@ -500,9 +499,9 @@ public class ThingPersistenceServiceTest {
         urns.add(secondUrn);
         urns.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
+        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
 
-        actualDataSize = response.size();
+        actualDataSize = response.getData().size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 
@@ -523,9 +522,9 @@ public class ThingPersistenceServiceTest {
         urns.add(seconUrn);
         urns.add(thirdUrn);
 
-        List<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
+        Page<ThingResponse> response = persistenceService.findByTypeAndUrns(tenantUrn, TYPE_ONE, urns);
 
-        actualDataSize = response.size();
+        actualDataSize = response.getData().size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
     }
 
@@ -541,11 +540,11 @@ public class ThingPersistenceServiceTest {
         int expectedSize = 12;
         int actualSize = 0;
 
-        List<ThingResponse> response = persistenceService.findAll(tenantUrn);
+        Page<ThingResponse> response = persistenceService.findAll(tenantUrn);
 
-        assertFalse(response.isEmpty());
+        assertFalse(response.getData().isEmpty());
 
-        actualSize = response.size();
+        actualSize = response.getData().size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
@@ -554,21 +553,21 @@ public class ThingPersistenceServiceTest {
 
         populateData();
 
-        List<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.ASC, "type");
+        Page<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.ASC, "type");
 
-        assertFalse(response.isEmpty());
-        assertEquals(TYPE_ONE, response.get(0).getType());
-        assertEquals(TYPE_ONE, response.get(1).getType());
-        assertEquals(TYPE_ONE, response.get(2).getType());
-        assertEquals(TYPE_TWO, response.get(3).getType());
-        assertEquals(TYPE_TWO, response.get(4).getType());
-        assertEquals(TYPE_TWO, response.get(5).getType());
-        assertEquals(WHATEVER, response.get(6).getType());
-        assertEquals(WHATEVER, response.get(7).getType());
-        assertEquals(WHATEVER, response.get(8).getType());
-        assertEquals(WHATEVER, response.get(9).getType());
-        assertEquals(WHATEVER, response.get(10).getType());
-        assertEquals(WHATEVER, response.get(11).getType());
+        assertFalse(response.getData().isEmpty());
+        assertEquals(TYPE_ONE, response.getData().get(0).getType());
+        assertEquals(TYPE_ONE, response.getData().get(1).getType());
+        assertEquals(TYPE_ONE, response.getData().get(2).getType());
+        assertEquals(TYPE_TWO, response.getData().get(3).getType());
+        assertEquals(TYPE_TWO, response.getData().get(4).getType());
+        assertEquals(TYPE_TWO, response.getData().get(5).getType());
+        assertEquals(WHATEVER, response.getData().get(6).getType());
+        assertEquals(WHATEVER, response.getData().get(7).getType());
+        assertEquals(WHATEVER, response.getData().get(8).getType());
+        assertEquals(WHATEVER, response.getData().get(9).getType());
+        assertEquals(WHATEVER, response.getData().get(10).getType());
+        assertEquals(WHATEVER, response.getData().get(11).getType());
     }
 
     @Test
@@ -576,21 +575,21 @@ public class ThingPersistenceServiceTest {
 
         populateData();
 
-        List<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.DESC, "type");
+        Page<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.DESC, "type");
 
-        assertFalse(response.isEmpty());
-        assertEquals(WHATEVER, response.get(0).getType());
-        assertEquals(WHATEVER, response.get(1).getType());
-        assertEquals(WHATEVER, response.get(2).getType());
-        assertEquals(WHATEVER, response.get(3).getType());
-        assertEquals(WHATEVER, response.get(4).getType());
-        assertEquals(WHATEVER, response.get(5).getType());
-        assertEquals(TYPE_TWO, response.get(6).getType());
-        assertEquals(TYPE_TWO, response.get(7).getType());
-        assertEquals(TYPE_TWO, response.get(8).getType());
-        assertEquals(TYPE_ONE, response.get(9).getType());
-        assertEquals(TYPE_ONE, response.get(10).getType());
-        assertEquals(TYPE_ONE, response.get(11).getType());
+        assertFalse(response.getData().isEmpty());
+        assertEquals(WHATEVER, response.getData().get(0).getType());
+        assertEquals(WHATEVER, response.getData().get(1).getType());
+        assertEquals(WHATEVER, response.getData().get(2).getType());
+        assertEquals(WHATEVER, response.getData().get(3).getType());
+        assertEquals(WHATEVER, response.getData().get(4).getType());
+        assertEquals(WHATEVER, response.getData().get(5).getType());
+        assertEquals(TYPE_TWO, response.getData().get(6).getType());
+        assertEquals(TYPE_TWO, response.getData().get(7).getType());
+        assertEquals(TYPE_TWO, response.getData().get(8).getType());
+        assertEquals(TYPE_ONE, response.getData().get(9).getType());
+        assertEquals(TYPE_ONE, response.getData().get(10).getType());
+        assertEquals(TYPE_ONE, response.getData().get(11).getType());
     }
 
     @Test
