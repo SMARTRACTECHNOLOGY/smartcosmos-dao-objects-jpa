@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,11 +36,6 @@ import net.smartcosmos.dto.things.ThingUpdate;
 @Slf4j
 @Service
 public class ThingPersistenceService implements ThingDao {
-
-    public static final Integer DEFAULT_PAGE = 1;
-    public static final Integer DEFAULT_SIZE = 20;
-    public static final Sort.Direction DEFAULT_SORT_ORDER = Sort.Direction.ASC;
-    public static final String DEFAULT_SORT_BY = "created";
 
     private final ThingRepository repository;
     private final ConversionService conversionService;
@@ -264,7 +260,7 @@ public class ThingPersistenceService implements ThingDao {
             entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, ids);
         }
 
-        return convertList(entityList);
+        return convertList(entityList, ThingEntity.class, ThingResponse.class);
     }
 
     // endregion
@@ -319,7 +315,7 @@ public class ThingPersistenceService implements ThingDao {
      */
     public Page<ThingResponse> getThings() {
 
-        return convertPage(repository.findAll(getPageable(null, null, null, null)));
+        return convertPage(repository.findAll(getPageable(null, null, null, null)), ThingEntity.class, ThingResponse.class);
     }
 
     // endregion
@@ -386,53 +382,41 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     /**
-     * Converts a single thing entity optional to the corresponding response object.
+     * Uses the conversion service to convert a typed list into another typed list.
      *
-     * @param entity the thing entity
-     * @return an {@link Optional} that contains a {@link ThingResponse} instance or is empty
+     * @param list the list
+     * @param sourceClass the class of the source type
+     * @param targetClass the class of the target type
+     * @param <S> the generic source type
+     * @param <T> the generic target type
+     * @return the converted typed list
      */
-    private Optional<ThingResponse> convertList(Optional<ThingEntity> entity) {
+    @SuppressWarnings("unchecked")
+    private <S, T> List<T> convertList(List<S> list, Class sourceClass, Class targetClass) {
 
-        if (entity.isPresent()) {
-            final ThingResponse response = conversionService.convert(entity.get(), ThingResponse.class);
-            return Optional.ofNullable(response);
-        } else {
-            return Optional.empty();
-        }
+        TypeDescriptor sourceDescriptor = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(sourceClass));
+        TypeDescriptor targetDescriptor = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(targetClass));
+
+        return (List<T>) conversionService.convert(list, sourceDescriptor, targetDescriptor);
     }
 
     /**
-     * Converts a list of thing entities to a list of corresponding response objects.
+     * Uses the conversion service to covert a typed {@link org.springframework.data.domain.Page} into a typed {@link Page}, i.e. converts the page
+     * information and the content list.
      *
-     * @param entityPage the entities
-     * @return the list of {@link ThingResponse} instances
+     * @param page the page
+     * @param sourceClass the class of the source type
+     * @param targetClass the class of the target type
+     * @param <S> the generic source type
+     * @param <T> the generic target type
+     * @return the converted typed page
      */
-    private Page<ThingResponse> convertPage(org.springframework.data.domain.Page<ThingEntity> entityPage) {
-        List<ThingResponse> responseData = entityPage.getContent().stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
+    private <S, T> Page<T> convertPage(org.springframework.data.domain.Page<S> page, Class sourceClass, Class targetClass) {
 
-        return Page.builder()
-            .data((List) responseData)
-            .page(PageInformation.builder()
-                      .number(entityPage.getNumber())
-                      .size(entityPage.getSize())
-                      .totalElements(entityPage.getTotalElements())
-                      .totalPages(entityPage.getTotalPages())
-                      .build())
+        return Page.<T>builder()
+            .page(conversionService.convert(page, PageInformation.class))
+            .data(convertList(page.getContent(), sourceClass, targetClass))
             .build();
-    }
-
-    /**
-     * Converts a list of thing entities to a list of corresponding response objects.
-     *
-     * @param entityList the entities
-     * @return the list of {@link ThingResponse} instances
-     */
-    private List<ThingResponse> convertList(List<ThingEntity> entityList) {
-        return entityList.stream()
-            .map(o -> conversionService.convert(o, ThingResponse.class))
-            .collect(Collectors.toList());
     }
 
 
@@ -446,12 +430,12 @@ public class ThingPersistenceService implements ThingDao {
      * @param direction the sort order direction
      * @return the pageable object
      */
-    protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort.Direction direction) {
+    protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort. Direction direction) {
 
         if (page == null) { page = DEFAULT_PAGE; }
         if (size == null) { size = DEFAULT_SIZE; }
         if (sortBy == null) { sortBy = DEFAULT_SORT_BY; }
-        if (direction == null) { direction = DEFAULT_SORT_ORDER; }
+        if (direction == null) { direction = Sort.Direction.fromString(DEFAULT_SORT_ORDER.toString()); }
 
         if ( page < 1) {
             throw new IllegalArgumentException("Page index must not be less than one!");
