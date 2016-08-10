@@ -16,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import net.smartcosmos.dao.things.domain.ThingEntity;
 
-public interface ThingRepository extends JpaRepository<ThingEntity, UUID>, PagingAndSortingRepository<ThingEntity, UUID>, QueryByExampleExecutor<ThingEntity>, JpaSpecificationExecutor<ThingEntity>
-{
+public interface ThingRepository
+    extends JpaRepository<ThingEntity, UUID>, PagingAndSortingRepository<ThingEntity, UUID>, QueryByExampleExecutor<ThingEntity>,
+            JpaSpecificationExecutor<ThingEntity> {
+
     @Transactional
     List<ThingEntity> deleteByIdAndTenantIdAndTypeIgnoreCase(UUID id, UUID tenantId, String type);
 

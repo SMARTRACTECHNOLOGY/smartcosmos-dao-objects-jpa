@@ -1,19 +1,20 @@
 package net.smartcosmos.dao.things.converter;
 
-import net.smartcosmos.dao.things.domain.ThingEntity;
-import net.smartcosmos.dao.things.util.UuidUtil;
-import net.smartcosmos.dto.things.ThingCreate;
+import java.util.UUID;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
+import net.smartcosmos.dao.things.domain.ThingEntity;
+import net.smartcosmos.dao.things.util.UuidUtil;
+import net.smartcosmos.dto.things.ThingCreate;
 
 @Component
 public class ThingCreateToThingEntityConverter
-        implements Converter<ThingCreate, ThingEntity>, FormatterRegistrar {
+    implements Converter<ThingCreate, ThingEntity>, FormatterRegistrar {
 
     @Override
     public ThingEntity convert(ThingCreate thingCreate) {
@@ -34,6 +35,7 @@ public class ThingCreateToThingEntityConverter
 
     @Override
     public void registerFormatters(FormatterRegistry registry) {
+
         registry.addConverter(this);
     }
 }

@@ -2,8 +2,8 @@ package net.smartcosmos.dao.things.converter;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +16,11 @@ import net.smartcosmos.dto.things.ThingResponse;
 public class SpringDataPageToThingResponsePageConverter
     extends ConversionServiceAwareConverter<org.springframework.data.domain.Page<ThingEntity>, Page<ThingResponse>> {
 
-    @Inject
+    @Autowired
     private ConversionService conversionService;
 
     protected ConversionService conversionService() {
+
         return conversionService;
     }
 
@@ -33,7 +34,8 @@ public class SpringDataPageToThingResponsePageConverter
             .totalPages(page.getTotalPages())
             .build();
 
-        List<ThingResponse> data = page.getContent().stream()
+        List<ThingResponse> data = page.getContent()
+            .stream()
             .map(entity -> conversionService.convert(entity, ThingResponse.class))
             .collect(Collectors.toList());
 

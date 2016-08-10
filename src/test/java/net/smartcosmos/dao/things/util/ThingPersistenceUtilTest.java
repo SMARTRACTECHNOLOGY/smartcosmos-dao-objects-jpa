@@ -1,18 +1,17 @@
 package net.smartcosmos.dao.things.util;
 
-import org.junit.Test;
-
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 public class ThingPersistenceUtilTest {
 
     @Test
     public void isEntityFieldValid() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
         assertTrue(ThingPersistenceUtil.isThingEntityField("id"));
         assertTrue(ThingPersistenceUtil.isThingEntityField("tenantId"));
         assertTrue(ThingPersistenceUtil.isThingEntityField("type"));
@@ -23,6 +22,7 @@ public class ThingPersistenceUtilTest {
 
     @Test
     public void isEntityFieldInValid() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
         assertFalse(ThingPersistenceUtil.isThingEntityField("name"));
         assertFalse(ThingPersistenceUtil.isThingEntityField("description"));
         assertFalse(ThingPersistenceUtil.isThingEntityField("moniker"));
@@ -30,6 +30,7 @@ public class ThingPersistenceUtilTest {
 
     @Test
     public void normalizeFieldNameUrn() {
+
         assertEquals("id", ThingPersistenceUtil.normalizeFieldName("urn"));
         assertEquals("id", ThingPersistenceUtil.normalizeFieldName("Urn"));
         assertEquals("id", ThingPersistenceUtil.normalizeFieldName("URN"));
@@ -41,6 +42,7 @@ public class ThingPersistenceUtilTest {
 
     @Test
     public void normalizeFieldNameTenantUrn() {
+
         assertEquals("tenantId", ThingPersistenceUtil.normalizeFieldName("tenanturn"));
         assertEquals("tenantId", ThingPersistenceUtil.normalizeFieldName("TenantUrn"));
         assertEquals("tenantId", ThingPersistenceUtil.normalizeFieldName("TENANTURN"));

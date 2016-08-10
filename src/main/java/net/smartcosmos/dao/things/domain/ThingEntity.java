@@ -75,7 +75,7 @@ public class ThingEntity implements Serializable {
 
     @Basic
     @NotNull
-    @Column(name="active", nullable = false)
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     /*
@@ -85,14 +85,15 @@ public class ThingEntity implements Serializable {
         We therefore provide our own AllArgsConstructor that is used by the generated builder and takes care of field initialization.
      */
     @Builder
-    @ConstructorProperties({"id", "type", "tenantId", "created", "lastModified", "active"})
-    protected ThingEntity(UUID id,
-                          String type,
-                          UUID tenantId,
-                          Date created,
-                          Date lastModified,
-                          Boolean active)
-    {
+    @ConstructorProperties({ "id", "type", "tenantId", "created", "lastModified", "active" })
+    protected ThingEntity(
+        UUID id,
+        String type,
+        UUID tenantId,
+        Date created,
+        Date lastModified,
+        Boolean active) {
+
         this.id = id;
         this.type = type;
         this.tenantId = tenantId;

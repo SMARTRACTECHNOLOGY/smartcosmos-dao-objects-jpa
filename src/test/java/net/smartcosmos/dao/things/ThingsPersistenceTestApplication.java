@@ -9,4 +9,5 @@ import org.springframework.context.annotation.Configuration;
 @EnableAutoConfiguration
 @Configuration
 public class ThingsPersistenceTestApplication {
+
 }
