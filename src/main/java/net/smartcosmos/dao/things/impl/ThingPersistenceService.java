@@ -44,6 +44,7 @@ public class ThingPersistenceService implements ThingDao {
     public ThingPersistenceService(
         ThingRepository repository,
         ConversionService conversionService) {
+
         this.repository = repository;
         this.conversionService = conversionService;
     }
@@ -197,26 +198,32 @@ public class ThingPersistenceService implements ThingDao {
 
     @Override
     public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith) {
+
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     @Override
     public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer number) {
+
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     @Override
     public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, SortOrder sortOrder, String sortBy) {
+
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     @Override
-    public Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Integer page, Integer size,
-                                                          SortOrder sortOrder, String sortBy) {
+    public Page<ThingResponse> findByTypeAndUrnStartsWith(
+        String tenantUrn, String type, String urnStartsWith, Integer page, Integer size,
+        SortOrder sortOrder, String sortBy) {
+
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
     private Page<ThingResponse> findByTypeAndUrnStartsWith(String tenantUrn, String type, String urnStartsWith, Pageable pageable) {
+
         throw new UnsupportedOperationException("The database implementation does not support 'startsWith' search for URNs");
     }
 
@@ -245,8 +252,7 @@ public class ThingPersistenceService implements ThingDao {
         UUID tenantId;
         try {
             tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
             return new ArrayList<>();
         }
@@ -288,7 +294,7 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Page<ThingResponse> findAll(String tenantUrn, Integer page, Integer size, SortOrder sortOrder, String sortBy) {
 
-       return findAll(tenantUrn, getPageable(page, size, sortBy, ThingPersistenceUtil.getSortDirection(sortOrder)));
+        return findAll(tenantUrn, getPageable(page, size, sortBy, ThingPersistenceUtil.getSortDirection(sortOrder)));
     }
 
     private Page<ThingResponse> findAll(String tenantUrn, Pageable pageable) {
@@ -346,6 +352,7 @@ public class ThingPersistenceService implements ThingDao {
     }
 
     private List<UUID> getUuidListFromUrnCollection(String tenantUrn, Collection<String> urns) {
+
         return urns.stream()
             .map(urn -> {
                 try {
@@ -419,7 +426,6 @@ public class ThingPersistenceService implements ThingDao {
             .build();
     }
 
-
     /**
      * Builds the pageable for repository calls, including translation of 1-based page numbering on the API level to
      * 0-based page numbering on the repository level.
@@ -430,14 +436,22 @@ public class ThingPersistenceService implements ThingDao {
      * @param direction the sort order direction
      * @return the pageable object
      */
-    protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort. Direction direction) {
+    protected Pageable getPageable(Integer page, Integer size, String sortBy, Sort.Direction direction) {
 
-        if (page == null) { page = DEFAULT_PAGE; }
-        if (size == null) { size = DEFAULT_SIZE; }
-        if (sortBy == null) { sortBy = DEFAULT_SORT_BY; }
-        if (direction == null) { direction = Sort.Direction.fromString(DEFAULT_SORT_ORDER.toString()); }
+        if (page == null) {
+            page = DEFAULT_PAGE;
+        }
+        if (size == null) {
+            size = DEFAULT_SIZE;
+        }
+        if (sortBy == null) {
+            sortBy = DEFAULT_SORT_BY;
+        }
+        if (direction == null) {
+            direction = Sort.Direction.fromString(DEFAULT_SORT_ORDER.toString());
+        }
 
-        if ( page < 1) {
+        if (page < 1) {
             throw new IllegalArgumentException("Page index must not be less than one!");
         }
         page = page - 1;

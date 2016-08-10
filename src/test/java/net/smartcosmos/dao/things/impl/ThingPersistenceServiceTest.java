@@ -80,12 +80,14 @@ public class ThingPersistenceServiceTest {
             .thenReturn(new SmartCosmosUser(tenantUrn, "urn:userUrn", "username",
                                             "password", Arrays.asList(new SimpleGrantedAuthority("USER"))));
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.when(securityContext.getAuthentication())
+            .thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
     }
 
     @After
     public void tearDown() throws Exception {
+
         repository.deleteAll();
     }
 
@@ -108,13 +110,18 @@ public class ThingPersistenceServiceTest {
         Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(urn), tenantUuid, "type");
 
         assertTrue(entity.isPresent());
-        assertEquals(UUID.fromString(uuid), entity.get().getId());
+        assertEquals(UUID.fromString(uuid),
+                     entity.get()
+                         .getId());
 
-        assertEquals(urn, response.get().getUrn());
+        assertEquals(urn,
+                     response.get()
+                         .getUrn());
     }
 
     @Test
     public void thatCreateByTypeGeneratesId() throws Exception {
+
         ThingCreate create = ThingCreate.builder()
             .type("type")
             .build();
@@ -122,18 +129,25 @@ public class ThingPersistenceServiceTest {
             .create(tenantUrn, create);
         assertTrue(response.isPresent());
 
-        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(response.get().getUrn()), tenantUuid, "type");
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(UuidUtil.getUuidFromUrn(response.get()
+                                                                                                                   .getUrn()), tenantUuid, "type");
 
         assertTrue(entity.isPresent());
 
-        assertEquals("type", entity.get().getType());
-        assertEquals("type", response.get().getType());
-        assertTrue(response.get().getUrn().startsWith("urn:thing:uuid:"));
+        assertEquals("type",
+                     entity.get()
+                         .getType());
+        assertEquals("type",
+                     response.get()
+                         .getType());
+        assertTrue(response.get()
+                       .getUrn()
+                       .startsWith("urn:thing:uuid:"));
 
         try {
-            UuidUtil.getUuidFromUrn(response.get().getUrn());
-        } catch (IllegalArgumentException e)
-        {
+            UuidUtil.getUuidFromUrn(response.get()
+                                        .getUrn());
+        } catch (IllegalArgumentException e) {
             Assert.fail();
         }
     }
@@ -172,8 +186,12 @@ public class ThingPersistenceServiceTest {
         Optional<ThingResponse> createResponse1 = persistenceService
             .create(tenantUrn, create1);
         assertTrue(createResponse1.isPresent());
-        assertEquals(type1, createResponse1.get().getType());
-        assertEquals(urn, createResponse1.get().getUrn());
+        assertEquals(type1,
+                     createResponse1.get()
+                         .getType());
+        assertEquals(urn,
+                     createResponse1.get()
+                         .getUrn());
 
         Optional<ThingResponse> persistResponse1 = persistenceService.findByTypeAndUrn(tenantUrn, type1, urn);
         assertTrue(persistResponse1.isPresent());
@@ -185,8 +203,12 @@ public class ThingPersistenceServiceTest {
         Optional<ThingResponse> createResponse2 = persistenceService
             .create(tenantUrn, create2);
         assertTrue(createResponse2.isPresent());
-        assertEquals(type2, createResponse2.get().getType());
-        assertEquals(urn, createResponse2.get().getUrn());
+        assertEquals(type2,
+                     createResponse2.get()
+                         .getType());
+        assertEquals(urn,
+                     createResponse2.get()
+                         .getUrn());
 
         Optional<ThingResponse> persistResponse2 = persistenceService.findByTypeAndUrn(tenantUrn, type2, urn);
         assertTrue(persistResponse2.isPresent());
@@ -216,7 +238,8 @@ public class ThingPersistenceServiceTest {
 
         assertTrue(entity.isPresent());
 
-        assertTrue(entity.get().getActive());
+        assertTrue(entity.get()
+                       .getActive());
 
         assertEquals(urn, responseCreate.getUrn());
         assertTrue(responseCreate.getActive());
@@ -229,14 +252,23 @@ public class ThingPersistenceServiceTest {
 
         assertTrue(responseUpdate.isPresent());
 
-        assertEquals(urn, responseUpdate.get().getUrn());
-        assertEquals(responseCreate.getUrn(), responseUpdate.get().getUrn());
-        assertEquals(type, responseUpdate.get().getType());
-        assertEquals(false, responseUpdate.get().getActive());
+        assertEquals(urn,
+                     responseUpdate.get()
+                         .getUrn());
+        assertEquals(responseCreate.getUrn(),
+                     responseUpdate.get()
+                         .getUrn());
+        assertEquals(type,
+                     responseUpdate.get()
+                         .getType());
+        assertEquals(false,
+                     responseUpdate.get()
+                         .getActive());
     }
 
     @Test
     public void thatUpdateNonexistentByTypeAndUrnFails() {
+
         ThingUpdate update = ThingUpdate.builder()
             .active(false)
             .build();
@@ -269,12 +301,15 @@ public class ThingPersistenceServiceTest {
 
         assertTrue(entity.isPresent());
 
-        UUID id = entity.get().getId();
+        UUID id = entity.get()
+            .getId();
 
         Optional<ThingResponse> responseDelete = persistenceService.delete(tenantUrn, type, urn);
 
         assertTrue(responseDelete.isPresent());
-        assertEquals(id, UuidUtil.getUuidFromUrn(responseDelete.get().getUrn()));
+        assertEquals(id,
+                     UuidUtil.getUuidFromUrn(responseDelete.get()
+                                                 .getUrn()));
     }
 
     // endregion
@@ -283,17 +318,23 @@ public class ThingPersistenceServiceTest {
 
     @Test
     public void testFindByTypeAndUrn() throws Exception {
+
         populateData();
 
         Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01);
 
         assertTrue(response.isPresent());
-        assertEquals(URN_01, response.get().getUrn());
-        assertEquals(TYPE_ONE, response.get().getType());
+        assertEquals(URN_01,
+                     response.get()
+                         .getUrn());
+        assertEquals(TYPE_ONE,
+                     response.get()
+                         .getType());
     }
 
     @Test
     public void testFindByTypeAndUrnIsCaseSensitiveUrn() throws Exception {
+
         populateData();
 
         Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01.toUpperCase());
@@ -303,6 +344,7 @@ public class ThingPersistenceServiceTest {
 
     @Test
     public void testFindByTypeAndUrnNonExistent() throws Exception {
+
         populateData();
 
         Optional<ThingResponse> response = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_01);
@@ -323,7 +365,8 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE);
 
-        actualSize = response.getData().size();
+        actualSize = response.getData()
+            .size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
@@ -337,7 +380,8 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> response = persistenceService.findByType(tenantUrn, TYPE_ONE.toUpperCase());
 
-        assertFalse(response.getData().isEmpty());
+        assertFalse(response.getData()
+                        .isEmpty());
     }
 
     @Test
@@ -357,13 +401,17 @@ public class ThingPersistenceServiceTest {
         assertNotNull(response.getData());
         assertNotNull(response.getPage());
 
-        actualPageSize = response.getData().size();
+        actualPageSize = response.getData()
+            .size();
         assertTrue("Expected " + expectedPageSize + " elements on page, but received " + actualPageSize, actualPageSize == expectedPageSize);
 
-        actualTotalSize = response.getPage().getTotalElements();
+        actualTotalSize = response.getPage()
+            .getTotalElements();
         assertTrue("Expected " + expectedTotalSize + " total elements, but received " + actualTotalSize, actualTotalSize == expectedTotalSize);
 
-        assertEquals(1, response.getPage().getNumber());
+        assertEquals(1,
+                     response.getPage()
+                         .getNumber());
     }
 
     // endregion
@@ -371,16 +419,22 @@ public class ThingPersistenceServiceTest {
     // region Find by URNs
 
     @Test
-    public void testFindByUrns() throws Exception
-    {
+    public void testFindByUrns() throws Exception {
+
         populateData();
 
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_02).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01)
+            .get()
+            .getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_02)
+            .get()
+            .getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03)
+            .get()
+            .getUrn();
 
         Collection<String> urn = new ArrayList<>();
         urn.add(firstUrn);
@@ -394,16 +448,22 @@ public class ThingPersistenceServiceTest {
     }
 
     @Test
-    public void testFindByUrnsSortingByUrn() throws Exception
-    {
+    public void testFindByUrnsSortingByUrn() throws Exception {
+
         populateData();
 
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09)
+            .get()
+            .getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08)
+            .get()
+            .getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07)
+            .get()
+            .getUrn();
 
         Collection<String> urn = new ArrayList<>();
         urn.add(secondUrn);
@@ -415,22 +475,34 @@ public class ThingPersistenceServiceTest {
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(firstUrn, response.get(0).getUrn());
-        assertEquals(secondUrn, response.get(1).getUrn());
-        assertEquals(thirdUrn, response.get(2).getUrn());
+        assertEquals(firstUrn,
+                     response.get(0)
+                         .getUrn());
+        assertEquals(secondUrn,
+                     response.get(1)
+                         .getUrn());
+        assertEquals(thirdUrn,
+                     response.get(2)
+                         .getUrn());
     }
 
     @Test
-    public void testFindByUrnsSortingEmptySortByDefaultsToId() throws Exception
-    {
+    public void testFindByUrnsSortingEmptySortByDefaultsToId() throws Exception {
+
         populateData();
 
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09)
+            .get()
+            .getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08)
+            .get()
+            .getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07)
+            .get()
+            .getUrn();
 
         List<String> urn = new ArrayList<>();
         urn.add(secondUrn);
@@ -446,22 +518,34 @@ public class ThingPersistenceServiceTest {
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
-        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
-        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
+        assertEquals(sortedUrns.get(0),
+                     response.get(0)
+                         .getUrn());
+        assertEquals(sortedUrns.get(1),
+                     response.get(1)
+                         .getUrn());
+        assertEquals(sortedUrns.get(2),
+                     response.get(2)
+                         .getUrn());
     }
 
     @Test
-    public void testFindByUrnsSortingNullSortByDefaultsToId() throws Exception
-    {
+    public void testFindByUrnsSortingNullSortByDefaultsToId() throws Exception {
+
         populateData();
 
         int expectedDataSize = 3;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09).get().getUrn();
-        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08).get().getUrn();
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_09)
+            .get()
+            .getUrn();
+        String secondUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_08)
+            .get()
+            .getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, WHATEVER, URN_07)
+            .get()
+            .getUrn();
 
         List<String> urn = new ArrayList<>();
         urn.add(secondUrn);
@@ -477,22 +561,32 @@ public class ThingPersistenceServiceTest {
         actualDataSize = response.size();
         assertTrue("Expected " + expectedDataSize + " matches, but received " + actualDataSize, actualDataSize == expectedDataSize);
 
-        assertEquals(sortedUrns.get(0), response.get(0).getUrn());
-        assertEquals(sortedUrns.get(1), response.get(1).getUrn());
-        assertEquals(sortedUrns.get(2), response.get(2).getUrn());
+        assertEquals(sortedUrns.get(0),
+                     response.get(0)
+                         .getUrn());
+        assertEquals(sortedUrns.get(1),
+                     response.get(1)
+                         .getUrn());
+        assertEquals(sortedUrns.get(2),
+                     response.get(2)
+                         .getUrn());
     }
 
     @Test
-    public void thatFindByUrnsReturnsPartialResultsWithNonexistentId() throws Exception
-    {
+    public void thatFindByUrnsReturnsPartialResultsWithNonexistentId() throws Exception {
+
         populateData();
 
         int expectedDataSize = 2;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01)
+            .get()
+            .getUrn();
         String secondUrn = UuidUtil.getThingUrnFromUuid(UUID.randomUUID());
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03)
+            .get()
+            .getUrn();
 
         Collection<String> urns = new ArrayList<>();
         urns.add(firstUrn);
@@ -506,16 +600,20 @@ public class ThingPersistenceServiceTest {
     }
 
     @Test
-    public void thatFindByUrnsReturnsPartialResultsWithUnparseableId() throws Exception
-    {
+    public void thatFindByUrnsReturnsPartialResultsWithUnparseableId() throws Exception {
+
         populateData();
 
         int expectedDataSize = 2;
         int actualDataSize = 0;
 
-        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01).get().getUrn();
+        String firstUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_01)
+            .get()
+            .getUrn();
         String seconUrn = "no URN";
-        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03).get().getUrn();
+        String thirdUrn = persistenceService.findByTypeAndUrn(tenantUrn, TYPE_ONE, URN_03)
+            .get()
+            .getUrn();
 
         Collection<String> urns = new ArrayList<>();
         urns.add(firstUrn);
@@ -542,9 +640,11 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> response = persistenceService.findAll(tenantUrn);
 
-        assertFalse(response.getData().isEmpty());
+        assertFalse(response.getData()
+                        .isEmpty());
 
-        actualSize = response.getData().size();
+        actualSize = response.getData()
+            .size();
         assertTrue("Expected " + expectedSize + " but received " + actualSize, actualSize == expectedSize);
     }
 
@@ -555,19 +655,56 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.ASC, "type");
 
-        assertFalse(response.getData().isEmpty());
-        assertEquals(TYPE_ONE, response.getData().get(0).getType());
-        assertEquals(TYPE_ONE, response.getData().get(1).getType());
-        assertEquals(TYPE_ONE, response.getData().get(2).getType());
-        assertEquals(TYPE_TWO, response.getData().get(3).getType());
-        assertEquals(TYPE_TWO, response.getData().get(4).getType());
-        assertEquals(TYPE_TWO, response.getData().get(5).getType());
-        assertEquals(WHATEVER, response.getData().get(6).getType());
-        assertEquals(WHATEVER, response.getData().get(7).getType());
-        assertEquals(WHATEVER, response.getData().get(8).getType());
-        assertEquals(WHATEVER, response.getData().get(9).getType());
-        assertEquals(WHATEVER, response.getData().get(10).getType());
-        assertEquals(WHATEVER, response.getData().get(11).getType());
+        assertFalse(response.getData()
+                        .isEmpty());
+        assertEquals(TYPE_ONE,
+                     response.getData()
+                         .get(0)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     response.getData()
+                         .get(1)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     response.getData()
+                         .get(2)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     response.getData()
+                         .get(3)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     response.getData()
+                         .get(4)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     response.getData()
+                         .get(5)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(6)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(7)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(8)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(9)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(10)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(11)
+                         .getType());
     }
 
     @Test
@@ -577,19 +714,56 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> response = persistenceService.findAll(tenantUrn, SortOrder.DESC, "type");
 
-        assertFalse(response.getData().isEmpty());
-        assertEquals(WHATEVER, response.getData().get(0).getType());
-        assertEquals(WHATEVER, response.getData().get(1).getType());
-        assertEquals(WHATEVER, response.getData().get(2).getType());
-        assertEquals(WHATEVER, response.getData().get(3).getType());
-        assertEquals(WHATEVER, response.getData().get(4).getType());
-        assertEquals(WHATEVER, response.getData().get(5).getType());
-        assertEquals(TYPE_TWO, response.getData().get(6).getType());
-        assertEquals(TYPE_TWO, response.getData().get(7).getType());
-        assertEquals(TYPE_TWO, response.getData().get(8).getType());
-        assertEquals(TYPE_ONE, response.getData().get(9).getType());
-        assertEquals(TYPE_ONE, response.getData().get(10).getType());
-        assertEquals(TYPE_ONE, response.getData().get(11).getType());
+        assertFalse(response.getData()
+                        .isEmpty());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(0)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(1)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(2)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(3)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(4)
+                         .getType());
+        assertEquals(WHATEVER,
+                     response.getData()
+                         .get(5)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     response.getData()
+                         .get(6)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     response.getData()
+                         .get(7)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     response.getData()
+                         .get(8)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     response.getData()
+                         .get(9)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     response.getData()
+                         .get(10)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     response.getData()
+                         .get(11)
+                         .getType());
     }
 
     @Test
@@ -599,13 +773,24 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> response = persistenceService.findAll(tenantUrn, 1, 3);
 
-        assertFalse(response.getData().isEmpty());
-        assertEquals(3, response.getData().size());
+        assertFalse(response.getData()
+                        .isEmpty());
+        assertEquals(3,
+                     response.getData()
+                         .size());
 
-        assertEquals(3, response.getPage().getSize());
-        assertEquals(4, response.getPage().getTotalPages());
-        assertEquals(12, response.getPage().getTotalElements());
-        assertEquals(1, response.getPage().getNumber());
+        assertEquals(3,
+                     response.getPage()
+                         .getSize());
+        assertEquals(4,
+                     response.getPage()
+                         .getTotalPages());
+        assertEquals(12,
+                     response.getPage()
+                         .getTotalElements());
+        assertEquals(1,
+                     response.getPage()
+                         .getNumber());
     }
 
     @Test
@@ -615,31 +800,71 @@ public class ThingPersistenceServiceTest {
 
         Page<ThingResponse> page1 = persistenceService.findAll(tenantUrn, 1, 3, SortOrder.ASC, "type");
 
-        assertFalse(page1.getData().isEmpty());
-        assertEquals(3, page1.getData().size());
+        assertFalse(page1.getData()
+                        .isEmpty());
+        assertEquals(3,
+                     page1.getData()
+                         .size());
 
-        assertEquals(3, page1.getPage().getSize());
-        assertEquals(4, page1.getPage().getTotalPages());
-        assertEquals(12, page1.getPage().getTotalElements());
-        assertEquals(1, page1.getPage().getNumber());
+        assertEquals(3,
+                     page1.getPage()
+                         .getSize());
+        assertEquals(4,
+                     page1.getPage()
+                         .getTotalPages());
+        assertEquals(12,
+                     page1.getPage()
+                         .getTotalElements());
+        assertEquals(1,
+                     page1.getPage()
+                         .getNumber());
 
-        assertEquals(TYPE_ONE, page1.getData().get(0).getType());
-        assertEquals(TYPE_ONE, page1.getData().get(1).getType());
-        assertEquals(TYPE_ONE, page1.getData().get(2).getType());
+        assertEquals(TYPE_ONE,
+                     page1.getData()
+                         .get(0)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     page1.getData()
+                         .get(1)
+                         .getType());
+        assertEquals(TYPE_ONE,
+                     page1.getData()
+                         .get(2)
+                         .getType());
 
         Page<ThingResponse> page2 = persistenceService.findAll(tenantUrn, 2, 3, SortOrder.ASC, "type");
 
-        assertFalse(page2.getData().isEmpty());
-        assertEquals(3, page2.getData().size());
+        assertFalse(page2.getData()
+                        .isEmpty());
+        assertEquals(3,
+                     page2.getData()
+                         .size());
 
-        assertEquals(3, page2.getPage().getSize());
-        assertEquals(4, page2.getPage().getTotalPages());
-        assertEquals(12, page2.getPage().getTotalElements());
-        assertEquals(2, page2.getPage().getNumber());
+        assertEquals(3,
+                     page2.getPage()
+                         .getSize());
+        assertEquals(4,
+                     page2.getPage()
+                         .getTotalPages());
+        assertEquals(12,
+                     page2.getPage()
+                         .getTotalElements());
+        assertEquals(2,
+                     page2.getPage()
+                         .getNumber());
 
-        assertEquals(TYPE_TWO, page2.getData().get(0).getType());
-        assertEquals(TYPE_TWO, page2.getData().get(1).getType());
-        assertEquals(TYPE_TWO, page2.getData().get(2).getType());
+        assertEquals(TYPE_TWO,
+                     page2.getData()
+                         .get(0)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     page2.getData()
+                         .get(1)
+                         .getType());
+        assertEquals(TYPE_TWO,
+                     page2.getData()
+                         .get(2)
+                         .getType());
     }
 
     // endregion
@@ -648,41 +873,77 @@ public class ThingPersistenceServiceTest {
 
     private void populateData() throws Exception {
 
-        ThingEntity entityNameOneTypeOne = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_01)).type(TYPE_ONE).build();
+        ThingEntity entityNameOneTypeOne = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_01))
+            .type(TYPE_ONE)
+            .build();
 
-        ThingEntity entityNameTwoTypeOne = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_02)).type(TYPE_ONE).build();
+        ThingEntity entityNameTwoTypeOne = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_02))
+            .type(TYPE_ONE)
+            .build();
 
-        ThingEntity entityNameThreeTypeOne = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_03)).type(TYPE_ONE).build();
+        ThingEntity entityNameThreeTypeOne = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_03))
+            .type(TYPE_ONE)
+            .build();
 
-        ThingEntity entityNameOneTypeTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_04)).type(TYPE_TWO).build();
+        ThingEntity entityNameOneTypeTwo = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_04))
+            .type(TYPE_TWO)
+            .build();
 
-        ThingEntity entityNameTwoTypeTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_05)).type(TYPE_TWO).build();
+        ThingEntity entityNameTwoTypeTwo = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_05))
+            .type(TYPE_TWO)
+            .build();
 
-        ThingEntity entityNameThreeTypeTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_06)).type(TYPE_TWO).build();
+        ThingEntity entityNameThreeTypeTwo = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_06))
+            .type(TYPE_TWO)
+            .build();
 
-        ThingEntity entityNameOneMonikerOne = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_07)).type(WHATEVER).build();
+        ThingEntity entityNameOneMonikerOne = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_07))
+            .type(WHATEVER)
+            .build();
 
-        ThingEntity entityNameOneMonikerTwo = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_08)).type(WHATEVER).build();
+        ThingEntity entityNameOneMonikerTwo = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_08))
+            .type(WHATEVER)
+            .build();
 
-        ThingEntity entityNameOneMonikerThree = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_09)).type(WHATEVER).build();
+        ThingEntity entityNameOneMonikerThree = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_09))
+            .type(WHATEVER)
+            .build();
 
-        ThingEntity entityObjectUrn10 = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_10)).type(WHATEVER).build();
+        ThingEntity entityObjectUrn10 = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_10))
+            .type(WHATEVER)
+            .build();
 
-        ThingEntity entityObjectUrn11 = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_11)).type(WHATEVER).build();
+        ThingEntity entityObjectUrn11 = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_11))
+            .type(WHATEVER)
+            .build();
 
-        ThingEntity entityObjectUrn12 = ThingEntity.builder().tenantId(tenantUuid)
-            .id(UuidUtil.getUuidFromUrn(URN_12)).type(WHATEVER).build();
+        ThingEntity entityObjectUrn12 = ThingEntity.builder()
+            .tenantId(tenantUuid)
+            .id(UuidUtil.getUuidFromUrn(URN_12))
+            .type(WHATEVER)
+            .build();
 
         repository.save(entityNameOneTypeOne);
         repository.save(entityNameTwoTypeOne);

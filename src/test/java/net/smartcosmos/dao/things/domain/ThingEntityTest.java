@@ -1,19 +1,16 @@
 package net.smartcosmos.dao.things.domain;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
+import java.util.Set;
+import java.util.UUID;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Set;
-import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.lang.RandomStringUtils;
+import org.junit.*;
+
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 public class ThingEntityTest {
@@ -28,6 +25,7 @@ public class ThingEntityTest {
 
     @BeforeClass
     public static void setUp() {
+
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
@@ -54,7 +52,7 @@ public class ThingEntityTest {
 
         ThingEntity objectEntity = ThingEntity.builder()
             .id(ID)
-//            .type(TYPE)
+            //            .type(TYPE)
             .active(ACTIVE)
             .tenantId(ACCOUNT_ID)
             .build();
@@ -64,8 +62,14 @@ public class ThingEntityTest {
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
+                     violationSet.iterator()
+                         .next()
+                         .getMessageTemplate());
+        assertEquals("type",
+                     violationSet.iterator()
+                         .next()
+                         .getPropertyPath()
+                         .toString());
     }
 
     @Test
@@ -83,8 +87,14 @@ public class ThingEntityTest {
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{org.hibernate.validator.constraints.NotEmpty.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
+                     violationSet.iterator()
+                         .next()
+                         .getMessageTemplate());
+        assertEquals("type",
+                     violationSet.iterator()
+                         .next()
+                         .getPropertyPath()
+                         .toString());
     }
 
     @Test
@@ -102,8 +112,14 @@ public class ThingEntityTest {
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{javax.validation.constraints.Size.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("type", violationSet.iterator().next().getPropertyPath().toString());
+                     violationSet.iterator()
+                         .next()
+                         .getMessageTemplate());
+        assertEquals("type",
+                     violationSet.iterator()
+                         .next()
+                         .getPropertyPath()
+                         .toString());
     }
 
     // endregion
@@ -117,7 +133,7 @@ public class ThingEntityTest {
             .id(ID)
             .type(TYPE)
             .active(ACTIVE)
-//            .tenantId(ACCOUNT_ID)
+            //            .tenantId(ACCOUNT_ID)
             .build();
 
         Set<ConstraintViolation<ThingEntity>> violationSet = validator.validate(objectEntity);
@@ -125,8 +141,14 @@ public class ThingEntityTest {
         assertFalse(violationSet.isEmpty());
         assertEquals(1, violationSet.size());
         assertEquals("{javax.validation.constraints.NotNull.message}",
-            violationSet.iterator().next().getMessageTemplate());
-        assertEquals("tenantId", violationSet.iterator().next().getPropertyPath().toString());
+                     violationSet.iterator()
+                         .next()
+                         .getMessageTemplate());
+        assertEquals("tenantId",
+                     violationSet.iterator()
+                         .next()
+                         .getPropertyPath()
+                         .toString());
     }
 
     @Test
@@ -151,7 +173,7 @@ public class ThingEntityTest {
         ThingEntity objectEntity = ThingEntity.builder()
             .id(ID)
             .type(TYPE)
-//            .active(ACTIVE)
+            //            .active(ACTIVE)
             .tenantId(ACCOUNT_ID)
             .build();
 

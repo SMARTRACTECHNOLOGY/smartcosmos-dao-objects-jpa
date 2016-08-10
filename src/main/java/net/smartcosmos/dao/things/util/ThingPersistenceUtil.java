@@ -1,12 +1,13 @@
 package net.smartcosmos.dao.things.util;
 
+import org.apache.commons.lang.StringUtils;
+import org.springframework.data.domain.Sort;
+
 import net.smartcosmos.dao.things.SortOrder;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dto.things.Page;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.data.domain.Sort;
 
 public class ThingPersistenceUtil {
 
@@ -87,6 +88,7 @@ public class ThingPersistenceUtil {
      * @return the case-corrected field name if it exists, {@code id} otherwise
      */
     public static String getSortByFieldName(String sortBy) {
+
         sortBy = ThingPersistenceUtil.normalizeFieldName(sortBy);
         if (StringUtils.isBlank(sortBy) || !ThingPersistenceUtil.isThingEntityField(sortBy)) {
             sortBy = "id";
@@ -101,10 +103,15 @@ public class ThingPersistenceUtil {
      * @return the Spring sort direction
      */
     public static Sort.Direction getSortDirection(SortOrder sortOrder) {
+
         Sort.Direction direction = Sort.DEFAULT_DIRECTION;
         switch (sortOrder) {
-            case ASC: direction = Sort.Direction.ASC; break;
-            case DESC: direction = Sort.Direction.DESC; break;
+            case ASC:
+                direction = Sort.Direction.ASC;
+                break;
+            case DESC:
+                direction = Sort.Direction.DESC;
+                break;
         }
         return direction;
     }
