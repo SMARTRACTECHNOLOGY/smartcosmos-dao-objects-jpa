@@ -8,10 +8,10 @@
         <groupId>net.smartcosmos</groupId>
         <artifactId>smartcosmos-framework-parent</artifactId>
         <version>3.0.0</version>
-        <relativePath></relativePath>
+        <relativePath />
     </parent>
     <artifactId>smartcosmos-dao-things-default</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
     <name>SMART COSMOS DAO Impl for JPA Entities</name>
     <description>Access simple Thing entities</description>
     <properties>
@@ -87,6 +87,6 @@
         <connection>scm:git:ssh://git@github.com/SMARTRACTECHNOLOGY/smartcosmos-dao-things-default.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/SMARTRACTECHNOLOGY/smartcosmos-dao-things-default.git</developerConnection>
         <url>https://github.com/SMARTRACTECHNOLOGY/smartcosmos-dao-things-default/tree/master/</url>
-        <tag>v3.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
