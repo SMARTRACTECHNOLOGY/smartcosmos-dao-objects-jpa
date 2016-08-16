@@ -1,4 +1,4 @@
-= SMART COSMOS DAO Objects for JPA
+= SMART COSMOS DAO Things for JPA
 SMARTRAC Technology Fletcher Inc <api@smartrac-group.com>
 ifdef::env-github[:USER: SMARTRACTECHNOLOGY]
 ifdef::env-github[:REPO: smartcosmos-dao-things-default]
