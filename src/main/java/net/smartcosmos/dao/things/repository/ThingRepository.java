@@ -25,6 +25,8 @@ public interface ThingRepository
 
     Optional<ThingEntity> findByIdAndTenantIdAndTypeIgnoreCase(UUID id, UUID tenantId, String type);
 
+    Optional<ThingEntity> findByIdAndTypeIgnoreCase(UUID id, String type);
+
     Optional<ThingEntity> findByIdAndTenantId(UUID id, UUID tenantId);
 
     Page<ThingEntity> findByTenantIdAndTypeIgnoreCase(UUID tenantId, String type, Pageable pageable);

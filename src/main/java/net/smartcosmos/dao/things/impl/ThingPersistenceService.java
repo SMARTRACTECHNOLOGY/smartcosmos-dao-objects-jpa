@@ -178,10 +178,16 @@ public class ThingPersistenceService implements ThingDao {
     public Optional<ThingResponse> findByTypeAndUrn(String tenantUrn, String type, String urn) {
 
         try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             UUID id = UuidUtil.getUuidFromUrn(urn);
+            
+            Optional<ThingEntity> entity;
+            if (StringUtils.isNotBlank(tenantUrn)) {
+                UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+                entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+            } else {
+                entity = repository.findByIdAndTypeIgnoreCase(id, type);
+            }
 
-            Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
             if (entity.isPresent()) {
                 return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
             }
