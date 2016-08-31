@@ -13,6 +13,7 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -32,7 +33,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Data
 @EntityListeners({ AuditingEntityListener.class })
-@Table(name = "thing")
+@Table(name = "thing", uniqueConstraints = @UniqueConstraint(columnNames = { "id", "type", "tenantId" }))
 public class ThingEntity implements Serializable {
 
     private static final int UUID_LENGTH = 16;
