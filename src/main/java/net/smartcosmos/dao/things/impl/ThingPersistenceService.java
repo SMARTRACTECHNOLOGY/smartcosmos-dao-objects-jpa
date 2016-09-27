@@ -1,6 +1,5 @@
 package net.smartcosmos.dao.things.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,8 @@ import net.smartcosmos.dto.things.ThingCreate;
 import net.smartcosmos.dto.things.ThingResponse;
 import net.smartcosmos.dto.things.ThingUpdate;
 
+import static net.smartcosmos.dao.things.util.ThingPersistenceUtil.emptyPage;
+
 @Slf4j
 @Service
 public class ThingPersistenceService implements ThingDao {
@@ -55,24 +56,16 @@ public class ThingPersistenceService implements ThingDao {
     public Optional<ThingResponse> create(String tenantUrn, ThingCreate createThing) {
 
         if (!alreadyExists(tenantUrn, createThing)) {
-            try {
-                UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
 
-                ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-                entity.setTenantId(tenantId);
+            ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
+            entity.setTenantId(tenantId);
 
-                entity = persist(entity);
-                ThingResponse response = conversionService.convert(entity, ThingResponse.class);
+            entity = persist(entity);
+            ThingResponse response = conversionService.convert(entity, ThingResponse.class);
 
-                return Optional.ofNullable(response);
-            } catch (IllegalArgumentException e) {
-                if (StringUtils.isNotBlank(createThing.getUrn())) {
-                    log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, createThing.getUrn());
-                } else {
-                    log.warn("Error processing ID: Tenant ID '{}'", tenantUrn);
-                }
-                throw e;
-            }
+            return Optional.ofNullable(response);
+
         }
 
         return Optional.empty();
@@ -85,20 +78,16 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> update(String tenantUrn, String type, String urn, ThingUpdate updateThing) throws ConstraintViolationException {
 
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            UUID id = UuidUtil.getUuidFromUrn(urn);
-            Optional<ThingEntity> thing = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+        UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        UUID id = UuidUtil.getUuidFromUrn(urn);
+        Optional<ThingEntity> thing = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
-            if (thing.isPresent()) {
-                ThingEntity updateEntity = ThingPersistenceUtil.merge(thing.get(), updateThing);
-                updateEntity = persist(updateEntity);
-                final ThingResponse response = conversionService.convert(updateEntity, ThingResponse.class);
+        if (thing.isPresent()) {
+            ThingEntity updateEntity = ThingPersistenceUtil.merge(thing.get(), updateThing);
+            updateEntity = persist(updateEntity);
+            final ThingResponse response = conversionService.convert(updateEntity, ThingResponse.class);
 
-                return Optional.ofNullable(response);
-            }
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+            return Optional.ofNullable(response);
         }
 
         return Optional.empty();
@@ -111,16 +100,12 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> delete(String tenantUrn, String type, String urn) {
 
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            UUID id = UuidUtil.getUuidFromUrn(urn);
-            List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+        UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        UUID id = UuidUtil.getUuidFromUrn(urn);
+        List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
 
-            if (!deleteList.isEmpty()) {
-                return Optional.ofNullable(conversionService.convert(deleteList.get(0), ThingResponse.class));
-            }
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+        if (!deleteList.isEmpty()) {
+            return Optional.ofNullable(conversionService.convert(deleteList.get(0), ThingResponse.class));
         }
 
         return Optional.empty();
@@ -158,16 +143,10 @@ public class ThingPersistenceService implements ThingDao {
 
     private Page<ThingResponse> findByType(String tenantUrn, String type, Pageable pageable) {
 
-        Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, pageable);
+        UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, pageable);
 
-            return conversionService.convert(pageResponse, result.getClass());
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-        }
-        return result;
+        return conversionService.convert(pageResponse, emptyPage().getClass());
     }
 
     // endregion
@@ -177,22 +156,18 @@ public class ThingPersistenceService implements ThingDao {
     @Override
     public Optional<ThingResponse> findByTypeAndUrn(String tenantUrn, String type, String urn) {
 
-        try {
-            UUID id = UuidUtil.getUuidFromUrn(urn);
-            
-            Optional<ThingEntity> entity;
-            if (StringUtils.isNotBlank(tenantUrn)) {
-                UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-                entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
-            } else {
-                entity = repository.findByIdAndTypeIgnoreCase(id, type);
-            }
+        UUID id = UuidUtil.getUuidFromUrn(urn);
 
-            if (entity.isPresent()) {
-                return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
-            }
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+        Optional<ThingEntity> entity;
+        if (StringUtils.isNotBlank(tenantUrn)) {
+            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+            entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+        } else {
+            entity = repository.findByIdAndTypeIgnoreCase(id, type);
+        }
+
+        if (entity.isPresent()) {
+            return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
         }
 
         return Optional.empty();
@@ -255,14 +230,7 @@ public class ThingPersistenceService implements ThingDao {
 
     private List<ThingResponse> findByTypeAndUrns(String tenantUrn, String type, Collection<String> urns, Sort sort) {
 
-        UUID tenantId;
-        try {
-            tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-            return new ArrayList<>();
-        }
-
+        UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
         List<UUID> ids = getUuidListFromUrnCollection(tenantUrn, urns);
 
         List<ThingEntity> entityList;
@@ -305,17 +273,10 @@ public class ThingPersistenceService implements ThingDao {
 
     private Page<ThingResponse> findAll(String tenantUrn, Pageable pageable) {
 
-        Page<ThingResponse> result = ThingPersistenceUtil.emptyPage();
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantId(tenantId, pageable);
+        UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        org.springframework.data.domain.Page<ThingEntity> pageResponse = repository.findByTenantId(tenantId, pageable);
 
-            return conversionService.convert(pageResponse, result.getClass());
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URN: Tenant URN '{}'", tenantUrn);
-        }
-
-        return result;
+        return conversionService.convert(pageResponse, emptyPage().getClass());
     }
 
     /**
@@ -379,18 +340,14 @@ public class ThingPersistenceService implements ThingDao {
 
     private Optional<ThingResponse> findByUrnAndType(String tenantUrn, String urn, String type) {
 
-        try {
-            UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
-            UUID id = UuidUtil.getUuidFromUrn(urn);
+        UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
+        UUID id = UuidUtil.getUuidFromUrn(urn);
 
-            Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
-            if (entity.isPresent()) {
-                return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
-            }
-        } catch (IllegalArgumentException e) {
-            log.warn("Error processing URNs: Tenant URN '{}' - Thing URN '{}'", tenantUrn, urn);
+        Optional<ThingEntity> entity = repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+        if (entity.isPresent()) {
+            return Optional.ofNullable(conversionService.convert(entity.get(), ThingResponse.class));
         }
-
+            
         return Optional.empty();
     }
 
