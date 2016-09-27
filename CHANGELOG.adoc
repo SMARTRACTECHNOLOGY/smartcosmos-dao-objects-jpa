@@ -10,6 +10,7 @@
 
 * OBJECTS-979 Empty page response returns incorrect number of pages
 * OBJECTS-1010 Duplicate Thing Urn through Edge Service responds with 500
+* OBJECTS-1007 Invalid URN scheme results in 500 response, and URN scheme is not checked correctly
 
 == Release 3.0.0 (August 12, 2016)
 
