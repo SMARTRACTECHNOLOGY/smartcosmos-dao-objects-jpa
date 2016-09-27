@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.*;
-import org.junit.runner.*;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -68,7 +68,7 @@ public class ThingRepositoryTest {
     @Test
     public void deleteByIdAndTenantIdAndType() throws Exception {
 
-        List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type);
+        List<ThingEntity> deleteList = repository.deleteByIdAndTenantIdAndType(id, tenantId, type);
 
         assertFalse(deleteList.isEmpty());
         assertEquals(1, deleteList.size());
@@ -80,7 +80,7 @@ public class ThingRepositoryTest {
     @Test
     public void findByIdAndTenantId() throws Exception {
 
-        assertTrue(this.repository.findByIdAndTenantIdAndTypeIgnoreCase(id, tenantId, type)
+        assertTrue(this.repository.findByIdAndTenantIdAndType(id, tenantId, type)
                        .isPresent());
     }
 
@@ -103,7 +103,7 @@ public class ThingRepositoryTest {
     @Test
     public void findByTenantIdAndType() throws Exception {
 
-        Page<ThingEntity> entityPage = repository.findByTenantIdAndTypeIgnoreCase(tenantId, type, null);
+        Page<ThingEntity> entityPage = repository.findByTenantIdAndType(tenantId, type, null);
         assertFalse(entityPage.getContent()
                         .isEmpty());
 
@@ -122,7 +122,7 @@ public class ThingRepositoryTest {
         List<UUID> uuids = new ArrayList<>();
         uuids.add(id);
 
-        List<ThingEntity> entityList = repository.findByTenantIdAndTypeIgnoreCaseAndIdIn(tenantId, type, uuids);
+        List<ThingEntity> entityList = repository.findByTenantIdAndTypeAndIdIn(tenantId, type, uuids);
         assertFalse(entityList.isEmpty());
 
         assertEquals(1, entityList.size());
