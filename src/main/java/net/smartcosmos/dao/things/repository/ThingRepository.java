@@ -21,21 +21,21 @@ public interface ThingRepository
             JpaSpecificationExecutor<ThingEntity> {
 
     @Transactional
-    List<ThingEntity> deleteByIdAndTenantIdAndTypeIgnoreCase(UUID id, UUID tenantId, String type);
+    List<ThingEntity> deleteByIdAndTenantIdAndType(UUID id, UUID tenantId, String type);
 
-    Optional<ThingEntity> findByIdAndTenantIdAndTypeIgnoreCase(UUID id, UUID tenantId, String type);
+    Optional<ThingEntity> findByIdAndTenantIdAndType(UUID id, UUID tenantId, String type);
 
-    Optional<ThingEntity> findByIdAndTypeIgnoreCase(UUID id, String type);
+    Optional<ThingEntity> findByIdAndType(UUID id, String type);
 
     Optional<ThingEntity> findByIdAndTenantId(UUID id, UUID tenantId);
 
-    Page<ThingEntity> findByTenantIdAndTypeIgnoreCase(UUID tenantId, String type, Pageable pageable);
+    Page<ThingEntity> findByTenantIdAndType(UUID tenantId, String type, Pageable pageable);
 
     Page<ThingEntity> findByTenantId(UUID tenantId, Pageable pageable);
 
-    List<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, Collection<UUID> ids);
+    List<ThingEntity> findByTenantIdAndTypeAndIdIn(UUID tenantId, String type, Collection<UUID> ids);
 
-    List<ThingEntity> findByTenantIdAndTypeIgnoreCaseAndIdIn(UUID tenantId, String type, Collection<UUID> ids, Sort sort);
+    List<ThingEntity> findByTenantIdAndTypeAndIdIn(UUID tenantId, String type, Collection<UUID> ids, Sort sort);
 
     Page<ThingEntity> findAll(Pageable pageable);
 
