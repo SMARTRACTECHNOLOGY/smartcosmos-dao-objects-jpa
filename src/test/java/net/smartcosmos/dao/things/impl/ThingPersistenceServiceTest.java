@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.junit.*;
-import org.junit.runner.*;
+import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.IntegrationTest;
@@ -266,16 +266,14 @@ public class ThingPersistenceServiceTest {
                          .getActive());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void thatUpdateNonexistentByTypeAndUrnFails() {
 
         ThingUpdate update = ThingUpdate.builder()
             .active(false)
             .build();
 
-        Optional<ThingResponse> responseUpdate = persistenceService.update(tenantUrn, "NO SUCH TYPE", "URN:DOES-NOT-EXIST", update);
-
-        assertFalse(responseUpdate.isPresent());
+        persistenceService.update(tenantUrn, "NO SUCH TYPE", "URN:DOES-NOT-EXIST", update);
     }
 
     // endregion
