@@ -22,6 +22,7 @@ import org.springframework.transaction.TransactionException;
 
 import net.smartcosmos.dao.things.SortOrder;
 import net.smartcosmos.dao.things.ThingDao;
+import net.smartcosmos.dao.things.converter.ThingCreateToThingEntityConverterUtility;
 import net.smartcosmos.dao.things.domain.ThingEntity;
 import net.smartcosmos.dao.things.repository.ThingRepository;
 import net.smartcosmos.dao.things.util.ThingPersistenceUtil;
@@ -58,8 +59,7 @@ public class ThingPersistenceService implements ThingDao {
         if (!alreadyExists(tenantUrn, createThing)) {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
 
-            ThingEntity entity = conversionService.convert(createThing, ThingEntity.class);
-            entity.setTenantId(tenantId);
+            ThingEntity entity = ThingCreateToThingEntityConverterUtility.convert(createThing, tenantId);
 
             entity = persist(entity);
             ThingResponse response = conversionService.convert(entity, ThingResponse.class);
