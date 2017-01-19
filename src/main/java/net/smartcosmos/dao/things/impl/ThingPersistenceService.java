@@ -158,12 +158,10 @@ public class ThingPersistenceService implements ThingDao {
 
         UUID id = UuidUtil.getUuidFromUrn(urn);
 
-        Optional<ThingEntity> entity;
+        Optional<ThingEntity> entity = Optional.empty();
         if (StringUtils.isNotBlank(tenantUrn)) {
             UUID tenantId = UuidUtil.getUuidFromUrn(tenantUrn);
             entity = repository.findByIdAndTenantIdAndType(id, tenantId, type);
-        } else {
-            entity = repository.findByIdAndType(id, type);
         }
 
         if (entity.isPresent()) {
