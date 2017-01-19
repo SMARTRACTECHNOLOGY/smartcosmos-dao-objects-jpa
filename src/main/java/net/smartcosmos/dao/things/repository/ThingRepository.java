@@ -25,10 +25,6 @@ public interface ThingRepository
 
     Optional<ThingEntity> findByIdAndTenantIdAndType(UUID id, UUID tenantId, String type);
 
-    Optional<ThingEntity> findByIdAndType(UUID id, String type);
-
-    Optional<ThingEntity> findByIdAndTenantId(UUID id, UUID tenantId);
-
     Page<ThingEntity> findByTenantIdAndType(UUID tenantId, String type, Pageable pageable);
 
     Page<ThingEntity> findByTenantId(UUID tenantId, Pageable pageable);
